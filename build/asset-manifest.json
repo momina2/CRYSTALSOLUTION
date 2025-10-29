@@ -1,0 +1,35 @@
+{
+  "files": {
+    "main.css": "/crystalsol/static/css/main.8c9ec3c5.css",
+    "main.js": "/crystalsol/static/js/main.7bd71c9d.js",
+    "static/js/52.fd891518.chunk.js": "/crystalsol/static/js/52.fd891518.chunk.js",
+    "static/js/760.ef2a6c11.chunk.js": "/crystalsol/static/js/760.ef2a6c11.chunk.js",
+    "static/js/239.7d9df2fe.chunk.js": "/crystalsol/static/js/239.7d9df2fe.chunk.js",
+    "static/media/homeapp.jpg": "/crystalsol/static/media/homeapp.9176551daf77401613d1.jpg",
+    "static/media/notification.wav": "/crystalsol/static/media/notification.60f7268a006d7476452e.wav",
+    "static/media/bootstrap-icons.woff?": "/crystalsol/static/media/bootstrap-icons.1295669cd4e305c97f2c.woff",
+    "static/media/UBLBANKLOGO.png": "/crystalsol/static/media/UBLBANKLOGO.865479cccf9799752305.png",
+    "static/media/bootstrap-icons.woff2?": "/crystalsol/static/media/bootstrap-icons.92ea18a81d737146ff04.woff2",
+    "static/media/minar-e-pakistan.jpg": "/crystalsol/static/media/minar-e-pakistan.486898d63424175afd0f.jpg",
+    "static/media/frieddeeklogo.jpg": "/crystalsol/static/media/frieddeeklogo.ce3edb97f8fb720ce13b.jpg",
+    "static/media/logo.png": "/crystalsol/static/media/logo.e59842faa0b58f33958e.png",
+    "static/media/JAZZCASH.jpg": "/crystalsol/static/media/JAZZCASH.a4f8feddbb6e81c7d7ae.jpg",
+    "static/media/firework.avif": "/crystalsol/static/media/firework.448e0c178a649c0df4db.avif",
+    "static/media/cresentmoon.jpeg": "/crystalsol/static/media/cresentmoon.6e09d396beac28adf5c4.jpeg",
+    "static/media/EASYPAISA.jpg": "/crystalsol/static/media/EASYPAISA.75fc82e58149c9e1bcd4.jpg",
+    "static/media/man.png": "/crystalsol/static/media/man.ca6e16baaa2863c2795e.png",
+    "static/media/keys.png": "/crystalsol/static/media/keys.c87af3db0ab80c85a3d9.png",
+    "static/media/Crystal_info.jpeg": "/crystalsol/static/media/Crystal_info.9a2f513e9bfee01f33cd.jpeg",
+    "static/media/FAISALBANKLOGO.png": "/crystalsol/static/media/FAISALBANKLOGO.3b8b95662e3ad79b982a.png",
+    "static/media/CHARITYLOGO.png": "/crystalsol/static/media/CHARITYLOGO.15ed3ccdcb51a49aa365.png",
+    "static/media/FBR.jpg": "/crystalsol/static/media/FBR.72922e0d3b659371d845.jpg",
+    "static/media/minus.png": "/crystalsol/static/media/minus.415e093d9fca936eba4d.png",
+    "static/media/logowithname.jpeg": "/crystalsol/static/media/logowithname.e831a235b42a41bf1b0c.jpeg",
+    "static/media/add.png": "/crystalsol/static/media/add.ca2503cea2acd00edc3c.png",
+    "index.html": "/crystalsol/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.8c9ec3c5.css",
+    "static/js/main.7bd71c9d.js"
+  ]
+}

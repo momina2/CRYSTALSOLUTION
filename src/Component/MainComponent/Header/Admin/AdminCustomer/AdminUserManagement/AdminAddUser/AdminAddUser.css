@@ -1,0 +1,127 @@
+.contentAdminUsermanagementStyle {
+  background-color: var(--getcolor);
+  width: 80vw;
+  position: absolute;
+  top: calc(52% - 0px);
+  left: 55%;
+  transform: translate(-50%, -50%);
+  transition: left 3s ease-in-out, width 2s ease-in-out;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  word-break: break-word;
+  text-align: center;
+  max-width: 700px;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px;
+  font-family: "Poppins", sans-serif;
+  padding: 0px;
+  margin: 0px;
+}
+
+/* Mobile view */
+@media (max-width: 768px) {
+  .contentAdminUsermanagementStyle {
+    margin-top: 2% !important;
+    width: 87vw !important;
+    left: 58%;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 20px;
+    /* padding: 50px; */
+    padding-left: 20px !important;
+  }
+  .contentAdminUserManagementstylescroll {
+    overflow-y: auto;
+    height: 70vh;
+  }
+  .label-field {
+    padding-left: 20px !important;
+    display: flex;
+    align-items: start;
+    justify-content: flex-start !important;
+    font-size: var(--font-fontsize) !important;
+    font-family: var(--font-family) !important;
+    font-style: normal !important;
+    font-weight: bold;
+  }
+  .label-input {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end !important;
+    padding-left: 20px !important;
+    width: 98%;
+  }
+}
+
+@media (max-width: 480px) {
+  .contentAdminUsermanagementStyle {
+    width: 95vw;
+    font-size: 13px;
+    line-height: 18px;
+    padding: 8px;
+  }
+}
+
+.label-field {
+  display: flex;
+  align-items: start;
+  justify-content: flex-end;
+  font-size: var(--font-fontsize) !important;
+  font-family: var(--font-family) !important;
+  font-style: normal !important;
+  font-weight: bold;
+}
+
+.form-control-field {
+  font-family: var(--font-family) !important;
+  font-weight: 400;
+  font-size: var(--font-fontsize) !important;
+  line-height: 23px;
+  color: var(--font-color) !important;
+  background-color: var(--getcolor) !important;
+  height: 24px !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
+  margin-bottom: 4px !important;
+  margin-left: -10px !important;
+}
+
+.table-item-file {
+  align-items: center;
+  text-align: center;
+  border: 1px solid white !important;
+  font-size: var(--font-fontsize) !important;
+  font-family: var(--font-family) !important;
+  font-style: normal !important;
+  font-weight: bold;
+}
+.my-modal-file {
+  width: 35vw;
+  max-width: 35vw;
+  border: 1px solid white;
+}
+
+.custom-table-file {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.custom-table-file::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.custom-table-file::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important;
+  border-radius: 8px;
+}
+
+.custom-table-file::-webkit-scrollbar-track {
+  background: var(--background-color) !important;
+}

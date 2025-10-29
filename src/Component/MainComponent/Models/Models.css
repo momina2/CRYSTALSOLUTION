@@ -1,0 +1,126 @@
+.label-field {
+  display: flex;
+  align-items: start;
+  justify-content: flex-end;
+  font-size: var(--font-fontsize) !important;
+  font-family: var(--font-family) !important;
+  font-style: normal !important;
+  font-weight: bold;
+}
+
+.form-control-field {
+  font-family: var(--font-family) !important;
+  font-weight: 400;
+  font-size: var(--font-fontsize) !important;
+  line-height: 23px;
+  color: var(--font-color) !important;
+  background-color: var(--getcolor) !important;
+  height: 24px !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
+  margin-bottom: 4px !important;
+  margin-left: -10px !important;
+}
+
+.table-item-file {
+  align-items: center;
+  text-align: center;
+  border: 1px solid white !important;
+  font-size: var(--font-fontsize) !important;
+  font-family: var(--font-family) !important;
+  font-style: normal !important;
+  font-weight: bold;
+}
+.my-modal-file {
+  width: 35vw;
+  max-width: 35vw;
+  border: 1px solid white;
+  margin: 0 auto; /* Centers horizontally */
+  position: fixed;
+  left: 0;
+  right: 0; /* Ensures it stays centered */
+}
+
+.my-modal-fifthmodel {
+  width: 45vw;
+  max-width: 45vw;
+  border: 1px solid white;
+}
+.custom-table-fifthmodel {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.custom-table-fifthmodel::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.custom-table-fifthmodel::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important;
+  border-radius: 8px;
+}
+
+.custom-table-filemenu::-webkit-scrollbar-track {
+  background: var(--background-color) !important;
+}
+
+.custom-table-filemenu {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.custom-table-filemenu::-webkit-scrollbar {
+  width: 0.6em;
+}
+
+.custom-table-filemenu::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important;
+  border-radius: 8px;
+}
+
+.custom-table-filemenu::-webkit-scrollbar-track {
+  background: var(--background-color) !important;
+}
+/* /////////////////////////////////////////// */
+.transaction-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease-in-out;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+}
+
+.info-card h6 {
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #ffcb06; /* highlight color */
+}
+
+.info-card p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+.my-modal-GetTransactionInfoModel {
+  width: 35vw;
+  max-width: 35vw;
+  height: 20vh;
+  margin: 0 auto; /* Centers horizontally */
+  position: fixed;
+  left: 0;
+  right: 0; /* Ensures it stays centered */
+}

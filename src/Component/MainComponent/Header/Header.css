@@ -1,0 +1,107 @@
+/* Header.css */
+
+/* General Styles */
+
+.header-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: white;
+  font-family: inherit;
+  line-height: 22.5px;
+  text-align: center;
+  text-transform: none;
+  text-decoration: none;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon-button {
+  color: white;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.header-icon-button:hover {
+  background-color: rgba(191, 191, 191, 0.5);
+}
+
+.header-dropdown {
+  background-color: #0a66c2;
+  color: white;
+  height: 25px;
+  padding: 5px 30px 5px 10px;
+  font-family: inherit;
+  font-size: 11px;
+  border: 1px solid white;
+  border-radius: 8px;
+  appearance: none;
+  cursor: pointer;
+  margin-top: 11px;
+  margin-right: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.header-dropdown:hover {
+  border-color: #0a66c2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.header-dropdown-arrow {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+/* //////////////////////////////////// */
+.header-logo {
+  height: 40px;
+  margin-right: 5px;
+  /* mix-blend-mode: multiply; */
+  /* background: transparent; */
+}
+
+.company-name {
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .header-logo {
+    height: 25px;
+    margin-left: -20px;
+  }
+  .company-name {
+    display: none;
+  }
+
+  .header-container {
+    padding: 10px;
+  }
+
+  .header-title {
+    font-size: 14px;
+  }
+
+  .header-dropdown {
+    font-size: 10px;
+    padding: 5px 20px 5px 8px;
+  }
+
+  .header-icons {
+    gap: 5px;
+  }
+}
+/* .my-modal-PaymentOptions {
+  width: 70vw;
+  height: 30vh;
+  max-width: 60vw;
+  border: 1px solid white;
+} */

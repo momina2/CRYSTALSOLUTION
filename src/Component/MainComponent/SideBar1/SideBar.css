@@ -1,0 +1,53 @@
+/* .custom-sidebar-file {
+  display: block;
+  max-height: 76vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.custom-sidebar-file::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.custom-sidebar-file::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important;
+  border-radius: 8px;
+}
+
+.custom-sidebar-file::-webkit-scrollbar-track {
+  background: var(--background-color) !important;
+} */
+
+
+/*
+  Soft Scrollbar aur Main Container ko halki si golai (rounded) dene ke liye
+  .custom-sidebar-file class ko update kiya gaya hai.
+*/
+.custom-sidebar-file {
+  display: block;
+  max-height: 76vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Sidebar ko thoda aur gol karein */
+  border-radius: 12px; /* -> rounded-xl */
+}
+
+/* Scrollbar ki chaurai (width) kam karein */
+.custom-sidebar-file::-webkit-scrollbar {
+  width: 6px; /* Custom width needed */
+}
+
+/* Thumb (jo hissa scroll hota hai) ko iOS-jaisa naram look dein */
+.custom-sidebar-file::-webkit-scrollbar-thumb {
+  /* Halka sa translucent rang, ya background color se milta julta */
+  background-color: var(--headercolor-color) !important; /* Custom color needed */
+  border-radius: 6px; /* -> rounded-md */
+  /* Transparent border se yeh aur patla aur soft lagega */
+  border: 2px solid transparent; /* Custom border needed */
+  background-clip: padding-box; /* Custom property needed */
+}
+
+/* Track (jis par thumb chalta hai) ko transparent (shaffaf) kar dein */
+.custom-sidebar-file::-webkit-scrollbar-track {
+  background: transparent !important; /* Custom background needed */
+}

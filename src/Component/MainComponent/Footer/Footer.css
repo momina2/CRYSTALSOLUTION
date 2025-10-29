@@ -1,0 +1,54 @@
+/* Footer.css */
+
+/* General Styles */
+.footer-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #0a2744;
+  border-top: 1px solid gray;
+  z-index: 9999;
+  padding: 5px 5px;
+  text-align: center;
+}
+
+.footer-content {
+  color: white;
+  font-size: 14px;
+}
+
+.footer-content a {
+  color: inherit; /* Inherit font color */
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.footer-content a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .footer-container {
+    padding: 10px;
+  }
+
+  .footer-content {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-container {
+    padding: 5px;
+  }
+
+  .footer-content {
+    font-size: 10px;
+  }
+
+  .footer-content a {
+    margin: 0 3px;
+  }
+}

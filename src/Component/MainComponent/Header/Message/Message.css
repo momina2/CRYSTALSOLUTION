@@ -1,0 +1,258 @@
+.chat-app {
+  display: flex;
+  max-width: 80vw;
+  height: 80vh;
+  margin: 20px auto;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+}
+
+.friends-list {
+  width: 30%;
+  border-right: 1px solid #ddd;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.friends-header {
+  background-color: #075e54;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.friends-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.friends-search {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.friends-search input {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+}
+
+.friends-container {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.friend {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.friend:hover,
+.friend.selected {
+  background-color: #f0f0f0;
+}
+
+.friend .avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid #075e54;
+}
+
+.friend-info {
+  flex-grow: 1;
+}
+
+.friend-info h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.friend-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.friend-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.chat-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  background-color: #075e54;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid #fff;
+}
+
+.user-details h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.user-details p {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.header-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #e5ddd5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='%23d1d1d1' fill-opacity='0.4'%3E%3Crect x='0' y='0' width='50' height='50'/%3E%3Crect x='50' y='50' width='50' height='50'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.message {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: flex-end;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.other {
+  justify-content: flex-start;
+}
+
+.message.me {
+  justify-content: flex-end;
+}
+
+.message-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid #075e54;
+}
+
+.message-content {
+  max-width: 60%;
+  padding: 10px;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message.other .message-content {
+  background-color: white;
+}
+
+.message.me .message-content {
+  background-color: #dcf8c6;
+}
+
+.message-content p {
+  margin: 0;
+  padding-right: 40px;
+}
+
+.message-time {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  font-size: 10px;
+  color: #999;
+}
+
+.chat-input {
+  height: 43px !important;
+  max-height: 43px !important;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-width: 70vw !important;
+  margin: auto;
+}
+
+.chat-input input {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  font-size: 14px;
+  background: #f8f8f8;
+}
+
+.chat-input button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+  color: #919191;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.chat-input .icon:hover {
+  color: #075e54;
+  transform: scale(1.1);
+}
+
+.send-icon {
+  color: #25d366;
+}
+
+.mic-icon {
+  color: #ff3b30;
+}

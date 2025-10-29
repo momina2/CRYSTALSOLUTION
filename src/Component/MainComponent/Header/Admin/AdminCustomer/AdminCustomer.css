@@ -1,0 +1,203 @@
+.contentCustomerStyle {
+  background-color: var(--getcolor);
+  width: 95vw;
+  position: absolute;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  transition: left 3s ease-in-out, width 2s ease-in-out;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  word-break: break-word;
+  text-align: center;
+  max-width: 1100px;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px;
+  font-family: "Poppins", sans-serif;
+  padding: 0px;
+  margin: 0px;
+}
+.contentCustomerformStyle {
+  background-color: var(--getcolor);
+  width: 65vw;
+  left: 50%;
+  position: absolute;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  transition: left 3s ease-in-out, width 2s ease-in-out;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  text-align: center;
+  max-width: 650px;
+  padding: 0px;
+  margin: 0px;
+}
+.sidebar-visible {
+  left: 59%;
+}
+
+.sidebar-hidden {
+  left: 55%;
+}
+
+.contentstylescroll {
+  overflow-y: auto;
+  height: 67vh;
+}
+.contentstylescroll::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.contentstylescroll::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important;
+  border-radius: 8px;
+}
+
+.contentstylescroll::-webkit-scrollbar-track {
+  background: var(--background-color) !important;
+}
+
+/* Mobile view */
+@media (max-width: 768px) {
+  .contentCustomerStyle {
+    margin-top: 2% !important;
+    width: 87vw !important;
+    left: 58%;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 20px;
+    padding-left: 20px !important;
+  }
+  .contentCustomerformStyle {
+    margin-top: 2% !important;
+    width: 85vw !important;
+    left: 55%;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 20px;
+    padding-left: 20px !important;
+  }
+  .contentstylescroll {
+    overflow-y: auto;
+    overflow-x: auto;
+    width: 100vw;
+    max-width: 100vw;
+    height: 60vh;
+  }
+  .contentstylesformcroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 65vh;
+  }
+  .label-field {
+    padding-left: 20px !important;
+    display: flex;
+    align-items: start;
+    justify-content: flex-start !important;
+    font-size: var(--font-fontsize) !important;
+    font-family: var(--font-family) !important;
+    font-style: normal !important;
+    font-weight: bold;
+  }
+  .label-input {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end !important;
+    padding-left: 20px !important;
+    width: 98%;
+  }
+  .label-input-status {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end !important;
+    padding-left: 30px !important;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .contentCustomerStyle {
+    width: 95vw;
+    font-size: 13px;
+    line-height: 18px;
+    padding: 8px;
+  }
+}
+
+.label-field {
+  display: flex;
+  align-items: start;
+  justify-content: flex-end;
+  font-size: var(--font-fontsize) !important;
+  font-family: var(--font-family) !important;
+  font-style: normal !important;
+  font-weight: bold;
+}
+
+.form-control-field {
+  font-family: var(--font-family) !important;
+  font-weight: 400;
+  font-size: var(--font-fontsize) !important;
+  line-height: 23px;
+  color: var(--font-color) !important;
+  background-color: var(--getcolor) !important;
+  height: 24px !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
+  margin-bottom: 4px !important;
+  margin-left: -10px !important;
+}
+.form-control-status {
+  font-family: var(--font-family) !important;
+  font-weight: 400;
+  font-size: var(--font-fontsize) !important;
+  line-height: 23px;
+  color: var(--font-color) !important;
+  background-color: var(--getcolor) !important;
+  height: 24px !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
+  margin-bottom: 4px !important;
+  margin-left: -10px !important;
+}
+.table-item-file {
+  align-items: center;
+  text-align: center;
+  border: 1px solid white !important;
+  font-size: var(--font-fontsize) !important;
+  font-family: var(--font-family) !important;
+  font-style: normal !important;
+  font-weight: bold;
+}
+.my-modal-file {
+  width: 35vw;
+  max-width: 35vw;
+  border: 1px solid white;
+}
+
+.custom-table-file {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.custom-table-file::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.custom-table-file::-webkit-scrollbar-thumb {
+  background-color: var(--headercolor-color) !important;
+  border-radius: 8px;
+}
+
+.custom-table-file::-webkit-scrollbar-track {
+  background: var(--background-color) !important;
+}
