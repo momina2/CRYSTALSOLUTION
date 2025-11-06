@@ -888,7 +888,7 @@ export default function TrailBalanceReport() {
       : "left 3s ease-in-out, width 2s ease-in-out",
     display: "flex",
     justifyContent: "center",
-    alignItems: "start",
+    alignItems: "center",
     overflowX: "hidden",
     overflowY: "hidden",
     wordBreak: "break-word",
