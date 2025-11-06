@@ -850,7 +850,7 @@ export default function MemberCollectionSummaryReport() {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    overflowX: "auto",
+    overflowX: "hidden",
     overflowY: "auto",
     wordBreak: "break-word",
     textAlign: "center",
