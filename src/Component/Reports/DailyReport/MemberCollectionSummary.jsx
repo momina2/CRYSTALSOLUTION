@@ -41,7 +41,7 @@ const REPORT_CONFIG = {
       col002: "80px",
       col003: "80px",
       col004: "100px",
-      col005: "10px",
+      col005: "15x",
 
     },
     PDF_WIDTHS: [22, 22, 20, 20],
@@ -832,7 +832,7 @@ export default function MemberCollectionSummaryReport() {
   const softTableStyles = {
     softBoxShadow:
       "0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03)",
-    softBorderColor: "#e9ecef",
+    softBorderColor: "#000000ff",
     softRowSeparator: "#f8f9fa",
     softSelectedColor: "#f0f8ff",
   };

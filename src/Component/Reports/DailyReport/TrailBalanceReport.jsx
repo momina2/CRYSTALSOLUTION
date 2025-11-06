@@ -871,7 +871,7 @@ export default function TrailBalanceReport() {
   const softTableStyles = {
     softBoxShadow:
       "0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03)",
-    softBorderColor: "#e9ecef",
+    softBorderColor: "#000000ff",
     softRowSeparator: "#f8f9fa",
     softSelectedColor: "#f0f8ff",
   };
