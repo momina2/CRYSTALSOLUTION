@@ -38,8 +38,8 @@ const REPORT_CONFIG = {
     TO_DATE: "FFnlDat",
   },
   TABLE: {
-    HEADERS: ["Trn#", "Date", "Member", "Code", "Type", "Collection"],
-    KEYS: ["Trn#", "Date", "Member", "Code", "Type", "Collection"],
+    HEADERS: ["Trn#", "Date", "Member", "Code", "Type", "Collection",""],
+    KEYS: ["Trn#", "Date", "Member", "Code", "Type", "Collection", ""],
     UI_WIDTHS: {
       col001: "60px",
       col002: "80px",
@@ -47,11 +47,13 @@ const REPORT_CONFIG = {
       col004: "58px",
       col005: "55px",
       col006: "90px",
+      col007: "12px",
+
     },
-    PDF_WIDTHS: [16, 22, 78, 12, 11, 20],
-    EXCEL_WIDTHS: [8, 12, 35, 7, 8, 12],
-    ALIGNMENTS: ["left", "left", "left", "center", "left", "right"],
-    PDF_ALIGNMENTS: ["left", "left", "left", "right", "right", "right"],
+    PDF_WIDTHS: [16, 22, 78, 12, 11, 20, 20,0],
+    EXCEL_WIDTHS: [8, 12, 35, 7, 8, 12, 20, 0],
+    ALIGNMENTS: ["left", "left", "left", "center", "left", "right", ""],
+    PDF_ALIGNMENTS: ["left", "left", "left", "right", "right", "right", ""],
     TOTAL_COLUMN_INDEX: 5,
   },
 };
