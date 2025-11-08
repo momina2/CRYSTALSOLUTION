@@ -948,7 +948,7 @@ const SideBar1 = () => {
               className={`rounded-lg mx-1 mb-1 p-0.5`}
               sx={{
                 backgroundColor:
-                  getcolor === "white" ? "#fafafa" : "rgba(0, 0, 0, 0.85)",
+                  getcolor === "white" ? "#fafafa" : "rgba(255, 255, 255, 0.05)",
               }}
             >
               <List component="div" disablePadding sx={{ py: 0 }}>
@@ -994,7 +994,6 @@ const SideBar1 = () => {
           if (hovered) {
             toggleSidebar(false);
             setHovered(false);
-            // Jab sidebar slim ho (hover khatam ho), to saare menus close kar dein
             setOpenMenu({});
             setOpenSubMenu({});
           }
@@ -1185,8 +1184,8 @@ const SideBar1 = () => {
                       padding: "4px 0",
                       backgroundColor:
                         getcolor === "white"
-                          ? "#e9e9e9" // darker for light mode
-                          : "rgba(0, 0, 0, 0.85)", // darker for dark mode
+                          ? "#e9e9e9" 
+                          : "rgba(255, 255, 255, 0.05)", 
                       borderRadius: "8px",
                       border: `1px solid ${
                         getcolor === "white"
