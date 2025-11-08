@@ -214,6 +214,7 @@ const SideBar1 = () => {
   // =============
   // Sub-Sub-Items
   // =============
+
   const renderSubSubMenu = (subItems) => {
     const filteredSubItems = subItems.slice(1);
     const MAX_LENGTH = 20;
@@ -236,20 +237,18 @@ const SideBar1 = () => {
           }}
           disabled={subItem.disabledd}
           className={`pl-14 h-8 rounded-md my-[0.1rem] transition-colors duration-200 
-              ${
-                getcolor === "white" ? "hover:bg-gray-100" : "hover:bg-white/5"
-              } 
-              ${subItem.disabledd ? "opacity-50" : ""}`}
+            ${getcolor === "white" ? "hover:bg-gray-100" : "hover:bg-white/5"} 
+            ${subItem.disabledd ? "opacity-50" : ""}`}
           sx={{ pl: 10, height: "32px", my: 0.1 }}
         >
           <Typography
             className={`font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-full font-normal`}
             sx={{
               fontSize: "12px",
-              color: subItem.disabledd ? "gray" : fontcolor,
+              color: subItem.disabledd ? "gray" : "black",
               fontFamily: SOFT_FONT_FAMILY,
               letterSpacing: linespacing,
-              opacity: 0.85,
+              // opacity: 0.95,
             }}
           >
             {truncateLabel(subItem.label, MAX_LENGTH)}
