@@ -1,7 +1,5 @@
 
 
-
-
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -24,7 +22,7 @@ import {
   FaHome,
   FaChevronDown,
   FaChevronUp,
-} from "react-icons/fa";
+} from "react-icons/fa"; 
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchGetActiveUserLocation,
@@ -49,7 +47,7 @@ import man from "../../../image/man.png";
 import { useTheme } from "../../../ThemeContext";
 
 const SOFT_FONT_FAMILY = "'Inter', 'Poppins', sans-serif";
-const ACTIVE_COLOR = '#1976d2';
+const ACTIVE_COLOR = '#1976d2'; 
 
 
 const SideBar1 = () => {
@@ -136,11 +134,11 @@ const SideBar1 = () => {
   };
 
   // =================
-  //handleSubMenuClick
+  //handleSubMenuClick 
   // =================
   const handleSubMenuClick = (topLevelKey, subMenuKey) => {
     const key = `${topLevelKey}-${subMenuKey}`;
-
+    
     setOpenSubMenu((prevOpenSubMenu) => {
       const isAlreadyOpen = prevOpenSubMenu[key];
       if (isAlreadyOpen) {
@@ -158,12 +156,12 @@ const SideBar1 = () => {
             }
         });
         newOpenSubMenu[key] = true;
-
+        
         return newOpenSubMenu;
       }
     });
   };
-
+  
   const hierarchicalMenuData = {};
   menuData.forEach((item) => {
     const [topLevel, middleLevel, subLevel] = item.tmencod.split("-");
@@ -183,7 +181,7 @@ const SideBar1 = () => {
         if (!hierarchicalMenuData[topLevel].items['000']) {
              hierarchicalMenuData[topLevel].items['000'] = [];
         }
-          hierarchicalMenuData[topLevel].items['000'].push({
+         hierarchicalMenuData[topLevel].items['000'].push({
             label: item.tmendsc,
             to: item.tmenurl,
             disabledd: item.tusrpem === "N",
@@ -200,14 +198,14 @@ const SideBar1 = () => {
         });
     }
   });
-  const linespacing = "0.2px";
+  const linespacing = "0.2px"; 
 
   const truncateLabel = (label, maxLength) => {
     return label.length > maxLength
       ? `${label.substring(0, maxLength)}...`
       : label;
   };
-
+  
   useEffect(() => {
     document.documentElement.style.setProperty("--background-color", getcolor);
     document.documentElement.style.setProperty("--font-color", fontcolor);
@@ -216,68 +214,73 @@ const SideBar1 = () => {
       headercolor
     );
   }, [getcolor, fontcolor, headercolor]);
-
+  
   // =============
   // Sub-Sub-Items
   // =============
   const renderSubSubMenu = (subItems) => {
-    const filteredSubItems = subItems.slice(1);
+    const filteredSubItems = subItems.slice(1); 
+    const MAX_LENGTH = 20; // 20 character limit
 
     return filteredSubItems.map(
       (subItem, index) => (
-        <ListItem
-          button
+        // Wrap ListItem with Tooltip
+        <Tooltip 
+          title={subItem.label} // Full label for tooltip on hover
+          placement="right" 
           key={index}
-          onClick={() => {
-            if (!subItem.disabledd) {
-              navigate(subItem.to);
-            }
-          }}
-          disabled={subItem.disabledd}
-          className={`pl-20 h-7 rounded-md my-[0.05rem] transition-colors duration-200 
-          ${getcolor === 'white' ? 'hover:bg-gray-100' : 'hover:bg-white/5'} 
-          ${subItem.disabledd ? 'opacity-50' : ''}`}
-          sx={{
-            pl: 11.5, // 
-            height: "28px", // 
-            my: 0, // 
-            borderBottom: (index < filteredSubItems.length - 1)
-              ? `1px solid ${getcolor === 'white' ? '#e0e0e0' : 'rgba(255, 255, 255, 0.15)'}`
-              : 'none',
-          }}
+          // Only enable tooltip if the label is longer than MAX_LENGTH
+          disableHoverListener={subItem.label.length <= MAX_LENGTH}
+          disableFocusListener={subItem.label.length <= MAX_LENGTH}
+          disableTouchListener={subItem.label.length <= MAX_LENGTH}
         >
-          <Typography
-            className={`font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-full font-normal`}
-            sx={{
-              fontSize: '12px',
-              color: subItem.disabledd ? "gray" : fontcolor,
-              fontFamily: SOFT_FONT_FAMILY,
-              letterSpacing: linespacing,
+          <ListItem
+            button
+            onClick={() => {
+              if (!subItem.disabledd) {
+                navigate(subItem.to);
+              }
             }}
+            disabled={subItem.disabledd}
+            className={`pl-14 h-8 rounded-md my-[0.1rem] transition-colors duration-200 
+              ${getcolor === 'white' ? 'hover:bg-gray-100' : 'hover:bg-white/5'} 
+              ${subItem.disabledd ? 'opacity-50' : ''}`}
+            sx={{ pl: 5.5, height: "32px", my: 0.1 }}
           >
-            {subItem.label}
-          </Typography>
-        </ListItem>
+            <Typography
+              className={`font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-full font-normal`}
+              sx={{ 
+                fontSize: '12px', 
+                color: subItem.disabledd ? "gray" : fontcolor,
+                fontFamily: SOFT_FONT_FAMILY, 
+                letterSpacing: linespacing,
+              }}
+            >
+              {/* Truncate the label to 20 characters and append "..." */}
+              {truncateLabel(subItem.label, MAX_LENGTH)}
+            </Typography>
+          </ListItem>
+        </Tooltip>
       )
     );
   };
 
   // =================
-  // Middle-Level Items
+  // Middle-Level Items 
   // =================
   const renderSubMenu = (topLevel, middleLevelItems) => {
     const sortedMiddleLevelKeys = Object.keys(middleLevelItems)
-      .filter((middleLevel) => middleLevel !== "000")
+      .filter((middleLevel) => middleLevel !== "000") 
       .sort();
 
     return sortedMiddleLevelKeys.map((middleLevel) => {
       const subItems = middleLevelItems[middleLevel];
-      const hasSubSubMenu = subItems.length > 1;
+      const hasSubSubMenu = subItems.length > 1; 
       const key = `${topLevel}-${middleLevel}`;
       const isActive = openSubMenu[key];
 
-      const activeBg = getcolor === 'white' ? '#e0e0e0' : 'rgba(255, 255, 255, 0.2)';
-      const linkItem = subItems[0];
+      const activeBg = getcolor === 'white' ? '#e0e0e0' : 'rgba(255, 255, 255, 0.2)'; 
+      const linkItem = subItems[0]; 
 
       return (
         <React.Fragment key={middleLevel}>
@@ -290,11 +293,11 @@ const SideBar1 = () => {
                   ? handleSubMenuClick(topLevel, middleLevel)
                   : linkItem.to && navigate(linkItem.to);
               }}
-              className={`pl-10 h-9 rounded-md mb-0= mx-0.5 transition-colors duration-200
+              className={`pl-6 h-9 rounded-md mb-1 mx-0.5 transition-colors duration-200
                 ${linkItem.disabledd ? 'opacity-50' : ''}`}
               sx={{
-                pl: 8.5, // 
-                height: "34px",
+                pl: 3.5, 
+                height: "36px", 
                 backgroundColor: isActive ? activeBg : 'transparent',
                 "&:hover": {
                   backgroundColor: getrowhover,
@@ -307,11 +310,11 @@ const SideBar1 = () => {
               <Typography
                 className={`leading-snug flex-grow`}
                 sx={{
-                  fontSize: '13px',
+                  fontSize: '13px', 
                   letterSpacing: linespacing,
-                  fontWeight: isActive ? '600' : '500',
+                  fontWeight: isActive ? '600' : '500', 
                   color: linkItem.disabledd ? "gray" : fontcolor,
-                  fontFamily: SOFT_FONT_FAMILY,
+                  fontFamily: SOFT_FONT_FAMILY, 
                 }}
               >
                 {linkItem.label}
@@ -324,7 +327,7 @@ const SideBar1 = () => {
                         ? "fas fa-chevron-up"
                         : "fas fa-chevron-right"
                     }
-                    style={{ fontSize: "10px" }}
+                    style={{ fontSize: "10px" }} 
                   />
                 </Box>
               )}
@@ -334,12 +337,12 @@ const SideBar1 = () => {
           {/* Sub-Sub-Menu */}
           {hasSubSubMenu && (
             <Collapse
-              in={isActive}
+              in={isActive} 
               timeout="auto"
               unmountOnExit
               className={`rounded-lg mx-1 mb-1 p-0.5`}
               sx={{
-                backgroundColor: getcolor === 'white' ? '#fafafa' : 'rgba(0,0,0,0.1)',
+                backgroundColor: getcolor === 'white' ? '#fafafa' : 'rgba(0,0,0,0.1)', 
               }}
             >
               <List component="div" disablePadding sx={{ py: 0 }}>
@@ -351,8 +354,8 @@ const SideBar1 = () => {
       );
     });
   };
-
-
+  
+  
   return (
     <Box className="flex">
       <Drawer
@@ -363,16 +366,16 @@ const SideBar1 = () => {
           "& .MuiDrawer-paper": {
             marginTop: "55px",
             width: isSidebarVisible ? EXPANDED_WIDTH : SLIM_WIDTH,
-            backgroundColor: getcolor,
+            backgroundColor: getcolor, 
             borderRight: "none",
-            boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)", 
             borderRadius: "3px",
             color: fontcolor,
-            maxHeight: "calc(100vh - 71px)",
-            left: "2px",
-            height: "calc(100vh - 71px)",
+            maxHeight: "calc(100vh - 71px)", 
+            left: "2px", 
+            height: "calc(100vh - 71px)", 
             transition: "width 0.3s ease-in-out, box-shadow 0.3s, background-color 0.3s",
-            padding: isSidebarVisible ? '0' : '0 4px',
+            padding: isSidebarVisible ? '0' : '0 4px', 
           },
         }}
         onMouseEnter={() => {
@@ -391,37 +394,37 @@ const SideBar1 = () => {
         anchor="left"
         open={isSidebarVisible}
       >
-
+        
         {/* ================== */}
         {/* User Profile Area
         {/* ================== */}
-        <Box
-            className="p-2 border-b"
-            sx={{
+        <Box 
+            className="p-2 border-b" 
+            sx={{ 
                 borderColor: getcolor === 'white' ? '#e0e0e0' : 'rgba(255, 255, 255, 0.1)',
             }}
         >
             <Tooltip title={!isSidebarVisible ? user.name : ""} placement="right">
-                <ListItem
-                    button
-                    className="h-[50px] rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-                    sx={{
-                        px: isSidebarVisible ? 1.5 : 1,
-                        justifyContent: isSidebarVisible ? 'flex-start' : 'center',
+                <ListItem 
+                    button 
+                    className="h-[50px] rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" 
+                    sx={{ 
+                        px: isSidebarVisible ? 1.5 : 1, 
+                        justifyContent: isSidebarVisible ? 'flex-start' : 'center', 
                     }}
                 >
                     <ListItemIcon sx={{ color: fontcolor, minWidth: isSidebarVisible ? '36px' : '36px', justifyContent: 'center' }}>
-                        <Avatar
-                            alt={user.name}
-                            src={man}
+                        <Avatar 
+                            alt={user.name} 
+                            src={man} 
                             sx={{ width: isSidebarVisible ? 32 : 36, height: isSidebarVisible ? 32 : 36 }}
                         />
                     </ListItemIcon>
                     {isSidebarVisible && (
-                        <ListItemText
+                        <ListItemText 
                             primary={truncateLabel(user.name || "User Profile", 20)}
                             secondary={user.tusrid || "ID"}
-                            sx={{
+                            sx={{ 
                                 marginLeft: "4px",
                                 "& .MuiListItemText-primary": {
                                     fontSize: '14px',
@@ -443,22 +446,22 @@ const SideBar1 = () => {
 
         <List
           className="custom-sidebar-file overflow-y-auto overflow-x-hidden rounded-xl flex-grow"
-          style={{ padding: "8px 4px" }}
+          style={{ padding: "8px 4px" }} 
         >
           {Object.keys(hierarchicalMenuData)
             .filter((topLevel) => topLevel !== "000")
             .map((topLevel) => {
               const isActive = openMenu[topLevel];
-
+              
               const isOnlyTopLevelLink = Object.keys(hierarchicalMenuData[topLevel].items).length === 0;
 
-              const primaryLink = hierarchicalMenuData[topLevel].items['000']?.[0];
-              const linkToUse = primaryLink || null;
+              const primaryLink = hierarchicalMenuData[topLevel].items['000']?.[0]; 
+              const linkToUse = primaryLink || null; 
 
               return (
               <React.Fragment key={topLevel}>
-                <Tooltip
-                  title={!isSidebarVisible ? hierarchicalMenuData[topLevel].label : ""}
+                <Tooltip 
+                  title={!isSidebarVisible ? hierarchicalMenuData[topLevel].label : ""} 
                   placement="right"
                 >
                 <ListItem
@@ -467,20 +470,20 @@ const SideBar1 = () => {
                     if (linkToUse && isOnlyTopLevelLink) {
                         navigate(linkToUse.to);
                     } else {
-                        handleMenuClick(topLevel);
+                        handleMenuClick(topLevel); 
                     }
                   }}
                   className={`rounded-lg mb-1 h-10 transition-all duration-300`}
                   sx={{
-                    px: isSidebarVisible ? 1.5 : 1,
-                    height: "40px",
+                    px: isSidebarVisible ? 1.5 : 1, 
+                    height: "40px", 
                     justifyContent: isSidebarVisible ? 'flex-start' : 'center',
                     backgroundColor: isActive ? ACTIVE_COLOR : 'transparent',
-
+                    
                     "&:hover": {
                       backgroundColor: isActive ? ACTIVE_COLOR : getrowhover,
                       "& .MuiListItemIcon-root, & .MuiTypography-root, & svg": {
-                        color: "white",
+                        color: "white", 
                       },
                       borderRadius: "8px",
                     },
@@ -489,7 +492,7 @@ const SideBar1 = () => {
                 >
                   <ListItemIcon
                     sx={{
-                      color: isActive ? 'white' : fontcolor,
+                      color: isActive ? 'white' : fontcolor, 
                       minWidth: isSidebarVisible ? '36px' : '36px',
                       justifyContent: 'center',
                     }}
@@ -510,27 +513,27 @@ const SideBar1 = () => {
                       "Dashboard"
                     ) && <FaHome size={18} />}
                   </ListItemIcon>
-
+                  
                   {isSidebarVisible && (
                     <ListItemText
                       primary={hierarchicalMenuData[topLevel].label}
                       sx={{
-                        marginLeft: "4px",
+                        marginLeft: "4px", 
                         "& .MuiTypography-root": {
-                          fontSize: '14px',
-                          fontFamily: SOFT_FONT_FAMILY,
+                          fontSize: '14px', 
+                          fontFamily: SOFT_FONT_FAMILY, 
                           letterSpacing: linespacing,
-                          fontWeight: isActive ? '600' : '500',
-                          color: isActive ? 'white' : fontcolor,
+                          fontWeight: isActive ? '600' : '500', 
+                          color: isActive ? 'white' : fontcolor, 
                         },
                       }}
                     />
                   )}
-
+                  
                   {isSidebarVisible && !isOnlyTopLevelLink && (
                     <Box sx={{ ml: "auto" }}>
                       {isActive ? (
-                        <FaChevronUp size={10} color='white' />
+                        <FaChevronUp size={10} color='white' /> 
                       ) : (
                         <FaChevronDown size={10} style={{ color: fontcolor }} />
                       )}
@@ -538,22 +541,15 @@ const SideBar1 = () => {
                   )}
                 </ListItem>
                 </Tooltip>
-
+                
                 <Collapse
-                  in={isActive}
+                  in={isActive} 
                   timeout="auto"
                   unmountOnExit
                   className="mx-0.5"
-                  sx={{
-                    padding: "4px 0",
-                    backgroundColor: getcolor === 'white' ? '#f5f5f5' : 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '8px',
-                    border: `1px solid ${getcolor === 'white' ? '#ddd' : 'rgba(255, 255, 255, 0.1)'}`,
-                    margin: '8px 0 !important', //
-                    boxShadow: getcolor === 'white' ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
-                  }}
+                  sx={{ padding: "4px 0" }}
                 >
-                  <List component="div" disablePadding sx={{ py: 0.5 }}>
+                  <List component="div" disablePadding>
                     {renderSubMenu(
                       topLevel,
                       hierarchicalMenuData[topLevel].items
@@ -563,8 +559,8 @@ const SideBar1 = () => {
               </React.Fragment>
             )})}
         </List>
-
-        <Box
+        
+        <Box 
             className="p-2"
         >
         </Box>
@@ -572,4 +568,5 @@ const SideBar1 = () => {
     </Box>
   );
 };
+
 export default SideBar1;
