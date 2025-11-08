@@ -220,16 +220,14 @@ const SideBar1 = () => {
   // =============
   const renderSubSubMenu = (subItems) => {
     const filteredSubItems = subItems.slice(1); 
-    const MAX_LENGTH = 20; // 20 character limit
+    const MAX_LENGTH = 20;
 
     return filteredSubItems.map(
       (subItem, index) => (
-        // Wrap ListItem with Tooltip
         <Tooltip 
-          title={subItem.label} // Full label for tooltip on hover
+          title={subItem.label} 
           placement="right" 
           key={index}
-          // Only enable tooltip if the label is longer than MAX_LENGTH
           disableHoverListener={subItem.label.length <= MAX_LENGTH}
           disableFocusListener={subItem.label.length <= MAX_LENGTH}
           disableTouchListener={subItem.label.length <= MAX_LENGTH}
@@ -256,7 +254,6 @@ const SideBar1 = () => {
                 letterSpacing: linespacing,
               }}
             >
-              {/* Truncate the label to 20 characters and append "..." */}
               {truncateLabel(subItem.label, MAX_LENGTH)}
             </Typography>
           </ListItem>
