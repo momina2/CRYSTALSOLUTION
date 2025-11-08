@@ -859,7 +859,7 @@ const SideBar1 = () => {
             className={`font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-full font-normal`}
             sx={{
               fontSize: "12px",
-              color: subItem.disabledd ? "gray" : "black",
+              color: subItem.disabledd ? "gray" : fontcolor,
               fontFamily: SOFT_FONT_FAMILY,
               letterSpacing: linespacing,
               // opacity: 0.95,
