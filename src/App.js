@@ -164,6 +164,7 @@ import CollectorList from "./Component/Reports/List/CollectorList.js";
 import MemberListCable from "./Component/Reports/List/MemberListCable.js";
 import notificationSound from "../src/image/notification.wav";
 import ResturentDashboard from "./Component/RestaurantDashboard/ResturentDashboard.jsx";
+import { loadTailwind } from "./Utils/helpers.js";
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
   const queryClient = new QueryClient();
@@ -198,6 +199,10 @@ function App() {
         setNotification(null);
       }, 5000);
     });
+  }, []);
+
+  useEffect(() => {
+    loadTailwind(); 
   }, []);
 
   return (
