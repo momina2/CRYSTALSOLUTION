@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Bar } from "react-chartjs-2";
@@ -21,7 +20,7 @@ ChartJS.register(
   Legend
 );
 
-// API URLs 
+// API URLs
 
 const ADMIN_INFO_API_URL = "https://crystalsolutions.com.pk/api/AdminInfo.php";
 const MONTHLY_COMPARISON_API_URL =
@@ -51,8 +50,10 @@ const getCurrentDateFormatted = () => {
 };
 
 const currentDate = getCurrentDateFormatted();
+
+
 // ----------------------
-// Vertical Stats Card 
+// Vertical Stats Card
 // ----------------------
 const VerticalStatsCard = ({ stats, cardTitle = null }) => (
   <div className="p-2 rounded-xl shadow-xl bg-white border border-gray-100 flex flex-col w-[300px] h-full">
@@ -65,35 +66,62 @@ const VerticalStatsCard = ({ stats, cardTitle = null }) => (
       </>
     )}
 
-    {stats.map((stat, index) => (
-      <div
-        key={stat.title}
-        className={`flex justify-between items-center p-1 ${
-          index < stats.length - 1 ? "border-b border-gray-100" : ""
-        } transition duration-150 hover:bg-gray-50`}
-      >
-        <p className="text-xs font-medium text-gray-500">{stat.title}</p>
+    {stats.map((stat, index) => {
+      // Check if it's the first stat, which you want to treat as the "Total"
+      const isTotalStat = index === 0;
 
-        <h2
-          className={`text-sm font-semibold ${
-            stat.isDark
-              ? "text-gray-900"
-              : stat.isNegative
-              ? "text-red-600"
-              : "text-gray-800"
-          }`}
+      if (isTotalStat) {
+        // Special rendering for the Total stat
+        return (
+          <div
+            key={stat.title}
+            // Removed 'text-center' if it was implicitly there or from parent.
+            // Explicitly ensuring flex-start alignment for its content.
+            className={`flex flex-col p-1 border-b border-gray-100 transition duration-150 hover:bg-gray-50 mb-2 items-start`} // Added items-start here
+          >
+            {/* Title (Total) */}
+            <p className="text-sm font-medium text-gray-500 mb-1">
+              {stat.title}
+            </p>
+            {/* Value (Large size below title, now left-aligned) */}
+            <h2 className={`text-3xl font-bold text-gray-900`}>
+              {String(stat.value)}
+            </h2>
+          </div>
+        );
+      }
+
+      // Default rendering for all other stats
+      return (
+        <div
+          key={stat.title}
+          className={`flex justify-between items-center p-1 ${
+            index < stats.length - 1 ? "border-b border-gray-100" : ""
+          } transition duration-150 hover:bg-gray-50`}
         >
-          {String(stat.value)}
-        </h2>
-      </div>
-    ))}
+          <p className="text-xs font-medium text-gray-500">{stat.title}</p>
+
+          <h2
+            className={`text-sm font-semibold ${
+              stat.isDark
+                ? "text-gray-900"
+                : stat.isNegative
+                ? "text-red-600"
+                : "text-gray-800"
+            }`}
+          >
+            {String(stat.value)}
+          </h2>
+        </div>
+      );
+    })}
   </div>
 );
 
 // ----------------------
 // Dashboard Component
 // ----------------------
-const AmericanDashboard = () => {
+const MemberCollectionReport = () => {
   const [adminData, setAdminData] = useState(null);
   const [monthlyData, setMonthlyData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -129,7 +157,7 @@ const AmericanDashboard = () => {
         );
         setAdminData(adminResponse.data);
 
-        // --- 2. Fetch Monthly Comparison Data  
+        // --- 2. Fetch Monthly Comparison Data
         const monthlyFormData = new FormData();
         monthlyFormData.append("code", "AMRELEC");
         monthlyFormData.append("FRepYer", "2025");
@@ -178,19 +206,18 @@ const AmericanDashboard = () => {
   // -----------------------------------------------------
 
   const CustomerStats = [
-    { title: "Total Customer", value: mainData["Total Customer"] || "N/A" },
+    { title: "Total ", value: mainData["Total Customer"] || "N/A" },
     { title: "Non Active", value: mainData["Non Active"] || "N/A" },
     {
-      title: "OutStanding Customer",
+      title: "OutStanding ",
       value: mainData["OutStanding Customer"] || "N/A",
     },
-    { title: "Advance Customer", value: mainData["Advance Customer"] || "N/A" },
-    { title: "Nil Customer", value: mainData["Nil Customer"] || "N/A" },
+    { title: "Advance ", value: mainData["Advance Customer"] || "N/A" },
+    { title: "Nil ", value: mainData["Nil Customer"] || "N/A" },
   ];
 
-
   // -------------------------------------------------------------------
-  //  2. DATA FOR GRAPHS 
+  //  2. DATA FOR GRAPHS
   // -------------------------------------------------------------------
 
   const chart1CollectionData = parseData(mainData.Collection);
@@ -250,26 +277,22 @@ const AmericanDashboard = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">
+    // <div div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans">
+    <div div className="p-1 bg-gray-50 min-h-screen font-sans">
+      <h1 className="text-2xl font-bold text-gray-800 mb-0 px-1">
         Analytics Dashboard
       </h1>
-      <hr className="mb-4 border-gray-200" />
+      <hr className="mb-1 border-gray-200" />
 
       {/* Stats Cards Section */}
       <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="col-span-1">
-          <VerticalStatsCard
-            stats={CustomerStats}
-            cardTitle="Customer Overview"
-          />
+          <VerticalStatsCard stats={CustomerStats} cardTitle=" Overview" />
         </div>
       </section>
 
       {/* Graph Section  */}
       <section className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-     
-
         {/* Monthly Comparison Chart  */}
         <div className="col-span-1 lg:col-span-3 w-[900px]">
           <div className="bg-white p-6 rounded-xl shadow-xl border h-[400px]">
@@ -323,4 +346,4 @@ const AmericanDashboard = () => {
   );
 };
 
-export default AmericanDashboard;
+export default MemberCollectionReport;
