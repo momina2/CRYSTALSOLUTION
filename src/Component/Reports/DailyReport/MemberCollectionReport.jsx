@@ -38,7 +38,7 @@ const REPORT_CONFIG = {
     TO_DATE: "FFnlDat",
   },
   TABLE: {
-    HEADERS: ["Trn#", "Date", "Member", "Code", "Type", "Collection",""],
+    HEADERS: ["Trn#", "Date", "Member", "Code", "Type", "Collection", ""],
     KEYS: ["Trn#", "Date", "Member", "Code", "Type", "Collection", ""],
     UI_WIDTHS: {
       col001: "60px",
@@ -48,9 +48,8 @@ const REPORT_CONFIG = {
       col005: "55px",
       col006: "90px",
       col007: "12px",
-
     },
-    PDF_WIDTHS: [16, 22, 78, 12, 11, 20, 20,0],
+    PDF_WIDTHS: [16, 22, 78, 12, 11, 20, 20, 0],
     EXCEL_WIDTHS: [8, 12, 35, 7, 8, 12, 20, 0],
     ALIGNMENTS: ["left", "left", "left", "center", "left", "right", ""],
     PDF_ALIGNMENTS: ["left", "left", "left", "right", "right", "right", ""],
@@ -132,7 +131,7 @@ export default function MemberCollectionReport() {
   const [selectedToDate, setSelectedToDate] = useState(null);
   const [toInputDate, settoInputDate] = useState("");
   const [toCalendarOpen, settoCalendarOpen] = useState(false);
-  const [selectedRadio, setSelectedRadio] = useState("custom");
+  const [selectedRadio, setSelectedRadio] = useState("Custom"); // <--- ADDED: State for radio buttons
   const [tableData, setTableData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({
@@ -185,6 +184,45 @@ export default function MemberCollectionReport() {
   };
   const handleToInputChange = (e) => {
     settoInputDate(e.target.value);
+  };
+
+  // <--- ADDED: Radio Button Change Handler
+  const handleRadioChange = (event) => {
+    const value = event.target.value;
+    setSelectedRadio(value);
+    setfromCalendarOpen(false);
+    settoCalendarOpen(false);
+
+    const currentDate = new Date();
+    setSelectedToDate(currentDate);
+    settoInputDate(formatDate(currentDate));
+
+    if (value === "Custom") {
+      const firstDateOfCurrentMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      );
+      setSelectedfromDate(firstDateOfCurrentMonth);
+      setfromInputDate(formatDate(firstDateOfCurrentMonth));
+      fromRef.current.focus();
+    } else {
+      let daysToSubtract = 0;
+      if (value === "30 days") {
+        daysToSubtract = 30;
+      } else if (value === "60 days") {
+        daysToSubtract = 60;
+      } else if (value === "90 days") {
+        daysToSubtract = 90;
+      }
+
+      const fromDate = new Date();
+      fromDate.setDate(currentDate.getDate() - daysToSubtract);
+
+      setSelectedfromDate(fromDate);
+      setfromInputDate(formatDate(fromDate));
+      selectButtonRef.current.focus();
+    }
   };
 
   function fetchDailyMemberCollectionDetailReport() {
@@ -315,24 +353,26 @@ export default function MemberCollectionReport() {
   }, []);
 
   useEffect(() => {
-    const currentDate = new Date();
-    setSelectedToDate(currentDate);
-    settoInputDate(formatDate(currentDate));
-    const firstDateOfCurrentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    setSelectedfromDate(firstDateOfCurrentMonth);
-    setfromInputDate(formatDate(firstDateOfCurrentMonth));
-  }, []);
+    if (selectedRadio === "Custom") {
+      const currentDate = new Date();
+      setSelectedToDate(currentDate);
+      settoInputDate(formatDate(currentDate));
+      const firstDateOfCurrentMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      );
+      setSelectedfromDate(firstDateOfCurrentMonth);
+      setfromInputDate(formatDate(firstDateOfCurrentMonth));
+    }
+  }, [selectedRadio]);
 
   const parseValue = (value, key) => {
     if (key === "Collection") {
       const num = parseFloat(String(value).replace(/[^0-9.-]+/g, ""));
       return isNaN(num) ? 0 : num;
     } else if (key === "Date") {
-      const parts = String(value).split('-');
+      const parts = String(value).split("-");
       if (parts.length === 3) {
         const [day, month, year] = parts.map(Number);
         return new Date(year, month - 1, day).getTime();
@@ -822,7 +862,7 @@ export default function MemberCollectionReport() {
   });
   useHotkeys("esc", () => navigate("/MainPage"));
 
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [setWindowWidth] = useState(window.innerWidth);
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -936,41 +976,6 @@ export default function MemberCollectionReport() {
     }
   }, [selectedIndex]);
 
-  const handleRadioChange = (days) => {
-    setSelectedRadio(days === 0 ? "custom" : `${days}days`);
-    if (days !== 0) {
-      const toDate = convertToDate(toInputDate);
-      const fromDate = new Date(toDate);
-      fromDate.setUTCDate(fromDate.getUTCDate() - days);
-      setSelectedfromDate(fromDate);
-      setfromInputDate(formatDate(fromDate));
-    }
-  };
-
-  useEffect(() => {
-    if (selectedRadio === "custom") {
-      const currentDate = new Date();
-      const firstDateOfCurrentMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1
-      );
-      setSelectedfromDate(firstDateOfCurrentMonth);
-      setfromInputDate(formatDate(firstDateOfCurrentMonth));
-      setSelectedToDate(currentDate);
-      settoInputDate(formatDate(currentDate));
-    } else {
-      const days = parseInt(selectedRadio.replace("days", ""));
-      if (!isNaN(days) && toInputDate) {
-        const toDate = convertToDate(toInputDate);
-        const fromDate = new Date(toDate);
-        fromDate.setUTCDate(fromDate.getUTCDate() - days);
-        setSelectedfromDate(fromDate);
-        setfromInputDate(formatDate(fromDate));
-      }
-    }
-  }, [selectedRadio, toInputDate]);
-
   const focusNextElement = (currentRef, nextRef) => {
     if (currentRef.current && nextRef.current) {
       currentRef.current.focus();
@@ -1032,7 +1037,7 @@ export default function MemberCollectionReport() {
   };
 
   const handleFromDateEnter = (e) => {
-    if (e.key !== "Enter") return;
+    if (e.key !== "Enter" || selectedRadio !== "Custom") return;
     e.preventDefault();
 
     const result = validateAndFormatDate(e.target.value, fromRef, toRef);
@@ -1042,7 +1047,7 @@ export default function MemberCollectionReport() {
   };
 
   const handleToDateEnter = (e) => {
-    if (e.key !== "Enter") return;
+    if (e.key !== "Enter" || selectedRadio !== "Custom") return; // Only process if Custom is selected
     e.preventDefault();
     const result = validateAndFormatDate(
       e.target.value,
@@ -1069,22 +1074,37 @@ export default function MemberCollectionReport() {
     }
   };
 
+  // <--- ADDED: Radio Button styles
+  const radioContainerStyle = {
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    padding: "8px 0",
+    backgroundColor: "white",
+    borderRadius: "12px 12px 0 0",
+    borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
+    color: fontcolor,
+  };
+
+  const radioLabelStyle = {
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    fontWeight: "bold",
+  };
+
+  const radioInputStyle = {
+    marginRight: "5px",
+  };
+
+  const isCustomMode = selectedRadio === "Custom";
+
   return (
     <>
       <style>
         {`
-          /* Remove the custom scrollbar hiding styles to allow
-             the default browser scrollbar to appear.
-
-          .table-scroll::-webkit-scrollbar {
-              display: none;
-          }
-          .table-scroll {
-              -ms-overflow-style: none;
-              scrollbar-width: none;
-          }
-          */
-
           /* Custom style for sortable header */
           .sortable-header {
             cursor: pointer;
@@ -1117,54 +1137,22 @@ export default function MemberCollectionReport() {
           }}
         >
           <NavComponent textdata={reportName} />
-
-          <div
-            className="d-flex align-items-center"
-            style={{
-              flex: "1 1 auto",
-              minWidth: "260px",
-              justifyContent: "flex-end",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "flex-end",
-                gap: "10px",
-              }}
-            >
-              {["custom", "30days", "60days", "90days"].map((val) => (
-                <div
-                  key={val}
-                  className="d-flex align-items-baseline"
-                  style={{ marginRight: "8px" }}
-                >
-                  <input
-                    type="radio"
-                    name="dateRange"
-                    id={val}
-                    checked={selectedRadio === val}
-                    onChange={() =>
-                      handleRadioChange(
-                        val === "custom" ? 0 : parseInt(val.replace("days", ""))
-                      )
-                    }
-                  />
-                  &nbsp;
-                  <label
-                    htmlFor={val}
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                    }}
-                  >
-                    {val === "custom" ? "Custom" : val.replace("days", " Days")}
-                  </label>
-                </div>
-              ))}
-            </div>
+          <div style={radioContainerStyle}>
+            {["Custom", "30 days", "60 days", "90 days"].map((label) => (
+              <label key={label} style={radioLabelStyle}>
+                <input
+                  type="radio"
+                  name="dateRange"
+                  value={label}
+                  checked={selectedRadio === label}
+                  onChange={handleRadioChange}
+                  style={radioInputStyle}
+                />
+                {label}
+              </label>
+            ))}
           </div>
+
           <div
             className="row"
             style={{
@@ -1241,9 +1229,8 @@ export default function MemberCollectionReport() {
                       fontFamily: getfontstyle,
                       backgroundColor: getcolor,
                       color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
+                      opacity: isCustomMode ? 1 : 0.6,
+                      pointerEvents: isCustomMode ? "auto" : "none",
                     }}
                     id="frominputid"
                     value={fromInputDate}
@@ -1253,7 +1240,7 @@ export default function MemberCollectionReport() {
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
                     aria-label="Date Input"
-                    disabled={selectedRadio !== "custom"}
+                    disabled={!isCustomMode}
                   />
                   <DatePicker
                     selected={selectedfromDate}
@@ -1261,32 +1248,23 @@ export default function MemberCollectionReport() {
                     dateFormat="dd-MM-yyyy"
                     popperPlacement="bottom"
                     showPopperArrow={false}
-                    open={fromCalendarOpen}
+                    open={fromCalendarOpen && isCustomMode}
                     dropdownMode="select"
                     customInput={
                       <div>
                         <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleFromCalendar
-                              : undefined
-                          }
+                          onClick={isCustomMode ? toggleFromCalendar : null}
                           style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
+                            cursor: isCustomMode ? "pointer" : "default",
                             marginLeft: "18px",
                             fontSize: getdatafontsize,
                             fontFamily: getfontstyle,
                             color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                            opacity: isCustomMode ? 1 : 0.6,
                           }}
-                          disabled={selectedRadio !== "custom"}
                         />
                       </div>
                     }
-                    disabled={selectedRadio !== "custom"}
                   />
                 </div>
               </div>
@@ -1348,9 +1326,8 @@ export default function MemberCollectionReport() {
                       fontFamily: getfontstyle,
                       backgroundColor: getcolor,
                       color: fontcolor,
-                      opacity: selectedRadio === "custom" ? 1 : 0.5,
-                      pointerEvents:
-                        selectedRadio === "custom" ? "auto" : "none",
+                      opacity: isCustomMode ? 1 : 0.6,
+                      pointerEvents: isCustomMode ? "auto" : "none",
                     }}
                     value={toInputDate}
                     onChange={handleToInputChange}
@@ -1359,7 +1336,7 @@ export default function MemberCollectionReport() {
                     autoComplete="off"
                     placeholder="dd-mm-yyyy"
                     aria-label="To Date Input"
-                    disabled={selectedRadio !== "custom"}
+                    disabled={!isCustomMode}
                   />
                   <DatePicker
                     selected={selectedToDate}
@@ -1367,32 +1344,23 @@ export default function MemberCollectionReport() {
                     dateFormat="dd-MM-yyyy"
                     popperPlacement="bottom"
                     showPopperArrow={false}
-                    open={toCalendarOpen}
+                    open={toCalendarOpen && isCustomMode}
                     dropdownMode="select"
                     customInput={
                       <div>
                         <BsCalendar
-                          onClick={
-                            selectedRadio === "custom"
-                              ? toggleToCalendar
-                              : undefined
-                          }
+                          onClick={isCustomMode ? toggleToCalendar : null}
                           style={{
-                            cursor:
-                              selectedRadio === "custom"
-                                ? "pointer"
-                                : "default",
+                            cursor: isCustomMode ? "pointer" : "default",
                             marginLeft: "18px",
                             fontSize: getdatafontsize,
                             fontFamily: getfontstyle,
                             color: fontcolor,
-                            opacity: selectedRadio === "custom" ? 1 : 0.5,
+                            opacity: isCustomMode ? 1 : 0.6,
                           }}
-                          disabled={selectedRadio !== "custom"}
                         />
                       </div>
                     }
-                    disabled={selectedRadio !== "custom"}
                   />
                 </div>
               </div>
@@ -1447,8 +1415,8 @@ export default function MemberCollectionReport() {
                         }}
                       >
                         <div className="sortable-header">
-                            {column.header}
-                            {getSortIcon(column.key)}
+                          {column.header}
+                          {getSortIcon(column.key)}
                         </div>
                       </td>
                     ))}
@@ -1456,15 +1424,12 @@ export default function MemberCollectionReport() {
                 </thead>
               </table>
             </div>
-            {/* Table Body Container Div - **Modified to remove scrollbar-hiding CSS** */}
+            {/* Table Body Container Div */}
             <div
               className="table-scroll"
               style={{
                 backgroundColor: "white",
                 borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
-                // Removed overflowY: "auto" and overflowX: "hidden" from here,
-                // and added to the .table-scroll class in <style> block instead
-                // to make scrollbar visible.
                 maxHeight: "50vh",
                 width: "100%",
                 wordBreak: "break-word",
@@ -1476,11 +1441,11 @@ export default function MemberCollectionReport() {
                 style={{
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
-                  // The following width calculation is crucial for column alignment
-                  // with a fixed-layout table inside a scrollable div.
                   width: tableWidth,
                   position: "relative",
-                  ...(sortedTableData.length > 0 ? { tableLayout: "fixed" } : {}),
+                  ...(sortedTableData.length > 0
+                    ? { tableLayout: "fixed" }
+                    : {}),
                 }}
               >
                 <tbody id="tablebody">
@@ -1685,5 +1650,3 @@ export default function MemberCollectionReport() {
     </>
   );
 }
-
-
