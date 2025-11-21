@@ -121,7 +121,7 @@ const VerticalStatsCard = ({ stats, cardTitle = null }) => (
 // ----------------------
 // Dashboard Component
 // ----------------------
-const MemberCollectionReport = () => {
+const AmericanDashboard = () => {
   const [adminData, setAdminData] = useState(null);
   const [monthlyData, setMonthlyData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -346,4 +346,4 @@ const MemberCollectionReport = () => {
   );
 };
 
-export default MemberCollectionReport;
+export default AmericanDashboard;
