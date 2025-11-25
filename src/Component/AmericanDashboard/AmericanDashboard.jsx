@@ -21,7 +21,7 @@ ChartJS.register(
   Legend
 );
 
-// API URLs
+// API URLs (Keep as is)
 const ADMIN_INFO_API_URL = "https://crystalsolutions.com.pk/api/AdminInfo.php";
 const MONTHLY_COMPARISON_API_URL =
   "https://crystalsolutions.com.pk/api/MonthlyComparison.php";
@@ -45,11 +45,6 @@ const months = [
   "Dec",
 ];
 
-/**
- * Helper function to format the current date as DD-MM-YYYY.
- * This ensures the API calls have the correct date parameter.
- * @returns {string} Formatted date string.
- */
 const getCurrentDateFormatted = () => {
   const date = new Date();
   const day = String(date.getDate()).padStart(2, "0");
@@ -58,76 +53,100 @@ const getCurrentDateFormatted = () => {
   return `${day}-${month}-${year}`;
 };
 
-const currentDate = getCurrentDateFormatted(); // Current date for FRepDat
+const currentDate = getCurrentDateFormatted();
 
 // ----------------------
-// Vertical Stats Card
+// YearlySalePurchaseGraph
 // ----------------------
-const VerticalStatsCard = ({ stats, cardTitle = null }) => (
-  <div className="p-2 rounded-xl shadow-xl bg-white border border-gray-100 flex flex-col w-[300px] h-full">
-    {cardTitle && (
-      <>
-        <h3 className="text-base font-bold text-gray-800 mb-1 px-2">
-          {cardTitle}
-        </h3>
-        <hr className="mb-1 border-gray-100" />
-      </>
-    )}
+const YearlySPCGraph = ({ apiData }) => {
+  const YearBar = Bar;
 
-    {stats.map((stat, index) => {
-      const isTotalStat = index === 0;
-      const hasAmount = stat.amountValue !== undefined;
+  if (!apiData) return null;
 
-      if (isTotalStat) {
-        return (
-          <div
-            key={stat.title}
-            className="flex flex-col p-1 border-b border-gray-100 transition duration-150 hover:bg-gray-50 mb-2 items-start"
-          >
-            <p className="text-sm font-medium text-gray-500 mb-1">
-              {stat.title}
-            </p>
-            <h2 className="text-3xl font-bold text-gray-900 mb-1">
-              {String(stat.value)}
-            </h2>
-            {hasAmount && (
-              <p className="text-sm font-semibold text-blue-600">
-                {String(stat.amountValue)}
-              </p>
-            )}
-          </div>
-        );
-      }
+  // DYNAMIC YEAR CALCULATION
+  const dateParts = currentDate.split("-");
+  const currentYear = parseInt(dateParts[2], 10); // e.g., 2025
+  const lastYear = currentYear - 1; // e.g., 2024
 
-      return (
-        <div
-          key={stat.title}
-          className={`flex justify-between items-center p-1 ${
-            index < stats.length - 1 ? "border-b border-gray-100" : ""
-          } transition duration-150 hover:bg-gray-50`}
-        >
-          <p className="text-xs font-medium text-gray-500">{stat.title}</p>
+  const formatToMillions = (value) => {
+    if (!value) return 0;
+    const number = Number(value.toString().replace(/,/g, ""));
+    return number / 1_000_000;
+  };
 
-          <div className="flex flex-col items-end">
-            <h2
-              className={`text-sm font-semibold ${
-                stat.isDark ? "text-gray-900" : "text-gray-800"
-              }`}
-            >
-              {String(stat.value)}
-            </h2>
+  // Data extraction
+  const lastYearSale = formatToMillions(apiData.LastYearSaleAmount);
+  const currentYearSale = formatToMillions(apiData.YearSaleAmount);
+  const lastYearPur = formatToMillions(apiData.LastYearPurAmount);
+  const currentYearPur = formatToMillions(apiData.YearPurAmount);
+  const lastYearCollection = formatToMillions(apiData.Collection);
+  const currentYearCollection = formatToMillions(apiData.MonthCollection);
 
-            {hasAmount && (
-              <p className="text-xs font-medium black">
-                {String(stat.amountValue)}
-              </p>
-            )}
-          </div>
-        </div>
-      );
-    })}
-  </div>
-);
+  const data = {
+    // DYNAMIC LABELS
+    labels: [String(lastYear), String(currentYear)],
+    datasets: [
+      {
+        label: "Sales",
+        data: [lastYearSale, currentYearSale],
+        backgroundColor: "#FFB6C1",
+        borderRadius: 6,
+        barThickness: 18,
+      },
+      {
+        label: "Purchase",
+        data: [lastYearPur, currentYearPur],
+        backgroundColor: "#A1C6FF",
+        borderRadius: 6,
+        barThickness: 18,
+      },
+      {
+        label: "Collection",
+        data: [lastYearCollection, currentYearCollection],
+        backgroundColor: "#a1ffb5ff",
+        barThickness: 18,
+      },
+    ],
+  };
+
+  const options = {
+    indexAxis: "y",
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: "top" },
+      title: {
+        display: true,
+        text: "Sale & Purchase Comparison",
+        color: "#333",
+        font: { size: 14, weight: "bold" },
+      },
+    },
+    scales: {
+      x: {
+        ticks: { callback: (value) => value + "M" },
+        grid: { display: true },
+      },
+      y: { grid: { display: false } },
+    },
+  };
+
+  return (
+    <div
+      style={{
+        // FIXED GRAPH DIMENSIONS
+        width: "700px",
+        height: "260px",
+        background: "white",
+        borderRadius: "10px",
+        padding: "15px",
+        border: "1px solid #eee",
+      }}
+    >
+      <YearBar data={data} options={options} />
+    </div>
+  );
+};
 
 // ----------------------
 // Horizontal Balance Card (Customer Balances)
@@ -136,7 +155,11 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
   const formatValue = (key) => mainData[key] || "N/A";
 
   return (
-    <div className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 w-full h-full">
+    <div
+      // FIXED CARD DIMENSIONS - INCREASED HEIGHT TO 220px
+      className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 flex-shrink-0"
+      style={{ width: "370px", height: "280px" }}
+    >
       {cardTitle && (
         <>
           <h3 className="text-base font-bold text-gray-800 mb-2">
@@ -163,7 +186,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-4 gap-2 text-center">
+      <div className="grid grid-cols-4 gap-2 text-center pt-2">
         <div className="flex flex-col p-1 border-r border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1">Non Active</p>
           <h4 className="text-xl font-semibold text-blue-700">
@@ -173,25 +196,12 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
         </div>
 
         <div className="flex flex-col p-1 border-r border-gray-100">
-          <p className="text-xs font-medium text-gray-500 mb-1">Outstanding</p>
-          <h4 className="text-xl font-semibold text-blue-700">
-            {formatValue("OutStanding Customer")}
-          </h4>
-          <p
-            className="text-xs font-medium text-gray-500 mt-1 truncate"
-            title={formatValue("OutStanding Amount")}
-          >
-            {formatValue("OutStanding Amount")}
-          </p>
-        </div>
-
-        <div className="flex flex-col p-1 border-r border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1">Advance</p>
           <h4 className="text-xl font-semibold text-blue-700">
             {formatValue("Advance Customer")}
           </h4>
           <p
-            className={`text-xs font-medium mt-1 truncate ${
+            className={`text-xs font-normal mt-1 truncate ${
               (formatValue("Advance Amount") || "").startsWith("-")
                 ? "text-gray-500"
                 : "text-gray-500"
@@ -202,12 +212,25 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
           </p>
         </div>
 
-        <div className="flex flex-col p-1">
+        <div className="flex flex-col p-1 border-r border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1">Nil</p>
           <h4 className="text-xl font-semibold text-blue-700">
             {formatValue("Nil Customer")}
           </h4>
           <p className="text-xs text-gray-500 mt-1">-</p>
+        </div>
+
+        <div className="flex flex-col p-1 ">
+          <p className="text-xs font-medium text-gray-500 mb-1">Outstanding</p>
+          <h4 className="text-xl font-semibold text-blue-700">
+            {formatValue("OutStanding Customer")}
+          </h4>
+          <p
+            className="text-xs font-normal text-gray-500 mt-1 truncate"
+            title={formatValue("OutStanding Amount")}
+          >
+            {formatValue("OutStanding Amount")}
+          </p>
         </div>
       </div>
     </div>
@@ -255,7 +278,11 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
   const labelPreviousMonth = `${previousMonthName} ${currentYear}`;
 
   return (
-    <div className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 w-full h-full">
+    <div
+      // FIXED CARD DIMENSIONS - INCREASED HEIGHT TO 220px
+      className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 flex-shrink-0"
+      style={{ width: "320px", height: "280px" }}
+    >
       {cardTitle && (
         <>
           <h3 className="text-base font-bold text-gray-800 mb-2">
@@ -266,11 +293,9 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
 
       {/* Top Row - Year-by-Year Comparison (Amount & Quantity together) */}
       <div className="flex justify-between items-start border-b pb-3 mb-3 border-gray-200">
-        {/* Left Column: Last Year (2024) Data */}
         <div className="flex flex-col items-center min-w-0 pr-2 w-1/2">
           <h4 className="text-md font-bold text-gray-500 mb-2">{lastYear}</h4>
 
-          {/* Quantity (LastYearSaleQnty) is shown as the main number */}
           <h5
             className="text-xl font-bold text-blue-700 truncate"
             title={`Quantity: ${quantity2024}`}
@@ -278,7 +303,6 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
             {quantity2024}
           </h5>
 
-          {/* Amount (LastYearSaleAmount) is shown below */}
           <h5
             className="text-sm font-normal text-gray-500 truncate"
             title={`Amount: ${amount2024}`}
@@ -287,13 +311,11 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
           </h5>
         </div>
 
-        {/* Right Column: Current Year (2025) Data */}
         <div className="flex flex-col items-center min-w-0 pl-4 w-1/2">
           <h4 className="text-md font-bold text-gray-500 mb-2">
             {currentYear}
           </h4>
 
-          {/* Quantity (YearSaleQnty) is shown as the main number */}
           <h5
             className="text-xl font-bold text-blue-700 truncate"
             title={`Quantity: ${quantity2025}`}
@@ -301,7 +323,6 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
             {quantity2025}
           </h5>
 
-          {/* Amount (YearSaleAmount) is shown below */}
           <h5
             className="text-sm font-normal text-gray-500 truncate"
             title={`Amount: ${amount2025}`}
@@ -313,7 +334,6 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
 
       {/* Bottom Row - Dynamic Monthly Comparison Indicators */}
       <div className="grid grid-cols-3 gap-2 text-center pt-2">
-        {/* Left Column: Same Month, Last Year (e.g., Nov 2024) - LastYearMonthSale */}
         <div className="flex flex-col p-1 border-r border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1">
             {labelLastYearSameMonth}
@@ -329,7 +349,6 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
           </p>
         </div>
 
-        {/* Center Column: Current Month, Current Year (e.g., Nov 2025) - MonthSale */}
         <div className="flex flex-col p-1 border-r border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1">
             {labelCurrentMonth}
@@ -345,7 +364,6 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
           </p>
         </div>
 
-        {/* Right Column: Previous Month, Current Year (e.g., Oct 2025) - PreviousMonthSale */}
         <div className="flex flex-col p-1">
           <p className="text-xs font-medium text-gray-500 mb-1">
             {labelPreviousMonth}
@@ -364,29 +382,52 @@ const NewSalesCard = ({ salesData, cardTitle = "Sale" }) => {
     </div>
   );
 };
-// ----------------------
-// Horizontal SaleBalance Card
-// ----------------------
-const HorizontalSaleBalanceCard = ({ mainData, cardTitle = null }) => {
-  // Mapping the daily sales API response keys to the existing card display structure
-  const dailyDataMap = {
-    // Top Row
-    "Total Sales": mainData["SaleQnty"], // Mapping to YTD Quantity (Total)
-    "Total Amount": mainData["SaleAmount"], // Mapping to YTD Amount (Balance)
 
-    // Bottom Row
-    MonthSaleQnty: mainData["MonthSaleQnty"], // Mapping to Daily Quantity
-    MonthSaleAmount: mainData["MonthSaleAmount"], // Mapping to Monthly Quantity
-    YearSaleQnty: mainData["YearSaleQnty"], // Mapping to Monthly Amount
-    YearSaleAmount: mainData["YearSaleAmount"], // Re-using Daily Quantity
-    "Advance Amount": mainData["SaleAmount"], // Re-using Daily Amount
-    "Nil Customer": mainData["SaleAmount"], // Re-using Daily Amount for Nil
-  };
+// ----------------------
+// New Purchase Card (Based on DashboardDailyWeb.php data)
+// ----------------------
+const NewPurchaseCard = ({ purchaseData, cardTitle = "Purchase" }) => {
+  if (!purchaseData) return null;
 
-  const formatValue = (key) => dailyDataMap[key] || "N/A";
+  const quantityLastYear = purchaseData.LastYearPurQnty ?? "N/A"; //2024 - Qnty
+  const amountLastYear = purchaseData.LastYearPurAmount ?? "N/A"; //2024 - Amount
+  const quantityCurrentYear = purchaseData.YearPurQnty ?? "N/A"; //2025 - Qnty
+  const amountCurrentYear = purchaseData.YearPurAmount ?? "N/A"; //2025 - Amount
+
+  // --- Data Mapping for Monthly comparison ---
+  const currentMonthAmount = purchaseData.MonthPurAmount ?? "N/A"; //Nov 2025 - Amount
+  const currentMonthQuantity = purchaseData.MonthPurQnty ?? "N/A"; //Nov 2025 - Qnty
+  const lastYearMonthAmount = purchaseData.LastYearMonthPurAmount ?? "N/A"; //Nov 2024 - Amount
+  const lastYearMonthQuantity = purchaseData.LastYearMonthPurQnty ?? "N/A"; //Nov 2024 - Qnty
+  const previousMonthAmount = purchaseData.PreviousMonthPurAmount ?? "N/A"; //Oct 2025 - Amount
+  const previousMonthQuantity = purchaseData.PreviousMonthPurQnty ?? "N/A"; //Oct 2025 - Qnty
+
+  // --- Dynamic Date Logic based on global currentDate ---
+  const dateParts = currentDate.split("-");
+  const currentMonthIndex = parseInt(dateParts[1], 10) - 1;
+  const currentYear = parseInt(dateParts[2], 10);
+  const lastYear = currentYear - 1;
+
+  const currentMonthName = months[currentMonthIndex];
+
+  // Calculate previous month index for labeling
+  let previousMonthIndex = currentMonthIndex - 1;
+  if (previousMonthIndex < 0) {
+    previousMonthIndex = 11;
+  }
+  const previousMonthName = months[previousMonthIndex];
+
+  // Labels
+  const labelLastYearSameMonth = `${currentMonthName} ${lastYear}`;
+  const labelCurrentMonth = `${currentMonthName} ${currentYear}`;
+  const labelPreviousMonth = `${previousMonthName} ${currentYear}`;
 
   return (
-    <div className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 w-full h-full">
+    <div
+      // FIXED CARD DIMENSIONS - INCREASED HEIGHT TO 220px
+      className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 flex-shrink-0"
+      style={{ width: "320px", height: "280px" }}
+    >
       {cardTitle && (
         <>
           <h3 className="text-base font-bold text-gray-800 mb-2">
@@ -395,229 +436,239 @@ const HorizontalSaleBalanceCard = ({ mainData, cardTitle = null }) => {
         </>
       )}
 
-      {/* Top Row - Showing Year to Date Sales */}
-      <div className="flex justify-between items-end border-b pb-2 mb-3 border-gray-200">
-        <div className="flex flex-col items-start">
-          <p className="text-sm font-medium text-gray-500">Quantity</p>
-          <h2 className="text-3xl font-bold text-gray-900 mt-1">
-            {formatValue("Total Sales")}
-          </h2>
+      {/* Top Row - Year-by-Year Comparison (Amount & Quantity together) */}
+      <div className="flex justify-between items-start border-b pb-3 mb-3 border-gray-200">
+        <div className="flex flex-col items-center min-w-0 pr-2 w-1/2">
+          <h4 className="text-md font-bold text-gray-500 mb-2">{lastYear}</h4>
+
+          <h5
+            className="text-xl font-bold text-blue-700 truncate"
+            title={`Quantity: ${quantityLastYear}`}
+          >
+            {quantityLastYear}
+          </h5>
+
+          <h5
+            className="text-sm font-normal text-gray-500 truncate"
+            title={`Amount: ${amountLastYear}`}
+          >
+            {amountLastYear}
+          </h5>
         </div>
 
-        <div className="flex flex-col items-end">
-          <p className="text-sm font-medium text-gray-500">Amount</p>
-          <h2 className="text-2xl font-bold text-black mt-1">
-            {formatValue("Total Amount")}
-          </h2>
-        </div>
-      </div>
+        <div className="flex flex-col items-center min-w-0 pl-4 w-1/2">
+          <h4 className="text-md font-bold text-gray-500 mb-2">
+            {currentYear}
+          </h4>
 
-      {/* Bottom Row - Showing Daily and Monthly Figures */}
-      <div className="flex justify-center w-full">
-        <div className="grid grid-cols-2 gap-2 text-center w-3/4">
-          {" "}
-          {/* w-3/4 or w-1/2 to control width */}
-          <div className="flex flex-col p-1 border-r border-gray-100">
-            <p className="text-xs font-medium text-gray-500 mb-1">Monthly</p>
-            <h4 className="text-xl font-semibold text-blue-700">
-              {mainData["MonthSaleQnty"] || "N/A"}
-            </h4>
-            <p
-              className="text-xs font-medium text-gray-500 mt-1 truncate"
-              title={mainData["MonthSaleAmount"] || "N/A"}
-            >
-              {mainData["MonthSaleAmount"] || "N/A"}
-            </p>
-          </div>
-          <div className="flex flex-col p-1">
-            <p className="text-xs font-medium text-gray-500 mb-1">Yearly</p>
-            <h4 className="text-xl font-semibold text-blue-700">
-              {mainData["YearSaleQnty"] || "N/A"}
-            </h4>
-            <p
-              className="text-xs font-medium text-gray-500 mt-1 truncate"
-              title={mainData["YearSaleAmount"] || "N/A"}
-            >
-              {mainData["YearSaleAmount"] || "N/A"}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+          <h5
+            className="text-xl font-bold text-blue-700 truncate"
+            title={`Quantity: ${quantityCurrentYear}`}
+          >
+            {quantityCurrentYear}
+          </h5>
 
-// ----------------------
-// Horizontal PurchaseBalance Card
-// ----------------------
-const HorizontalPurchaseBalanceCard = ({ mainData, cardTitle = null }) => {
-  // Mapping the daily sales API response keys to the existing card display structure
-  const dailyDataMap = {
-    // Top Row
-    "Total Purchase": mainData["PurQnty"],
-    "Total Amount": mainData["PurAmount"],
-
-    // Bottom Row
-    MonthPurQnty: mainData["MonthPurQnty"],
-    MonthPurAmount: mainData["MonthPurAmount"],
-    YearPurQnty: mainData["YearPurQnty"],
-    YearPurAmount: mainData["YearPurAmount"],
-  };
-
-  const formatValue = (key) => dailyDataMap[key] || "N/A";
-
-  return (
-    <div className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 w-full h-full">
-      {cardTitle && (
-        <>
-          <h3 className="text-base font-bold text-gray-800 mb-2">
-            {cardTitle}
-          </h3>
-        </>
-      )}
-
-      {/* Top Row - Showing Year to Date Sales */}
-      <div className="flex justify-between items-end border-b pb-2 mb-3 border-gray-200">
-        <div className="flex flex-col items-start">
-          <p className="text-sm font-medium text-gray-500">Quantity</p>
-          <h2 className="text-3xl font-bold text-gray-900 mt-1">
-            {formatValue("Total Purchase")}
-          </h2>
-        </div>
-
-        <div className="flex flex-col items-end">
-          <p className="text-sm font-medium text-gray-500">Amount</p>
-          <h2 className="text-2xl font-bold text-black mt-1">
-            {formatValue("Total Amount")}
-          </h2>
+          <h5
+            className="text-sm font-normal text-gray-500 truncate"
+            title={`Amount: ${amountCurrentYear}`}
+          >
+            {amountCurrentYear}
+          </h5>
         </div>
       </div>
 
-      {/* Bottom Row - Showing Daily and Monthly Figures */}
-      <div className="flex justify-center w-full">
-        <div className="grid grid-cols-2 gap-2 text-center w-3/4">
-          {" "}
-          {/* w-3/4 or w-1/2 to control width */}
-          <div className="flex flex-col p-1 border-r border-gray-100">
-            <p className="text-xs font-medium text-gray-500 mb-1">Monthly</p>
-            <h4 className="text-xl font-semibold text-blue-700">
-              {mainData["MonthPurQnty"] || "N/A"}
-            </h4>
-            <p
-              className="text-xs font-medium text-gray-500 mt-1 truncate"
-              title={mainData["MonthPurAmount"] || "N/A"}
-            >
-              {mainData["MonthPurAmount"] || "N/A"}
-            </p>
-          </div>
-          <div className="flex flex-col p-1">
-            <p className="text-xs font-medium text-gray-500 mb-1">Yearly</p>
-            <h4 className="text-xl font-semibold text-blue-700">
-              {mainData["YearPurQnty"] || "N/A"}
-            </h4>
-            <p
-              className="text-xs font-medium text-gray-500 mt-1 truncate"
-              title={mainData["YearPurAmount"] || "N/A"}
-            >
-              {mainData["YearPurAmount"] || "N/A"}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ----------------------
-// Horizontal CollectionBalance Card
-// ----------------------
-const HorizontalCollectionBalanceCard = ({ mainData, cardTitle = null }) => {
-  // Mapping the daily sales API response keys to the existing card display structure
-  const dailyDataMap = {
-    // Top Row
-    "Total Collection": mainData["Collection"],
-    MonthCollection: mainData["MonthCollection"],
-
-    // Bottom Row
-    Payment: mainData["Payment"],
-    MonthPayment: mainData["MonthPayment"],
-    Expense: mainData["Expense"],
-    MonthExpense: mainData["MonthExpense"],
-    Margin: mainData["Margin"],
-    MonthMargin: mainData["MonthMargin"],
-  };
-
-  const formatValue = (key) => dailyDataMap[key] || "N/A";
-
-  return (
-    <div className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 w-full h-full">
-      {cardTitle && (
-        <>
-          <h3 className="text-base font-bold text-gray-800 mb-2">
-            {cardTitle}
-          </h3>
-        </>
-      )}
-
-      {/* Top Row - Showing Year to Date Sales */}
-      <div className="flex justify-between items-end border-b pb-2 mb-3 border-gray-200">
-        <div className="flex flex-col items-start">
-          <p className="text-sm font-medium text-gray-500">Collection (YTD)</p>
-          <h2 className="text-3xl font-bold text-gray-900 mt-1">
-            {formatValue("Total Collection")}
-          </h2>
-        </div>
-
-        <div className="flex flex-col items-end">
-          <p className="text-sm font-medium text-gray-500">
-            Collection (Month)
+      <div className="grid grid-cols-3 gap-2 text-center pt-2">
+        <div className="flex flex-col p-1 border-r border-gray-100">
+          <p className="text-xs font-medium text-gray-500 mb-1">
+            {labelLastYearSameMonth}
           </p>
-          <h2 className="text-2xl font-bold text-black mt-1">
-            {formatValue("MonthCollection")}
-          </h2>
+          <h4 className="text-lg font-semibold text-blue-700">
+            {lastYearMonthQuantity}
+          </h4>
+          <p
+            className="text-sm font-normal text-gray-500 mt-1 truncate"
+            title={lastYearMonthAmount}
+          >
+            {lastYearMonthAmount}
+          </p>
+        </div>
+
+        <div className="flex flex-col p-1 border-r border-gray-100">
+          <p className="text-xs font-medium text-gray-500 mb-1">
+            {labelCurrentMonth}
+          </p>
+          <h4 className="text-lg font-semibold text-blue-700">
+            {currentMonthQuantity}
+          </h4>
+          <p
+            className="text-sm font-normal text-gray-500 mt-1 truncate"
+            title={currentMonthAmount}
+          >
+            {currentMonthAmount}
+          </p>
+        </div>
+
+        <div className="flex flex-col p-1">
+          <p className="text-xs font-medium text-gray-500 mb-1">
+            {labelPreviousMonth}
+          </p>
+          <h4 className="text-lg font-semibold text-blue-700">
+            {previousMonthQuantity}
+          </h4>
+          <p
+            className="text-sm font-normal text-gray-500 mt-1 truncate"
+            title={previousMonthAmount}
+          >
+            {previousMonthAmount}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ----------------------
+// New Collection Card (Based on DashboardDailyWeb.php data)
+// ----------------------
+const NewCollectionCard = ({ salesData, cardTitle = "Sale" }) => {
+  if (!salesData) return null;
+
+  // Since Collection Card is using Sale Data keys from dailyWebData, the mapping remains the same
+  // --- Data Mapping for Yearly comparison (2024 vs 2025) ---
+  const amount2024 = salesData.LastYearSaleAmount || "N/A";
+  const quantity2024 = salesData.LastYearSaleQnty || "N/A";
+  const amount2025 = salesData.YearSaleAmount || "N/A";
+  const quantity2025 = salesData.YearSaleQnty || "N/A";
+
+  // --- Data Mapping for Monthly comparison ---
+  const currentMonthAmount = salesData.MonthSaleAmount || "N/A";
+  const currentMonthQuantity = salesData.MonthSaleQnty || "N/A";
+  const lastYearMonthAmount = salesData.LastYearMonthSaleAmount || "N/A";
+  const lastYearMonthQuantity = salesData.LastYearMonthSaleQnty || "N/A";
+  const previousMonthAmount = salesData.PreviousMonthSaleAmount || "N/A";
+  const previousMonthQuantity = salesData.PreviousMonthSaleQnty || "N/A";
+
+  // --- Dynamic Date Logic based on global currentDate ---
+  const dateParts = currentDate.split("-");
+  const currentMonthIndex = parseInt(dateParts[1], 10) - 1;
+  const currentYear = parseInt(dateParts[2], 10);
+  const lastYear = currentYear - 1;
+
+  const currentMonthName = months[currentMonthIndex];
+
+  //  previous month labeling
+  let previousMonthIndex = currentMonthIndex - 1;
+  if (previousMonthIndex < 0) {
+    previousMonthIndex = 11;
+  }
+  const previousMonthName = months[previousMonthIndex];
+
+  // Labels
+  const labelLastYearSameMonth = `${currentMonthName} ${lastYear}`;
+  const labelCurrentMonth = `${currentMonthName} ${currentYear}`;
+  const labelPreviousMonth = `${previousMonthName} ${currentYear}`;
+
+  return (
+    <div
+      // FIXED CARD DIMENSIONS - INCREASED HEIGHT TO 220px
+      className="p-4 rounded-xl shadow-md bg-white border border-gray-100 flex flex-col gap-2 flex-shrink-0"
+      style={{ width: "320px", height: "280px" }}
+    >
+      {cardTitle && (
+        <>
+          <h3 className="text-base font-bold text-gray-800 mb-2">
+            {cardTitle}
+          </h3>
+        </>
+      )}
+
+      <div className="flex justify-between items-start border-b pb-3 mb-3 border-gray-200">
+        <div className="flex flex-col items-center min-w-0 pr-2 w-1/2">
+          <h4 className="text-md font-bold text-gray-500 mb-2">{lastYear}</h4>
+
+          <h5
+            className="text-xl font-bold text-blue-700 truncate"
+            title={`Quantity: ${quantity2024}`}
+          >
+            {quantity2024}
+          </h5>
+
+          <h5
+            className="text-sm font-normal text-gray-500 truncate"
+            title={`Amount: ${amount2024}`}
+          >
+            {amount2024}
+          </h5>
+        </div>
+
+        <div className="flex flex-col items-center min-w-0 pl-4 w-1/2">
+          <h4 className="text-md font-bold text-gray-500 mb-2">
+            {currentYear}
+          </h4>
+
+          {/* Quantity (YearSaleQnty) */}
+          <h5
+            className="text-xl font-bold text-blue-700 truncate"
+            title={`Quantity: ${quantity2025}`}
+          >
+            {quantity2025}
+          </h5>
+
+          {/* Amount (YearSaleAmount) */}
+          <h5
+            className="text-sm font-normal text-gray-500 truncate"
+            title={`Amount: ${amount2025}`}
+          >
+            {amount2025}
+          </h5>
         </div>
       </div>
 
-      {/* Bottom Row - Showing Daily and Monthly Figures */}
-      <div className="flex justify-center w-full">
-        <div className="grid grid-cols-3 gap-2 text-center w-3/4">
-          {/* w-3/4 or w-1/2 to control width */}
-          <div className="flex flex-col p-1 border-r border-gray-100">
-            <p className="text-xs font-medium text-gray-500 mb-1">Payment</p>
-            <h4 className="text-xl font-semibold text-blue-700">
-              {mainData["Payment"] || "N/A"}
-            </h4>
-            <p
-              className="text-xs font-medium text-gray-500 mt-1 truncate"
-              title={mainData["MonthPayment"] || "N/A"}
-            >
-              {mainData["MonthPayment"] || "N/A"}
-            </p>
-          </div>
-          <div className="flex flex-col p-1 border-r border-gray-100">
-            <p className="text-xs font-medium text-gray-500 mb-1">Expense</p>
-            <h4 className="text-xl font-semibold text-blue-700">
-              {mainData["Expense"] || "N/A"}
-            </h4>
-            <p
-              className="text-xs font-medium text-gray-500 mt-1 truncate"
-              title={mainData["MonthExpense"] || "N/A"}
-            >
-              {mainData["MonthExpense"] || "N/A"}
-            </p>
-          </div>
-          <div className="flex flex-col p-1">
-            <p className="text-xs font-medium text-gray-500 mb-1">Margin</p>
-            <h4 className="text-xl font-semibold text-blue-700">
-              {mainData["Margin"] || "N/A"}
-            </h4>
-            <p
-              className="text-xs font-medium text-gray-500 mt-1 truncate"
-              title={mainData["MonthExpense"] || "N/A"}
-            >
-              {mainData["MonthMargin"] || "N/A"}
-            </p>
-          </div>
+      {/* Bottom Row  */}
+      <div className="grid grid-cols-3 gap-2 text-center pt-2">
+        <div className="flex flex-col p-1 border-r border-gray-100">
+          <p className="text-xs font-medium text-gray-500 mb-1">
+            {labelLastYearSameMonth}
+          </p>
+          <h4 className="text-lg font-semibold text-blue-700">
+            {lastYearMonthQuantity}
+          </h4>
+          <p
+            className="text-sm font-normal text-gray-500 mt-1 truncate"
+            title={lastYearMonthAmount}
+          >
+            {lastYearMonthAmount}
+          </p>
+        </div>
+
+        <div className="flex flex-col p-1 border-r border-gray-100">
+          <p className="text-xs font-medium text-gray-500 mb-1">
+            {labelCurrentMonth}
+          </p>
+          <h4 className="text-lg font-semibold text-blue-700">
+            {currentMonthQuantity}
+          </h4>
+          <p
+            className="text-sm font-normal text-gray-500 mt-1 truncate"
+            title={currentMonthAmount}
+          >
+            {currentMonthAmount}
+          </p>
+        </div>
+
+        <div className="flex flex-col p-1">
+          <p className="text-xs font-medium text-gray-500 mb-1">
+            {labelPreviousMonth}
+          </p>
+          <h4 className="text-lg font-semibold text-blue-700">
+            {previousMonthQuantity}
+          </h4>
+          <p
+            className="text-sm font-normal text-gray-500 mt-1 truncate"
+            title={previousMonthAmount}
+          >
+            {previousMonthAmount}
+          </p>
         </div>
       </div>
     </div>
@@ -628,7 +679,11 @@ const HorizontalCollectionBalanceCard = ({ mainData, cardTitle = null }) => {
 // Horizontal Range Card
 // ------------------------------
 const HorizontalRangeCard = ({ stats, cardTitle = null }) => (
-  <div className="p-2 rounded-xl shadow-xl bg-white border border-gray-100 w-[700px] h-full flex flex-col justify-start">
+  <div
+    // FIXED RANGE CARD DIMENSIONS
+    className="p-2 rounded-xl shadow-xl bg-white border border-gray-100 flex flex-col justify-start flex-shrink-0"
+    style={{ width: "650px", height: "130px" }}
+  >
     {cardTitle && (
       <>
         <h3 className="text-base font-semibold text-gray-800 mb-1 px-1">
@@ -665,7 +720,7 @@ const HorizontalRangeCard = ({ stats, cardTitle = null }) => (
 );
 
 // ----------------------
-// AmericanDashboard Component (Main Component)
+// AmericanDashboard Component
 // ----------------------
 const AmericanDashboard = () => {
   const [adminData, setAdminData] = useState(null);
@@ -675,12 +730,6 @@ const AmericanDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /**
-   * Parses the monthly API response object into an array of 12 numerical values for charting.
-   * @param {Object} dataObject - The raw object from MONTHLY_COMPARISON_API_URL.
-   * @param {string} prefix - The prefix key (e.g., 'S' for sales, 'P' for purchase).
-   * @returns {number[]} Array of 12 month values.
-   */
   const parseData = (dataObject, prefix = "") => {
     if (!dataObject) return Array(12).fill(0);
 
@@ -689,7 +738,6 @@ const AmericanDashboard = () => {
       const valueString = dataObject[key];
       if (!valueString) return 0;
 
-      // Remove commas from strings like "1,000,000" and convert to float
       const cleanedValue = valueString.toString().replace(/,/g, "");
       const value = parseFloat(cleanedValue);
 
@@ -697,14 +745,13 @@ const AmericanDashboard = () => {
     });
   };
 
-  // Fetch dashboard data
+  // Fetch dashboard data (Keep as is)
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        setError(null); // Clear previous errors
+        setError(null);
 
-        // --- Form Data for all APIs ---
         const adminFormData = new FormData();
         adminFormData.append("code", "AMRELEC");
 
@@ -722,42 +769,38 @@ const AmericanDashboard = () => {
         dailyWebFormData.append("FRepDat", currentDate);
         dailyWebFormData.append("FLocCod", "001");
 
-        // --- Execute all API calls concurrently ---
+        // Use Promise.all to fetch all data concurrently
         const [
           adminResponse,
           monthlyResponse,
           dailyResponse,
-          dailyWebResponse, // <--- Now correctly receiving the response from the 4th promise
+          dailyWebResponse,
         ] = await Promise.all([
           axios.post(ADMIN_INFO_API_URL, adminFormData),
           axios.post(MONTHLY_COMPARISON_API_URL, monthlyFormData),
           axios.post(DASHBOARD_DAILY, dailyFormData),
-          axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData), // <--- CORRECTED: Added the missing promise
+          axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData),
         ]);
 
-        // Process Admin Data
         setAdminData(adminResponse.data);
         setMonthlyData(monthlyResponse.data);
 
-        // Process DashboardDaily Data (Expecting array or single object)
+        // Ensure single object extraction from potentially array response
         const dailyResponseData = Array.isArray(dailyResponse.data)
           ? dailyResponse.data[0]
           : dailyResponse.data;
         setDailyData(dailyResponseData);
 
-        // Process DashboardDailyWeb Data (Expecting array or single object)
         const dailyWebResponseData = Array.isArray(dailyWebResponse.data)
           ? dailyWebResponse.data[0]
           : dailyWebResponse.data;
         setDailyWebData(dailyWebResponseData);
       } catch (err) {
-        // Log verbose error details for debugging
         console.error("API Fetch Error Details:", err);
         if (err.response) {
           console.error("Response Status:", err.response.status);
           console.error("Response Data:", err.response.data);
         }
-        // Set user-friendly error message
         setError(
           "Couldn't fetch dashboard data. Please check network and API responses."
         );
@@ -786,9 +829,9 @@ const AmericanDashboard = () => {
   // Safely extract data
   const mainData = Array.isArray(adminData) ? adminData[0] : adminData;
   const dailySaleData = dailyData;
-  const webSalesData = dailyWebData; // Data for the NewSalesCard
+  const webData = dailyWebData;
 
-  if (!mainData || !dailySaleData || !webSalesData)
+  if (!mainData || !dailySaleData || !webData)
     return (
       <div className="text-center p-10 text-xl text-gray-600">
         Data loading failed or initial data is empty.
@@ -841,87 +884,93 @@ const AmericanDashboard = () => {
   // Rendered Dashboard Layout
   // ----------------------
   return (
-    // <div className="p-1 bg-gray-50 min-h-screen font-sans">
+    // **Main Scrollable Container**
     <div
       className="p-1 bg-gray-50 min-h-screen font-sans"
-      style={{ transform: "scale(0.80)", transformOrigin: "top left" }}
+      style={{
+        // This makes the entire content scrollable if it exceeds screen dimensions
+        overflow: "auto",
+        minHeight: "100vh",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
     >
-    {/* <div
-      className="p-1 bg-gray-50 min-h-screen font-sans"
-      style={{ zoom: "0.85" }}
-    > */}
       <hr className="mb-1 border-gray-200" />
 
       {/* ---------------------- Top Cards (4 Horizontal Cards) ---------------------- */}
-      <section className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <section className="mb-4 flex flex-row gap-3">
         <HorizontalBalanceCard mainData={mainData} cardTitle="Customer" />
-        <HorizontalPurchaseBalanceCard
-          mainData={dailySaleData}
-          cardTitle="Purchase"
-        />
-
-        {/* Using webSalesData for the NewSalesCard */}
-        <NewSalesCard salesData={webSalesData} cardTitle="Sale" />
-
-        <HorizontalCollectionBalanceCard
-          mainData={dailySaleData}
-          cardTitle="Collection"
-        />
+        <NewSalesCard salesData={webData} cardTitle="Sale" />
+        <NewPurchaseCard purchaseData={webData} cardTitle="Purchase" />
+        <NewCollectionCard salesData={webData} cardTitle="Collection" />
       </section>
 
-      <section className="mb-3 grid grid-cols-1 gap-3">
-        {/* Chart */}
-        <div className="w-[700px]">
-          <div className="h-[400px]">
-            <div className="bg-white p-6 rounded-xl shadow-xl border h-full">
-              <div className="h-[350px]">
-                {isMonthlyDataAvailable ? (
-                  <Bar
-                    options={chart2Options}
-                    data={{
-                      labels: months,
-                      datasets: [
-                        {
-                          label: "Sales",
-                          data: salesData,
-                          backgroundColor: "rgba(54, 162, 235, 0.8)",
-                          borderRadius: 6,
-                        },
-                        {
-                          label: "Purchase",
-                          data: purchaseData,
-                          backgroundColor: "rgba(255, 99, 132, 0.8)",
-                          borderRadius: 6,
-                        },
-                        {
-                          label: "Expense",
-                          data: expenseData,
-                          backgroundColor: "rgba(255, 206, 86, 0.8)",
-                          borderRadius: 6,
-                        },
-                        {
-                          label: "Collection",
-                          data: collectionData,
-                          backgroundColor: "rgba(75, 192, 192, 0.8)",
-                          borderRadius: 6,
-                        },
-                      ],
-                    }}
-                  />
-                ) : (
-                  <div className="text-center p-10 text-lg text-gray-500">
-                    Monthly comparison data not available.
-                  </div>
-                )}
+      {/* ---------------------- Middle Section: Charts and Range Card ---------------------- */}
+      <section className="mb-3">
+        {/* Enforcing horizontal arrangement for the charts and range card */}
+        <div className="flex flex-row gap-3">
+          <div className="flex flex-col gap-3">
+            {/* Monthly Chart Container (Fixed Width/Height) */}
+            <div
+              className="flex-shrink-0"
+              style={{ width: "650px", height: "400px" }}
+            >
+              <div className="bg-white p-6 rounded-xl shadow-xl border h-full">
+                <div className="h-full">
+                  {isMonthlyDataAvailable ? (
+                    <Bar
+                      options={chart2Options}
+                      data={{
+                        labels: months,
+                        datasets: [
+                          {
+                            label: "Sales",
+                            data: salesData,
+                            backgroundColor: "rgba(54, 162, 235, 0.8)",
+                            borderRadius: 6,
+                          },
+                          {
+                            label: "Purchase",
+                            data: purchaseData,
+                            backgroundColor: "rgba(255, 99, 132, 0.8)",
+                            borderRadius: 6,
+                          },
+                          {
+                            label: "Expense",
+                            data: expenseData,
+                            backgroundColor: "rgba(255, 206, 86, 0.8)",
+                            borderRadius: 6,
+                          },
+                          {
+                            label: "Collection",
+                            data: collectionData,
+                            backgroundColor: "rgba(75, 192, 192, 0.8)",
+                            borderRadius: 6,
+                          },
+                        ],
+                      }}
+                    />
+                  ) : (
+                    <div className="text-center p-10 text-lg text-gray-500">
+                      Monthly comparison data not available.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Range Card (Fixed Width/Height) - Placed below the monthly chart */}
+            <div className="flex-shrink-0" style={{ width: "650px" }}>
+              <HorizontalRangeCard
+                stats={newRangeStats}
+                cardTitle="Customer Amount & Count by Range"
+              />
+            </div>
           </div>
-          {/* Range Card */}
-          <div className="w-full mt-3">
-            <HorizontalRangeCard
-              stats={newRangeStats}
-              cardTitle="Customer Amount & Count by Range"
-            />
+
+          {/* Yearly Comparison Graph (Fixed Width/Height) */}
+          <div className="flex-shrink-0 pt-1" style={{ width: "500px" }}>
+            <YearlySPCGraph apiData={webData} />
           </div>
         </div>
       </section>
