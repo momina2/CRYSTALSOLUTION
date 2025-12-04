@@ -288,3 +288,12 @@
   0%,100% { transform: translateY(0%) scale(1); opacity: 1; }
   50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
 }
+
+
+/* ==== Scrolling ==== */
+
+.dashboard-scroll {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

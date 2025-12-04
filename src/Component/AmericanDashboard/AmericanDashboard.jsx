@@ -1190,7 +1190,6 @@ import {
   Legend,
 } from "chart.js";
 
-
 // Register Chart.js components
 import { Pie } from "react-chartjs-2";
 import { ArcElement } from "chart.js";
@@ -2445,7 +2444,7 @@ const AmericanDashboard = () => {
 
   return (
     <div
-      className="american-dashboard"
+      className="american-dashboard dashboard-scroll"
       style={{
         fontFamily:
           '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif"',
