@@ -164,7 +164,14 @@ import CollectorList from "./Component/Reports/List/CollectorList.js";
 import MemberListCable from "./Component/Reports/List/MemberListCable.js";
 import notificationSound from "../src/image/notification.wav";
 import ResturentDashboard from "./Component/RestaurantDashboard/ResturentDashboard.jsx";
-import { loadTailwind } from "./Utils/helpers.js";
+import { loadTailwind } from "./utils/helpers.js";
+import AmericanDashbaord from "./Component/AmericanDashboard/AmericanDashboard.jsx";
+import AmericanAdvance from "./Component/AmericanDashboard/reports/AmericanAdvance.jsx";
+import AmericanNil from "./Component/AmericanDashboard/reports/AmericanNil.jsx";
+import AmericanOutstanding from "./Component/AmericanDashboard/reports/AmericanOutstanding.jsx";
+import CustomerBalance from "./Component/AmericanDashboard/reports/CustomerBalance.jsx";
+// import "../../../Utils/helpers.js";
+
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
   const queryClient = new QueryClient();
@@ -202,7 +209,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    loadTailwind(); 
+    loadTailwind();
   }, []);
 
   return (
@@ -333,6 +340,39 @@ function App() {
                   path="/DashboardPOS"
                   element={<DashboardPOS />}
                 ></Route>
+                {/* /////////////////////////////////////////////////////////////////////////////
+             /////////////////////////////////////////////////////////////////////////////
+             /////////////////////////////   American Dashboard //////////////////////////
+             /////////////////////////////////////////////////////////////////////////////
+             ///////////////////////////////////////////////////////////////////////////// */}
+                <Route
+                  exact
+                  path="/AmericanDashbaord"
+                  element={<AmericanDashbaord />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanAdvance"
+                  element={<AmericanAdvance />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanNil"
+                  element={<AmericanNil />}
+                ></Route>
+
+                <Route
+                  exact
+                  path="/AmericanOutstanding"
+                  element={<AmericanOutstanding />}
+                ></Route>
+
+                <Route
+                  exact
+                  path="/CustomerBalance"
+                  element={<CustomerBalance />}
+                ></Route>
+
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////   FILE //////////////////////////
@@ -648,7 +688,7 @@ function App() {
                 <Route
                   exact
                   path="/MemberCollectionReport"
-                  element={<MemberCollectionReport />}
+                  element={<AmericanDashbaord />}
                 />
                 <Route
                   exact

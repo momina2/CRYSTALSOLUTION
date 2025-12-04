@@ -1,0 +1,290 @@
+/* Root container: background + iOS style font */
+.american-dashboard {
+  min-height: 100vh;
+  width: 100%;
+  padding: 1rem 0.75rem 1.25rem;
+  box-sizing: border-box;
+  background: linear-gradient(to bottom, #f3f6ff, #f9fbff);
+  font-family: "SF Pro Display", "SF Pro Text", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Ensure everything inside uses same font + proper box sizing */
+.american-dashboard * {
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+/* Center content same as max-w-7xl + mx-auto */
+.american-dashboard .max-w-7xl {
+  max-width: 80rem; /* 1280px approx (Tailwind 7xl) */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Header title + subtitle */
+.american-dashboard h1 {
+  letter-spacing: -0.01em;
+}
+
+.american-dashboard header p {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* "Today's Sale" pill */
+.american-dashboard .today-sale-pill {
+  border-radius: 999px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.9rem;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+/* All main white cards (based on existing Tailwind classes) */
+.american-dashboard [class*="bg-white"][class*="rounded-[20px]"] {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+/* Small section headings inside cards (Staff Summary, Financial Summary, etc.) */
+.american-dashboard h3,
+.american-dashboard .card-title {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: #111827;
+}
+
+/* Generic text colours (in case global CSS override ho rahi ho) */
+.american-dashboard .text-gray-900 {
+  color: #111827;
+}
+
+.american-dashboard .text-gray-800 {
+  color: #1f2933;
+}
+
+.american-dashboard .text-gray-700 {
+  color: #374151;
+}
+
+.american-dashboard .text-gray-600 {
+  color: #4b5563;
+}
+
+.american-dashboard .text-gray-500 {
+  color: #6b7280;
+}
+
+.american-dashboard .text-sky-700 {
+  color: #0369a1;
+}
+
+.american-dashboard .text-indigo-700 {
+  color: #4338ca;
+}
+
+.american-dashboard .text-indigo-800 {
+  color: #3730a3;
+}
+
+/* Small labels (range headings, column labels etc.) */
+.american-dashboard .label-xs {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+/* Chart container smooth look */
+.american-dashboard .chart-card {
+  border-radius: 20px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  padding: 0.75rem 1rem 1rem;
+}
+
+/* Responsive grid spacing fallback in case Tailwind override ho */
+.american-dashboard section {
+  row-gap: 1.25rem;
+}
+
+/* Table-ish range cards hover effect */
+.american-dashboard .range-item {
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.american-dashboard .range-item:hover {
+  background-color: #f9fafb;
+  transform: translateY(-1px);
+}
+
+
+.financial-pie-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem 1rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 320px;
+  overflow: hidden;
+}
+
+.financial-pie-wrapper {
+  width: 100%;
+  height: 240px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.customer-pie-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem 1rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 320px;
+  overflow: hidden;
+}
+
+.customer-pie-wrapper {
+  width: 100%;
+  height: 240px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.outstanding-wrapper-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #f8f9fb;
+  padding: 30px;
+  font-family: "SF Pro Display", sans-serif;
+}
+
+.outstanding-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1e1e1e;
+}
+
+.outstanding-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 10px;
+}
+
+.outstanding-table th {
+  background: #eef3ff;
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3949ab;
+}
+
+.outstanding-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ececec;
+  font-size: 13px;
+}
+
+.loadingText {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+
+/* ==== 3 DOT LOADER ==== */
+
+.three-body {
+  --uib-size: 35px;
+  --uib-speed: 0.8s;
+  --uib-color: #1c46cf;
+  position: relative;
+  display: inline-block;
+  height: var(--uib-size);
+  width: var(--uib-size);
+  animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+}
+.three-body__dot {
+  position: absolute;
+  height: 100%;
+  width: 30%;
+}
+.three-body__dot:after {
+  content: '';
+  position: absolute;
+  height: 0%;
+  width: 100%;
+  padding-bottom: 100%;
+  background-color: var(--uib-color);
+  border-radius: 50%;
+}
+.three-body__dot:nth-child(1) {
+  bottom: 5%;
+  left: 0;
+  transform: rotate(60deg);
+  transform-origin: 50% 85%;
+}
+.three-body__dot:nth-child(1)::after {
+  bottom: 0;
+  left: 0;
+  animation: wobble1 var(--uib-speed) infinite ease-in-out;
+  animation-delay: calc(var(--uib-speed) * -0.3);
+}
+.three-body__dot:nth-child(2) {
+  bottom: 5%;
+  right: 0;
+  transform: rotate(-60deg);
+  transform-origin: 50% 85%;
+}
+.three-body__dot:nth-child(2)::after {
+  bottom: 0;
+  left: 0;
+  animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+}
+.three-body__dot:nth-child(3) {
+  bottom: -5%;
+  left: 0;
+  transform: translateX(116.666%);
+}
+.three-body__dot:nth-child(3)::after {
+  top: 0;
+  left: 0;
+  animation: wobble2 var(--uib-speed) infinite ease-in-out;
+}
+@keyframes spin78236 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes wobble1 {
+  0%,100% { transform: translateY(0%) scale(1); opacity: 1; }
+  50% { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+}
+@keyframes wobble2 {
+  0%,100% { transform: translateY(0%) scale(1); opacity: 1; }
+  50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+}
