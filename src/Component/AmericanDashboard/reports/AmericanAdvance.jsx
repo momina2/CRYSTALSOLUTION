@@ -4,7 +4,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { formatNumberWithCommas } from "../../../utils/helpers.js";
 import { exportPDF } from "../components/ExportPDF";
 import { exportCSV } from "../components/ExportCSV";
-
+import "../AmericanDashboard.css"
 
 export default function AmericanAdvance() {
   const [rows, setRows] = useState([]);
@@ -115,8 +115,8 @@ export default function AmericanAdvance() {
   };
 
   return (
-    <div className="flex justify-center pt-8">
-      <div className="w-[auto] bg-white border border-gray-300 rounded-md shadow-lg">
+    <div className="center-screen">
+      <div className="center-card">
         <div className="p-3 border-b bg-blue-800 rounded-t-md">
           <h2 className="text-lg text-center font-semibold text-white leading-tight">
             Advance Customers

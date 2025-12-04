@@ -1573,12 +1573,23 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
       <div className="grid grid-cols-4 gap-2 text-center pt-1">
         <div className="flex flex-col px-1">
           <p className="text-[11px] font-medium text-gray-500 mb-1">
-            Non Active
+            Non-Active
           </p>
           <h4 className="text-lg font-semibold text-sky-700">
             {formatValue("Non Active")}
           </h4>
-          <p className="text-[11px] text-gray-400 mt-1">-</p>
+          <p
+            className="text-[11px] text-gray-500 mt-1 truncate cursor-pointer hover:underline"
+            title={formatValue("Non Active")}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/AmericanNonActive",
+                "_blank"
+              )
+            }
+          >
+            {formatValue("Non Active")}
+          </p>
         </div>
 
         <div className="flex flex-col px-1">

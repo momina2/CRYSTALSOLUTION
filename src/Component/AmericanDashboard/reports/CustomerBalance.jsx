@@ -6,6 +6,7 @@ import { formatNumberWithCommas } from "../../../utils/helpers.js";
 import { exportPDF } from "../components/ExportPDF";
 import { exportCSV } from "../components/ExportCSV";
 import "../../../utils/helpers.js";
+import "../AmericanDashboard.css"
 
 function useQueryParams() {
   const { search } = useLocation();
@@ -71,7 +72,7 @@ export default function CustomerBalance() {
   const columnsConfig = [
     { header: "Code", key: "tcstcod", align: "center", uiWidth: 60 },
     { header: "Customer", key: "tcstdsc", align: "left", uiWidth: 200 },
-    { header: "Contact", key: "tcntper", align: "left", uiWidth: 120 },
+    { header: "Contact", key: "tcntper", align: "left", uiWidth: 100 },
     { header: "Address", key: "address", align: "left", uiWidth: 180 },
     { header: "Mobile", key: "tmobnum", align: "center", uiWidth: 100 },
     { header: "Salesman", key: "SalesMan", align: "left", uiWidth: 120 },
@@ -149,8 +150,8 @@ export default function CustomerBalance() {
   };
 
   return (
-    <div className="flex justify-center pt-8">
-      <div className="w-[70%] bg-white border border-gray-300 rounded-md shadow-lg">
+    <div className="center-screen">
+      <div className="center-card">
         <div className="p-3 border-b bg-blue-800 rounded-t-md">
           <h2 className="text-lg font-semibold text-center text-white leading-tight">
             Customer Balance by Range

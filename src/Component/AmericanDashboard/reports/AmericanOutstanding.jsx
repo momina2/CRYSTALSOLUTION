@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -6,6 +5,8 @@ import { formatNumberWithCommas } from "../../../utils/helpers.js";
 import { exportPDF } from "../components/ExportPDF";
 import { exportCSV } from "../components/ExportCSV";
 import "../../../utils/helpers.js";
+import "../AmericanDashboard.css"
+
 
 export default function AmericanOutstanding() {
   const [rows, setRows] = useState([]);
@@ -114,8 +115,8 @@ export default function AmericanOutstanding() {
   };
 
   return (
-    <div className="flex justify-center pt-8">
-      <div className="w-[auto] bg-white border border-gray-300 rounded-md shadow-lg">
+    <div className="center-screen">
+      <div className="center-card">
         <div className="p-3 border-b bg-blue-800 rounded-t-md">
           <h2 className="text-lg font-semibold text-center text-white leading-tight">
             Outstanding Customers

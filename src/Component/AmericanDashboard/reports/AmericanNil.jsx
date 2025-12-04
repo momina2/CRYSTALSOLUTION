@@ -5,6 +5,7 @@ import { formatNumberWithCommas } from "../../../utils/helpers.js";
 import { exportPDF } from "../components/ExportPDF";
 import { exportCSV } from "../components/ExportCSV";
 import "../../../utils/helpers.js";
+import "../AmericanDashboard.css"
 
 
 export default function AmericanNil() {
@@ -117,8 +118,8 @@ export default function AmericanNil() {
   };
 
   return (
-    <div className="flex justify-center pt-8">
-      <div className="w-[auto] bg-white border border-gray-300 rounded-md shadow-lg">
+    <div className="center-screen">
+      <div className="center-card">
         <div className="p-3 border-b bg-blue-800 rounded-t-md">
           <h2 className="text-lg font-semibold text-center text-white leading-tight">
             Nil Customers
