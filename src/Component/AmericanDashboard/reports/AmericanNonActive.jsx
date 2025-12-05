@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-// import { formatNumberWithCommas } from "../../../utils/helpers.js";
 import { exportPDF } from "../components/ExportPDF";
 import { exportCSV } from "../components/ExportCSV";
-// import "../../../utils/helpers.js";
 
 export default function AmericanNonActive() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
   const [sortConfig, setSortConfig] = useState({
     key: "tcstcod",
     direction: "asc",
@@ -19,22 +20,33 @@ export default function AmericanNonActive() {
   }, []);
 
   const fetchData = async () => {
-    const form = new FormData();
-    form.append("code", "AMRELEC");
+    setIsLoading(true);
+    try {
+      const form = new FormData();
+      form.append("code", "AMRELEC");
 
-    const res = await axios.post(
-      "https://crystalsolutions.com.pk/api/NonActiveCustomers.php",
-      form
-    );
+      const res = await axios.post(
+        "https://crystalsolutions.com.pk/api/NonActiveCustomers.php",
+        form,
+        { timeout: 20000 }
+      );
 
-    const detailRows = res.data?.Detail || [];
+      const detailRows = res.data?.Detail || [];
 
-    setRows(
-      detailRows.map((row) => ({
-        ...row,
-        address: `${row.tadd001 || ""} ${row.tadd002 || ""}`.trim(),
-      }))
-    );
+      setRows(
+        detailRows.map((row) => ({
+          ...row,
+          address: `${row.tadd001 || ""} ${row.tadd002 || ""}`.trim(),
+        }))
+      );
+
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(
+        "Unable to load data due to server delay. Please try again shortly."
+      );
+    }
+    setIsLoading(false);
   };
 
   const columnsConfig = [
@@ -48,7 +60,6 @@ export default function AmericanNonActive() {
     { header: "Debit", key: "Debit", align: "left", uiWidth: 100 },
     { header: "Credit", key: "Credit", align: "left", uiWidth: 100 },
     { header: "Balance", key: "Balance", align: "left", uiWidth: 100 },
-
   ];
 
   const totalUiWidth = columnsConfig.reduce((sum, col) => sum + col.uiWidth, 0);
@@ -112,8 +123,8 @@ export default function AmericanNonActive() {
   };
 
   return (
-    <div className="flex justify-center pt-8">
-      <div className="w-[auto] bg-white border border-gray-300 rounded-md shadow-lg">
+    <div className="center-screen">
+      <div className="center-card">
         <div className="p-3 border-b bg-blue-800 rounded-t-md">
           <h2 className="text-lg font-semibold text-center text-white leading-tight">
             Non-Active Customers
@@ -153,7 +164,7 @@ export default function AmericanNonActive() {
         </div>
 
         {/* TABLE */}
-        <div className="overflow-y-auto max-h-[65vh]">
+        <div className="overflow-y-auto max-h-[47vh]">
           <table className="text-[11px] border-collapse w-full">
             <thead className="bg-blue-800 sticky top-0 z-20 text-[11px]">
               <tr>
@@ -193,36 +204,71 @@ export default function AmericanNonActive() {
                 ))}
               </tr>
             </thead>
-
             <tbody>
-              {filteredData.map((item, index) => (
-                <tr
-                  key={index}
-                  className={`hover:bg-gray-100 ${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } text-[11px] leading-tight`}
-                >
-                  {columnsConfig.map((col) => (
-                    <td
-                      key={col.key}
-                      style={{
-                        width: getWidthPercent(col),
-                        maxWidth: getWidthPercent(col),
-                      }}
-                      className={`p-1 border overflow-hidden text-ellipsis whitespace-nowrap ${
-                        col.align === "right"
-                          ? "text-right"
-                          : col.align === "center"
-                          ? "text-center"
-                          : "text-left"
-                      }`}
-                      title={item[col.key]}
-                    >
-                      {item[col.key]?.trim?.() ?? "-"}
-                    </td>
-                  ))}
+              {/* LOADER ONLY WHEN LOADING */}
+              {isLoading && (
+                <tr>
+                  <td
+                    colSpan={columnsConfig.length}
+                    className="text-center py-6"
+                  >
+                    <div className="min-h-[40px] flex flex-col gap-2 items-center justify-center">
+                      <div className="three-body">
+                        <div className="three-body__dot"></div>
+                        <div className="three-body__dot"></div>
+                        <div className="three-body__dot"></div>
+                      </div>
+                      <div className="text-gray-400 text-[10px] tracking-widest font-medium">
+                        Fetching data...
+                      </div>
+                    </div>
+                  </td>
                 </tr>
-              ))}
+              )}
+
+              {/* SHOW ERROR IF HAPPENS */}
+              {!isLoading && errorMessage && (
+                <tr>
+                  <td
+                    colSpan={columnsConfig.length}
+                    className="text-center py-6 text-red-600 text-xs"
+                  >
+                    {errorMessage}
+                  </td>
+                </tr>
+              )}
+
+              {/* SHOW DATA AFTER LOADING */}
+              {!isLoading &&
+                !errorMessage &&
+                filteredData.map((item, index) => (
+                  <tr
+                    key={index}
+                    className={`hover:bg-gray-100 ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } text-[11px] leading-tight`}
+                  >
+                    {columnsConfig.map((col) => (
+                      <td
+                        key={col.key}
+                        style={{
+                          width: getWidthPercent(col),
+                          maxWidth: getWidthPercent(col),
+                        }}
+                        className={`p-1 border overflow-hidden text-ellipsis whitespace-nowrap ${
+                          col.align === "right"
+                            ? "text-right"
+                            : col.align === "center"
+                            ? "text-center"
+                            : "text-left"
+                        }`}
+                        title={item[col.key]}
+                      >
+                        {item[col.key]?.trim?.() ?? "-"}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

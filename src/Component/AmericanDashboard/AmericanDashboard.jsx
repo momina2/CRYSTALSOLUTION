@@ -1579,16 +1579,16 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             {formatValue("Non Active")}
           </h4>
           <p
-            className="text-[11px] text-gray-500 mt-1 truncate cursor-pointer hover:underline"
+            className="text-[11px] text-gray-500 mt-1 cursor-pointer hover:underline"
             title={formatValue("Non Active")}
             onClick={() =>
               window.open(
-                window.location.origin + "/AmericanNonActive",
+                window.location.origin + "/crystalsol/AmericanNonActive",
                 "_blank"
               )
             }
           >
-            {formatValue("Non Active")}
+            {formatValue("Non Active Amount")}
           </p>
         </div>
 
@@ -1598,10 +1598,10 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             {formatValue("Advance Customer")}
           </h4>
           <p
-            className="text-[11px] ext-emerald-600 mt-1 truncate cursor-pointer hover:underline"
+            className="text-[11px] ext-emerald-600 mt-1 cursor-pointer hover:underline"
             title={formatValue("Advance Amount")}
             onClick={() =>
-              window.open(window.location.origin + "/AmericanAdvance", "_blank")
+              window.open(window.location.origin + "/crystalsol/AmericanAdvance", "_blank")
             }
           >
             {formatValue("Advance Amount")}
@@ -1621,10 +1621,10 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             {formatValue("Nil Customer")}
           </h4>
           <p
-            className="text-[11px] text-gray-500 mt-1 truncate cursor-pointer hover:underline"
+            className="text-[11px] text-gray-500 mt-1 cursor-pointer hover:underline"
             title={formatValue("Nil Amount")}
             onClick={() =>
-              window.open(window.location.origin + "/AmericanNil", "_blank")
+              window.open(window.location.origin + "/crystalsol/AmericanNil", "_blank")
             }
           >
             {formatValue("Nil Amount")}
@@ -1639,11 +1639,11 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             {formatValue("OutStanding Customer")}
           </h4>
           <p
-            className="text-[11px] text-red-500 mt-1 truncate cursor-pointer hover:underline"
+            className="text-[11px] text-red-500 mt-1 cursor-pointer hover:underline"
             title={formatValue("OutStanding Amount")}
             onClick={() =>
               window.open(
-                window.location.origin + "/AmericanOutstanding",
+                window.location.origin + "/crystalsol/AmericanOutstanding",
                 "_blank"
               )
             }
@@ -2082,7 +2082,7 @@ const HorizontalRangeCard = ({ stats, cardTitle = null }) => {
     // naya tab open with query params (min, max, label)
     const url =
       window.location.origin +
-      `/CustomerBalance?min=${FIntAmt}&max=${FFnlAmt}&label=${encodeURIComponent(
+      `/crystalsol/CustomerBalance?min=${FIntAmt}&max=${FFnlAmt}&label=${encodeURIComponent(
         rangeLabel
       )}`;
 
@@ -2454,144 +2454,148 @@ const AmericanDashboard = () => {
   const collectionData = parseData(monthlyData, "C");
 
   return (
-    <div
-      className="american-dashboard dashboard-scroll"
-      style={{
-        fontFamily:
-          '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif"',
-      }}
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-              American Dashboard
-            </h1>
-            <p className="text-[11px] text-gray-500 mt-1">
-              Code: AMRELEC • Snapshot date: {currentDate}
-            </p>
-          </div>
-
-          {dailyData && (
-            <div className="flex items-center gap-3 text-[11px] text-gray-600">
-              <div className="px-3 py-2 bg-white rounded-full shadow-sm border border-gray-100">
-                <span className="font-semibold text-indigo-700">
-                  Today&apos;s Sale:{" "}
-                </span>
-                <span>{dailyData?.TodaySale ?? "-"}</span>
+    <div className="dashboard-wrapper">
+      <div className="dashboard-zoom">
+        <div
+          className="american-dashboard dashboard-scroll"
+          style={{
+            fontFamily:
+              '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif"',
+          }}
+        >
+          <div className="max-w-7xl mx-auto">
+            {/* HEADER */}
+            <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-3">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                  American Dashboard
+                </h1>
+                <p className="text-[11px] text-gray-500 mt-1">
+                  Code: AMRELEC • Snapshot date: {currentDate}
+                </p>
               </div>
-            </div>
-          )}
-        </header>
 
-        {/* TOP METRIC CARDS */}
-        <section className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          <HorizontalBalanceCard mainData={mainData} cardTitle="Customer" />
-          <NewSalesCard salesData={webData} cardTitle="Sale" />
-          <NewPurchaseCard purchaseData={webData} cardTitle="Purchase" />
-          <NewCollectionCard salesData={webData} cardTitle="Collection" />
-          <NewPaymentCard salesData={webData} cardTitle="Payment" />
-          <NewCashBankCard
-            balanceData={webData}
-            cardTitle="Cash & Bank Balance"
-          />
-        </section>
-
-        {/* MAIN GRID SECTION (LIKE REFERENCE: CENTER + RIGHT SIDEBAR) */}
-        <section className="grid gap-5 xl:grid-cols-3 items-start">
-          {/* LEFT / CENTER AREA */}
-          <div className="xl:col-span-2 space-y-5">
-            {/* Monthly Comparison Chart */}
-            <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[360px]">
-              <h3 className="text-xs font-semibold text-gray-800 mb-3 border-b border-gray-100 pb-2 tracking-wide">
-                Monthly Performance Comparison (in Millions)
-              </h3>
-              <div className="h-[calc(100%-40px)]">
-                {isMonthlyDataAvailable ? (
-                  <Bar
-                    data={{
-                      labels: months,
-                      datasets: [
-                        {
-                          label: "Sales",
-                          data: salesData,
-                          backgroundColor: ChartColors.Sales,
-                          borderRadius: 8,
-                        },
-                        {
-                          label: "Purchase",
-                          data: purchaseData,
-                          backgroundColor: ChartColors.Purchase,
-                          borderRadius: 8,
-                        },
-                        {
-                          label: "Expense",
-                          data: expenseData,
-                          backgroundColor: ChartColors.Expense,
-                          borderRadius: 8,
-                        },
-                        {
-                          label: "Collection",
-                          data: collectionData,
-                          backgroundColor: ChartColors.Collection,
-                          borderRadius: 8,
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: "top",
-                          labels: { usePointStyle: true, padding: 16 },
-                        },
-                      },
-                      scales: {
-                        x: { grid: { display: false } },
-                        y: {
-                          ticks: {
-                            callback: (value) => value + "M",
-                            color: "#6b7280",
-                          },
-                          grid: { color: "rgba(0,0,0,0.04)" },
-                        },
-                      },
-                    }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-                    Monthly comparison data not available.
+              {dailyData && (
+                <div className="flex items-center gap-3 text-[11px] text-gray-600">
+                  <div className="px-3 py-2 bg-white rounded-full shadow-sm border border-gray-100">
+                    <span className="font-semibold text-indigo-700">
+                      Today&apos;s Sale:{" "}
+                    </span>
+                    <span>{dailyData?.TodaySale ?? "-"}</span>
                   </div>
-                )}
+                </div>
+              )}
+            </header>
+
+            {/* TOP METRIC CARDS */}
+            <section className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              <HorizontalBalanceCard mainData={mainData} cardTitle="Customer" />
+              <NewSalesCard salesData={webData} cardTitle="Sale" />
+              <NewPurchaseCard purchaseData={webData} cardTitle="Purchase" />
+              <NewCollectionCard salesData={webData} cardTitle="Collection" />
+              <NewPaymentCard salesData={webData} cardTitle="Payment" />
+              <NewCashBankCard
+                balanceData={webData}
+                cardTitle="Cash & Bank Balance"
+              />
+            </section>
+
+            {/* MAIN GRID SECTION (LIKE REFERENCE: CENTER + RIGHT SIDEBAR) */}
+            <section className="grid gap-5 xl:grid-cols-3 items-start">
+              {/* LEFT / CENTER AREA */}
+              <div className="xl:col-span-2 space-y-5">
+                {/* Monthly Comparison Chart */}
+                <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[360px]">
+                  <h3 className="text-xs font-semibold text-gray-800 mb-3 border-b border-gray-100 pb-2 tracking-wide">
+                    Monthly Performance Comparison (in Millions)
+                  </h3>
+                  <div className="h-[calc(100%-40px)]">
+                    {isMonthlyDataAvailable ? (
+                      <Bar
+                        data={{
+                          labels: months,
+                          datasets: [
+                            {
+                              label: "Sales",
+                              data: salesData,
+                              backgroundColor: ChartColors.Sales,
+                              borderRadius: 8,
+                            },
+                            {
+                              label: "Purchase",
+                              data: purchaseData,
+                              backgroundColor: ChartColors.Purchase,
+                              borderRadius: 8,
+                            },
+                            {
+                              label: "Expense",
+                              data: expenseData,
+                              backgroundColor: ChartColors.Expense,
+                              borderRadius: 8,
+                            },
+                            {
+                              label: "Collection",
+                              data: collectionData,
+                              backgroundColor: ChartColors.Collection,
+                              borderRadius: 8,
+                            },
+                          ],
+                        }}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "top",
+                              labels: { usePointStyle: true, padding: 16 },
+                            },
+                          },
+                          scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                              ticks: {
+                                callback: (value) => value + "M",
+                                color: "#6b7280",
+                              },
+                              grid: { color: "rgba(0,0,0,0.04)" },
+                            },
+                          },
+                        }}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                        Monthly comparison data not available.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Yearly SPC Graph */}
+                <YearlySPCGraph apiData={webData} />
+
+                {/* Customer Range Card */}
+                <HorizontalRangeCard
+                  stats={newRangeStats}
+                  cardTitle="Customer Amount & Count by Range"
+                />
+
+                {/* Admin Agging Range */}
+                <HorizontalAggingRangeCard
+                  stats={newRangeAggingStats}
+                  cardTitle="Admin Agging (Days)"
+                />
               </div>
-            </div>
 
-            {/* Yearly SPC Graph */}
-            <YearlySPCGraph apiData={webData} />
-
-            {/* Customer Range Card */}
-            <HorizontalRangeCard
-              stats={newRangeStats}
-              cardTitle="Customer Amount & Count by Range"
-            />
-
-            {/* Admin Agging Range */}
-            <HorizontalAggingRangeCard
-              stats={newRangeAggingStats}
-              cardTitle="Admin Agging (Days)"
-            />
+              {/* RIGHT COLUMN (INFO SIDEBAR STYLE) */}
+              <div className="space-y-5">
+                <StaffSummaryCard webData={webData} />
+                <FinanceSummaryCard webData={webData} />
+                <FinancialPieChart webData={webData} />
+                <CustomerDistributionChart mainData={mainData} />
+              </div>
+            </section>
           </div>
-
-          {/* RIGHT COLUMN (INFO SIDEBAR STYLE) */}
-          <div className="space-y-5">
-            <StaffSummaryCard webData={webData} />
-            <FinanceSummaryCard webData={webData} />
-            <FinancialPieChart webData={webData} />
-            <CustomerDistributionChart mainData={mainData} />
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );
