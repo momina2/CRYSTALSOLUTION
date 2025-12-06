@@ -1403,9 +1403,9 @@ const AmericanDashboard = () => {
 
   return (
     <div className="dashboard-wrapper">
-      <div className="dashboard-zoom">
+      <div className="american-dashboard">
         <div
-          className="american-dashboard"
+          className="dashboard-zoom"
           style={{
             fontFamily:
               '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',

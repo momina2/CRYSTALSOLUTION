@@ -1,5 +1,5 @@
 /* Root container: background + iOS style font */
-.american-dashboard {
+/* .american-dashboard {
   min-height: 100vh;
   width: 100%;
   padding: 1rem 0.75rem 1.25rem;
@@ -7,7 +7,17 @@
   background: linear-gradient(to bottom, #f3f6ff, #f9fbff);
   font-family: "SF Pro Display", "SF Pro Text", -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
+    overflow-y: auto;
+    overflow-x: hidden;
+} */
+
+.american-dashboard {
+  height: 100vh !important;
+  min-height: 100vh !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
 }
+
 
 /* Ensure everything inside uses same font + proper box sizing */
 .american-dashboard * {
@@ -184,7 +194,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 20px;
-  padding-top: 10px !important;
+  padding-top: 10px;
   padding-bottom: 30px;
   background: #f8f9fb;
   overflow-y: auto;
@@ -207,22 +217,43 @@
   border-collapse: collapse;
 }
 
-.dashboard-zoom {
+/* .dashboard-zoom {
   transform: scale(0.90);
+  transform-origin: top center;
+} */
+
+.dashboard-zoom {
+  max-width: 1650px;
+  width: 100%;
+  transform: scale(0.93);
   transform-origin: top center;
 }
 
+
+/* For big PC FULL HD screens */
+@media (min-width: 1600px) {
+  .dashboard-zoom {
+    transform: scale(1);
+    max-width: 1750px;
+  }
+}
+
+
+
 /* .dashboard-wrapper {
-  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
   overflow-x: hidden;
 } */
 
 
 .dashboard-wrapper {
-  height: 100vh;
-  overflow-y: auto;
+  width: 100%;
+  height: 100vh;  /* MUST */
+  overflow-y: auto !important;
   overflow-x: hidden;
 }
+
 
 /* -------------------------------
    ⭐ TABLE SCALE WRAPPER (same)
@@ -232,8 +263,9 @@
   transform-origin: top center; */
 
   width: 118%;
-  height: 118%;
+  /* height: 118%; */
   /* NEW — height fix */
+  height: auto;
   transform: scale(0.85);
   transform-origin: top center;
 
@@ -325,4 +357,11 @@
     opacity: 0.3;
     transform: translateY(1px);
   }
+}
+
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden;
 }
