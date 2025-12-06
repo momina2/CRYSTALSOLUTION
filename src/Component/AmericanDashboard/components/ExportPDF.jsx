@@ -1,126 +1,129 @@
+// // src/components/export/ExportPDF.js
+// import jsPDF from "jspdf";
 
+// export function exportPDF({
+//   rows,
+//   columnsConfig,
+//   totalCollection,
+//   companyName,
+//   reportName,
+//   font = "Helvetica",
+// }) {
+//   const doc = new jsPDF("landscape", "pt", "A4");
 
-// src/components/export/ExportPDF.js
-import jsPDF from "jspdf";
+//   const keys = columnsConfig.map((c) => c.key);
+//   const headers = columnsConfig.map((c) => c.header);
 
-export function exportPDF({
-  rows,
-  columnsConfig,
-  totalCollection,
-  companyName,
-  reportName,
-  font = "Helvetica",
-}) {
-  const doc = new jsPDF("landscape", "pt", "A4");
+//   const pageWidth = doc.internal.pageSize.getWidth();
+//   const pageHeight = doc.internal.pageSize.getHeight();
 
-  const keys = columnsConfig.map((c) => c.key);
-  const headers = columnsConfig.map((c) => c.header);
+//   const totalColumns = columnsConfig.length;
+//   const maxTableWidth = pageWidth - 90; // left & right margin safe zone
+//   let colWidth = maxTableWidth / totalColumns;
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+//   if (colWidth < 70) colWidth = 70;
 
-  const totalColumns = columnsConfig.length;
-  const maxTableWidth = pageWidth - 90; // left & right margin safe zone
-  let colWidth = maxTableWidth / totalColumns;
+//   const totalWidth = colWidth * totalColumns;
+//   const tableX = (pageWidth - totalWidth) / 2;
 
-  if (colWidth < 70) colWidth = 70;
+//   const HEADER_HEIGHT = 20;
+//   const ROW_HEIGHT_MIN = 14;
+//   const TOP_OFFSET = 60;
 
-  const totalWidth = colWidth * totalColumns;
-  const tableX = (pageWidth - totalWidth) / 2;
+//   // TITLE
+//   doc.setFont(font, "bold");
+//   doc.setFontSize(18);
+//   doc.text(companyName, pageWidth / 2, 30, { align: "center" });
 
-  const HEADER_HEIGHT = 20;
-  const ROW_HEIGHT_MIN = 14;
-  const TOP_OFFSET = 60;
+//   doc.setFont(font, "normal");
+//   doc.setFontSize(12);
+//   doc.text(reportName, pageWidth / 2, 48, { align: "center" });
 
-  // TITLE
-  doc.setFont(font, "bold");
-  doc.setFontSize(18);
-  doc.text(companyName, pageWidth / 2, 30, { align: "center" });
+//   // HEADER
+//   let x = tableX;
 
-  doc.setFont(font, "normal");
-  doc.setFontSize(12);
-  doc.text(reportName, pageWidth / 2, 48, { align: "center" });
+//   doc.setFontSize(10);
+//   doc.setFont(font, "bold");
 
-  // HEADER
-  let x = tableX;
+//   headers.forEach((h) => {
+//     doc.setFillColor(210);
+//     doc.rect(x, TOP_OFFSET, colWidth, HEADER_HEIGHT, "F");
+//     doc.rect(x, TOP_OFFSET, colWidth, HEADER_HEIGHT);
+//     doc.text(h, x + colWidth / 2, TOP_OFFSET + 12, { align: "center" });
+//     x += colWidth;
+//   });
 
-  doc.setFontSize(10);
-  doc.setFont(font, "bold");
+//   let y = TOP_OFFSET + HEADER_HEIGHT;
 
-  headers.forEach((h) => {
-    doc.setFillColor(210);
-    doc.rect(x, TOP_OFFSET, colWidth, HEADER_HEIGHT, "F");
-    doc.rect(x, TOP_OFFSET, colWidth, HEADER_HEIGHT);
-    doc.text(h, x + colWidth / 2, TOP_OFFSET + 12, { align: "center" });
-    x += colWidth;
-  });
+//   function wrapText(text, maxWidth) {
+//     return doc.splitTextToSize(text, maxWidth - 8);
+//   }
 
-  let y = TOP_OFFSET + HEADER_HEIGHT;
+//   // ROWS
+//   rows.forEach((item) => {
+//     const rowData = keys.map((k) => String(item[k] ?? ""));
+//     const wrappedLinesArr = rowData.map((txt) => wrapText(txt, colWidth));
+//     const rowHeight = Math.max(
+//       ...wrappedLinesArr.map((arr) => arr.length * ROW_HEIGHT_MIN)
+//     );
 
-  function wrapText(text, maxWidth) {
-    return doc.splitTextToSize(text, maxWidth - 8);
-  }
+//     if (y + rowHeight > pageHeight - 50) {
+//       doc.addPage();
+//       y = TOP_OFFSET;
 
-  // ROWS
-  rows.forEach((item) => {
-    const rowData = keys.map((k) => String(item[k] ?? ""));
-    const wrappedLinesArr = rowData.map((txt) => wrapText(txt, colWidth));
-    const rowHeight = Math.max(
-      ...wrappedLinesArr.map((arr) => arr.length * ROW_HEIGHT_MIN)
-    );
+//       let hx = tableX;
+//       doc.setFont(font, "bold");
+//       doc.setFontSize(10);
 
-    if (y + rowHeight > pageHeight - 50) {
-      doc.addPage();
-      y = TOP_OFFSET;
+//       headers.forEach((h) => {
+//         doc.setFillColor(210);
+//         doc.rect(hx, y, colWidth, HEADER_HEIGHT, "F");
+//         doc.rect(hx, y, colWidth, HEADER_HEIGHT);
+//         doc.text(h, hx + colWidth / 2, y + 12, { align: "center" });
+//         hx += colWidth;
+//       });
+//       y += HEADER_HEIGHT;
+//     }
 
-      let hx = tableX;
-      doc.setFont(font, "bold");
-      doc.setFontSize(10);
+//     let cx = tableX;
+//     doc.setFont(font, "normal");
+//     doc.setFontSize(9);
 
-      headers.forEach((h) => {
-        doc.setFillColor(210);
-        doc.rect(hx, y, colWidth, HEADER_HEIGHT, "F");
-        doc.rect(hx, y, colWidth, HEADER_HEIGHT);
-        doc.text(h, hx + colWidth / 2, y + 12, { align: "center" });
-        hx += colWidth;
-      });
-      y += HEADER_HEIGHT;
-    }
+//     wrappedLinesArr.forEach((lines) => {
+//       doc.rect(cx, y, colWidth, rowHeight);
+//       lines.forEach((line, i) => {
+//         doc.text(line, cx + 4, y + 12 + i * ROW_HEIGHT_MIN);
+//       });
+//       cx += colWidth;
+//     });
 
-    let cx = tableX;
-    doc.setFont(font, "normal");
-    doc.setFontSize(9);
+//     y += rowHeight;
+//   });
 
-    wrappedLinesArr.forEach((lines) => {
-      doc.rect(cx, y, colWidth, rowHeight);
-      lines.forEach((line, i) => {
-        doc.text(line, cx + 4, y + 12 + i * ROW_HEIGHT_MIN);
-      });
-      cx += colWidth;
-    });
+//   // TOTAL ROW
+//   const totalRow = new Array(headers.length).fill("");
+//   totalRow[0] = "TOTAL";
+//   totalRow[headers.length - 1] = totalCollection?.toFixed(2) ?? "";
 
-    y += rowHeight;
-  });
+//   if (y + ROW_HEIGHT_MIN > pageHeight - 50) {
+//     doc.addPage();
+//     y = TOP_OFFSET;
+//   }
 
-  // TOTAL ROW
-  const totalRow = new Array(headers.length).fill("");
-  totalRow[0] = "TOTAL";
-  totalRow[headers.length - 1] = totalCollection?.toFixed(2) ?? "";
+//   let tx = tableX;
+//   doc.setFont(font, "bold");
+//   doc.setFontSize(10);
 
-  if (y + ROW_HEIGHT_MIN > pageHeight - 50) {
-    doc.addPage();
-    y = TOP_OFFSET;
-  }
+//   totalRow.forEach((v) => {
+//     doc.rect(tx, y, colWidth, ROW_HEIGHT_MIN);
+//     doc.text(v, tx + colWidth - 8, y + 12, { align: "right" });
+//     tx += colWidth;
+//   });
 
-  let tx = tableX;
-  doc.setFont(font, "bold");
-  doc.setFontSize(10);
+//   doc.save(`${reportName}.pdf`);
+// }
 
-  totalRow.forEach((v) => {
-    doc.rect(tx, y, colWidth, ROW_HEIGHT_MIN);
-    doc.text(v, tx + colWidth - 8, y + 12, { align: "right" });
-    tx += colWidth;
-  });
+// ============================
+// Minimal ExportPDF.jsx
+// ============================
 
-  doc.save(`${reportName}.pdf`);
-}
