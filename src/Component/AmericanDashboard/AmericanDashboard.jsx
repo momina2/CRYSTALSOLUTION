@@ -1413,7 +1413,7 @@ const AmericanDashboard = () => {
         >
           <div className="max-w-7xl mx-auto gap-2 mt-1">
             {/* TOP METRIC CARDS */}
-            <section className="mb-2 grid gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <section className="mb-2 grid gap-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
               <HorizontalBalanceCard mainData={mainData} cardTitle="Customer" />
               <NewSalesCard salesData={webData} cardTitle="Sale" />
               <NewPurchaseCard purchaseData={webData} cardTitle="Purchase" />
@@ -1427,7 +1427,7 @@ const AmericanDashboard = () => {
             {/* --- BIG LOWER SECTION --- */}
             <section className="grid gap-2 mt-0">
               {/* ⭐ ROW 1: SPC + Range + Agging (3 Cards) */}
-              <div className="grid gap-2 md:grid-cols-3">
+              <div className="grid gap-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
                 <YearlySPCGraph apiData={webData} />
                 <HorizontalRangeCard stats={newRangeStats} />
                 <HorizontalAggingRangeCard stats={newRangeAggingStats} />
@@ -1497,6 +1497,7 @@ const AmericanDashboard = () => {
               </div> */}
 
               {/* ⭐ ROW 2: Monthly Graph (FULL WIDTH) */}
+              {/* <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]"> */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]">
                 <div className="h-[calc(100%-10px)]">
                   {isMonthlyDataAvailable ? (

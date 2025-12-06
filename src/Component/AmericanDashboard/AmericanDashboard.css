@@ -212,8 +212,15 @@
   transform-origin: top center;
 }
 
-.dashboard-wrapper {
+/* .dashboard-wrapper {
   width: 100%;
+  overflow-x: hidden;
+} */
+
+
+.dashboard-wrapper {
+  height: 100vh;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
