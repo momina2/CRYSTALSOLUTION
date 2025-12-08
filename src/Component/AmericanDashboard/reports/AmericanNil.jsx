@@ -353,24 +353,50 @@ export default function AmericanNil() {
     }
   };
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key === key) {
-      return sortConfig.direction === "ascending" ? (
-        <FaSortUp style={{ marginLeft: "5px" }} />
-      ) : (
-        <FaSortDown style={{ marginLeft: "5px" }} />
+    const getSortIcon = (key) => {
+      // Selected column
+      if (sortConfig.key === key) {
+        return sortConfig.direction === "ascending" ? (
+          <FaSortUp
+            style={{
+              marginLeft: "5px",
+              color: "#e74c3c",
+              transition: "0.3s",
+            }}
+          />
+        ) : (
+          <FaSortDown
+            style={{
+              marginLeft: "5px",
+              color: "#e74c3c",
+              transition: "0.3s",
+            }}
+          />
+        );
+      }
+  
+      // Default (unselected)
+      return (
+        <FaSortDown
+          style={{
+            marginLeft: "5px",
+            color: "white",
+            opacity: 0.4,
+          }}
+        />
       );
-    }
-    return <FaSort style={{ marginLeft: "5px", opacity: 0.4 }} />;
-  };
-
-  const requestSort = (key) => {
-    let direction = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-  };
+    };
+  
+  
+    const requestSort = (key) => {
+      let direction = "ascending";
+  
+      if (sortConfig.key === key && sortConfig.direction === "ascending") {
+        direction = "descending";
+      }
+  
+      setSortConfig({ key, direction });
+    };
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {

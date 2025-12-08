@@ -351,22 +351,49 @@ export default function AmericanOutstanding() {
     }
   };
 
+
   const getSortIcon = (key) => {
+    // Selected column
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
-        <FaSortUp style={{ marginLeft: "5px" }} />
+        <FaSortUp
+          style={{
+            marginLeft: "5px",
+            color: "#e74c3c",
+            transition: "0.3s",
+          }}
+        />
       ) : (
-        <FaSortDown style={{ marginLeft: "5px" }} />
+        <FaSortDown
+          style={{
+            marginLeft: "5px",
+            color: "#e74c3c",
+            transition: "0.3s",
+          }}
+        />
       );
     }
-    return <FaSort style={{ marginLeft: "5px", opacity: 0.4 }} />;
+
+    // Default (unselected)
+    return (
+      <FaSortDown
+        style={{
+          marginLeft: "5px",
+          color: "white",
+          opacity: 0.4,
+        }}
+      />
+    );
   };
+
 
   const requestSort = (key) => {
     let direction = "ascending";
+
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
       direction = "descending";
     }
+
     setSortConfig({ key, direction });
   };
 
