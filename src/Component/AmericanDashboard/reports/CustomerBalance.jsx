@@ -41,7 +41,7 @@ const columnsConfig = [
   },
   {
     header: "Mobile",
-    key: "SalesManMobile",
+    key: "tmobnum",
     alignment: "left",
     uiWidth: 110,
     pdfWidth: 25,

@@ -29,7 +29,7 @@ ChartJS.register(
   Legend
 );
 
-// API URLs (Keep as is)
+// API URLs
 const ADMIN_INFO_API_URL = "https://crystalsolutions.com.pk/api/AdminInfo.php";
 const MONTHLY_COMPARISON_API_URL =
   "https://crystalsolutions.com.pk/api/MonthlyComparison.php";
@@ -537,9 +537,25 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
           </h2>
         </div>
 
-        <div className="text-right">
+        {/* <div className="text-right">
           <p className="text-[11px] font-medium text-gray-500">Total Balance</p>
           <h2 className="text-xl font-semibold text-gray-900 mt-1">
+            {formatValue("Total Balance")}
+          </h2>
+        </div> */}
+
+        <div className="text-right">
+          <p className="text-[11px] font-medium text-gray-500">Total Balance</p>
+
+          <h2
+            className="text-xl font-semibold text-gray-900 mt-1 cursor-pointer hover:text-blue-600 transition"
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/TotalCustomers",
+                "_blank"
+              )
+            }
+          >
             {formatValue("Total Balance")}
           </h2>
         </div>
@@ -1033,12 +1049,12 @@ const NewPaymentCard = ({ salesData }) => {
 };
 
 const rangeApiMapping = {
-  "≤ 0 (Nil)": { FIntAmt: -999999999, FFnlAmt: 0 },
+  "≤ 0 (Nil)": { FIntAmt: -9999999999, FFnlAmt: 0 },
   "< 1M": { FIntAmt: 1, FFnlAmt: 1000000 },
-  "< 2M": { FIntAmt: 1000000, FFnlAmt: 2000000 },
-  "< 5M": { FIntAmt: 2000000, FFnlAmt: 5000000 },
-  "< 100M": { FIntAmt: 5000000, FFnlAmt: 100000000 },
-  "> 100M": { FIntAmt: 100000000, FFnlAmt: 9999999999 },
+  "< 2M": { FIntAmt: 1000001, FFnlAmt: 2000000 },
+  "< 5M": { FIntAmt: 2000001, FFnlAmt: 5000000 },
+  "< 10M": { FIntAmt: 5000001, FFnlAmt: 10000000 },
+  "> 100M": { FIntAmt: 10000001, FFnlAmt: 9999999999 },
 };
 
 const HorizontalRangeCard = ({ stats }) => {
@@ -1368,7 +1384,7 @@ const AmericanDashboard = () => {
     { range: "< 1M", amtKey: "Amt002", nosKey: "Nos002" },
     { range: "< 2M", amtKey: "Amt003", nosKey: "Nos003" },
     { range: "< 5M", amtKey: "Amt004", nosKey: "Nos004" },
-    { range: "< 100M", amtKey: "Amt005", nosKey: "Nos005" },
+    { range: "< 10M", amtKey: "Amt005", nosKey: "Nos005" },
     { range: "> 100M", amtKey: "Amt006", nosKey: "Nos006" },
   ];
 

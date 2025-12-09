@@ -171,6 +171,7 @@ import AmericanNil from "./Component/AmericanDashboard/reports/AmericanNil.jsx";
 import AmericanOutstanding from "./Component/AmericanDashboard/reports/AmericanOutstanding.jsx";
 import CustomerBalance from "./Component/AmericanDashboard/reports/CustomerBalance.jsx";
 import AmericanNonActive from "./Component/AmericanDashboard/reports/AmericanNonActive.jsx";
+import TotalCustomers from "./Component/AmericanDashboard/reports/AmericanTotalCustomers.jsx";
 // import "../../../Utils/helpers.js";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
@@ -377,6 +378,12 @@ function App() {
                   exact
                   path="/AmericanNonActive"
                   element={<AmericanNonActive />}
+                ></Route>
+
+                <Route
+                  exact
+                  path="/TotalCustomers"
+                  element={<TotalCustomers />}
                 ></Route>
 
                 {/* /////////////////////////////////////////////////////////////////////////////

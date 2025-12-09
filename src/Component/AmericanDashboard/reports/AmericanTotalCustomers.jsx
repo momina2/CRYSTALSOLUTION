@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { useTheme } from "../../../ThemeContext";
@@ -10,8 +9,9 @@ import "../AmericanDashboard.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { useLocation } from "react-router-dom";
 
-const REPORT_NAME = "American Nil Customers";
+const REPORT_NAME = "Total Customers";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
 const columnsConfig = [
@@ -31,23 +31,23 @@ const columnsConfig = [
     pdfWidth: 80,
     excelWidth: 40,
   },
-  //  {
-  //   header: "Salesman",
-  //   key: "SalesMan",
-  //   alignment: "left",
-  //   uiWidth: 200,
-  //   pdfWidth: 35,
-  //   excelWidth: 30,
-  // },
+  {
+    header: "Salesman",
+    key: "SalesMan",
+    alignment: "left",
+    uiWidth: 200,
+    pdfWidth: 35,
+    excelWidth: 30,
+  },
   {
     header: "Mobile",
-    key: "SalesManMobile",
+    key: "tmobnum",
     alignment: "left",
     uiWidth: 110,
     pdfWidth: 25,
     excelWidth: 20,
   },
- 
+
   {
     header: "Balance",
     key: "balance",
@@ -65,8 +65,12 @@ const columnsConfig = [
     excelWidth: 0,
   },
 ];
+function useQueryParams() {
+  const { search } = useLocation();
+  return useMemo(() => new URLSearchParams(search), [search]);
+}
 
-export default function AmericanNil() {
+export default function TotalCustomers() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -74,6 +78,14 @@ export default function AmericanNil() {
     key: null,
     direction: "ascending",
   });
+
+  const query = useQueryParams();
+
+  const minParam = query.get("min") || "0";
+  const maxParam = query.get("max") || "99999999";
+  const labelParam = query.get("label") || "";
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     isSidebarVisible,
@@ -85,31 +97,48 @@ export default function AmericanNil() {
   } = useTheme();
 
   // ----------- FETCH API (same as pehle) -----------
-   // === API CALL =====
+  // === API CALL =====
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-
-        const form = new FormData();
-        form.append("code", "AMRELEC");
-
-        const res = await axios.post(
-          "https://crystalsolutions.com.pk/api/NilCustomers.php",
-          form,
-          { timeout: 20000 }
-        );
-
-        const arr = res?.data?.Detail ?? [];
-        setRows(arr);
-      } catch (err) {
-        console.error("NilFetchError:", err);
-        setRows([]);
-      }
-      setIsLoading(false);
-    };
     fetchData();
-  }, []);
+  }, [minParam, maxParam]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const form = new FormData();
+      form.append("code", "AMRELEC");
+      form.append("FIntAmt", "-99999999");
+      form.append("FFnlAmt", "99999999");
+
+      const res = await axios.post(
+        "https://crystalsolutions.com.pk/api/CustomerBalance.php",
+        form
+      );
+
+      let dataRows = [];
+
+      if (Array.isArray(res.data.Detail)) {
+        dataRows = res.data.Detail;
+      } else if (Array.isArray(res.data)) {
+        dataRows = res.data;
+      }
+
+      const mapped = dataRows.map((row) => ({
+        ...row,
+      }));
+
+      setRows(mapped);
+      setErrorMessage("");
+    } catch (err) {
+      console.error("API error:", err);
+      setErrorMessage("Unable to retrieve data. Please try again.");
+      setRows([]);
+    }
+
+    setIsLoading(false);
+  };
 
   const exportPDFHandler = () => {
     const doc = new jsPDF({ orientation: "portrait" });
@@ -353,50 +382,49 @@ export default function AmericanNil() {
     }
   };
 
-    const getSortIcon = (key) => {
-      // Selected column
-      if (sortConfig.key === key) {
-        return sortConfig.direction === "ascending" ? (
-          <FaSortUp
-            style={{
-              marginLeft: "5px",
-              color: "#e74c3c",
-              transition: "0.3s",
-            }}
-          />
-        ) : (
-          <FaSortDown
-            style={{
-              marginLeft: "5px",
-              color: "#e74c3c",
-              transition: "0.3s",
-            }}
-          />
-        );
-      }
-  
-      // Default (unselected)
-      return (
+  const getSortIcon = (key) => {
+    // Selected column
+    if (sortConfig.key === key) {
+      return sortConfig.direction === "ascending" ? (
+        <FaSortUp
+          style={{
+            marginLeft: "5px",
+            color: "#e74c3c",
+            transition: "0.3s",
+          }}
+        />
+      ) : (
         <FaSortDown
           style={{
             marginLeft: "5px",
-            color: "white",
-            opacity: 0.4,
+            color: "#e74c3c",
+            transition: "0.3s",
           }}
         />
       );
-    };
-  
-  
-    const requestSort = (key) => {
-      let direction = "ascending";
-  
-      if (sortConfig.key === key && sortConfig.direction === "ascending") {
-        direction = "descending";
-      }
-  
-      setSortConfig({ key, direction });
-    };
+    }
+
+    // Default (unselected)
+    return (
+      <FaSortDown
+        style={{
+          marginLeft: "5px",
+          color: "white",
+          opacity: 0.4,
+        }}
+      />
+    );
+  };
+
+  const requestSort = (key) => {
+    let direction = "ascending";
+
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+
+    setSortConfig({ key, direction });
+  };
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
