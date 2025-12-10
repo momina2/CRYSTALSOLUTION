@@ -1,3 +1,435 @@
+// import React, { useState, useRef, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import "../Loginn/Login.css";
+// // import Crystal from "../../../image/logowithname.jpeg";
+// import axios from "axios";
+// import Alert from "@mui/material/Alert";
+// import { useTheme } from "../../../ThemeContext";
+// import Key from "../../../image/keys.png";
+// import { Link } from "react-router-dom";
+// // import Crystall from "../../../image/logowithname.jpeg";
+// import logocrystal from "../../../image/cs-logo.png";
+// import { ToastContainer, toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import { useSelector, useDispatch } from "react-redux";
+// // import UserPaymentOptionsModel from "../../Transaction/UserPaymentOptions/UserPaymentOptionsModel";
+// import {
+//   fetchGetActiveUserLocation,
+//   fetchGetActiveUserYear,
+// } from "../../Redux/action";
+// import { getFcmToken } from "../../../firebase";
+
+// function Loginn() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+//   const [alertData, setAlertData] = useState(null);
+//   const { primaryColor, secondaryColor, apiLinks } = useTheme();
+//   const {
+//     getLocationNumber,
+//     getyeardescription,
+//     getnavbarfontcolor,
+//     getnavbarbackgroundcolor,
+//     getnowdate,
+//     getnowtime,
+//     getheaderfontsize,
+//     getdatafontsize,
+//     getfontstyle,
+//     setFromDate,
+//     setToDate,
+//     setLocationNumber,
+//     setposid,
+//     setpostoken,
+//     setnowdate,
+//     setYearDescription,
+//   } = useTheme();
+//   const userid = useRef();
+//   const password = useRef();
+//   const Code = useRef();
+
+//   const [isSignUp, setIsSignUp] = useState(false);
+
+//   useEffect(() => {
+//     if (userid.current) {
+//       userid.current.focus();
+//     }
+
+//     // Fetch IP Address
+//     axios
+//       .get("https://api.ipify.org?format=json")
+//       .then((response) => {
+//         console.log("User IP Address:", response.data.ip);
+//       })
+//       .catch((error) => {
+//         console.error("Error fetching IP address:", error);
+//       });
+//   }, []);
+
+//   const {
+//     data: locationdata,
+//     loading: locationloading,
+//     error: locationerror,
+//   } = useSelector((state) => state.getactiveuserlocation);
+
+//   const {
+//     data: yeardata,
+//     loading: yearloading,
+//     error: yearerror,
+//   } = useSelector((state) => state.getactiveuseryear);
+//   const today = new Date();
+//   const day = String(today.getDate()).padStart(2, "0");
+//   const month = String(today.getMonth() + 1).padStart(2, "0");
+//   const year = today.getFullYear();
+//   const formattedDate = `${day}-${month}-${year}`;
+
+//   async function UserLogin(e) {
+//     e.preventDefault();
+//     console.log("Login function started");
+
+//     // Get form values
+//     const userIdValue = userid.current.value;
+//     const passwordValue = password.current.value;
+//     const codeValue = Code.current.value;
+
+//     // Validate inputs
+//     if (!userIdValue || !passwordValue || !codeValue) {
+//       toast.dismiss();
+//       toast.error("Please fill in all required fields", {
+//         autoClose: 3000,
+//       });
+//       return;
+//     }
+
+//     // 🔹 FCM Token ko await karein
+//     let fcmToken = await getFcmToken();
+//     console.log("✅ FCM Token received:", fcmToken);
+
+//     // Login data
+//     const data = {
+//       userid: userIdValue,
+//       password: passwordValue,
+//       code: codeValue,
+//       FToken: fcmToken || "", // agar token null ho to empty bhej do
+//     };
+
+//     const formData = new URLSearchParams(data).toString();
+
+//     try {
+//       // Show loading toast
+//       toast.info("Logging in, please wait...", {
+//         autoClose: false,
+//         toastId: "login-process",
+//       });
+
+//       const response = await axios.post(`${apiLinks}/login.php`, formData, {
+//         headers: {
+//           "Content-Type": "application/x-www-form-urlencoded",
+//         },
+//       });
+
+//       console.log("Login response:", response);
+//       toast.dismiss("login-process");
+
+//       const { error, message, user, organisation } = response.data;
+
+//       // ✅ Login response check
+//       if (error === 200) {
+//         if (user.tusrsts === "A") {
+//           // ✅ Active account
+
+//           if (organisation.code !== "CRYSTAL") {
+//             try {
+//               // Fetch location and year data
+//               await dispatch(
+//                 fetchGetActiveUserLocation(user?.tusrid, organisation.code)
+//               );
+//               await dispatch(
+//                 fetchGetActiveUserYear(user?.tusrid, organisation.code)
+//               );
+
+//               // Check if yeardata and locationdata are available
+//               if (!yeardata[0] || !locationdata[0]) {
+//                 // toast.error(
+//                 //   `Invalid parameter please contact the administrator.`,
+//                 //   { autoClose: 3000 }
+//                 // );
+//                 return;
+//               }
+
+//               // ✅ Save to state + localStorage
+//               setFromDate(yeardata[0].tstrdat);
+//               setToDate(yeardata[0].tenddat);
+//               setYearDescription(yeardata[0].tyerdsc);
+//               setLocationNumber(locationdata[0].tloccod);
+//               setposid(locationdata[0].tposid);
+//               setpostoken(locationdata[0].tpostkn);
+
+//               localStorage.setItem("isLoggedIn", "true");
+//               localStorage.setItem("user", JSON.stringify(user));
+//               localStorage.setItem(
+//                 "organisation",
+//                 JSON.stringify(organisation)
+//               );
+//               localStorage.setItem(
+//                 "locationnumber",
+//                 JSON.stringify(locationdata[0].tloccod)
+//               );
+//               localStorage.setItem(
+//                 "yeardescription",
+//                 JSON.stringify(yeardata[0].tyerdsc)
+//               );
+//               localStorage.setItem(
+//                 "globalposid",
+//                 JSON.stringify(locationdata[0].tposid)
+//               );
+//               localStorage.setItem(
+//                 "globallivedata",
+//                 JSON.stringify(locationdata[0].tposliv)
+//               );
+//               localStorage.setItem(
+//                 "globalStockCheck",
+//                 JSON.stringify(locationdata[0].tstkchk)
+//               );
+//               localStorage.setItem(
+//                 "globalMRPCheck",
+//                 JSON.stringify(locationdata[0].tmrpchk)
+//               );
+//               localStorage.setItem(
+//                 "globalpostoken",
+//                 JSON.stringify(yeardata[0].tpostkn)
+//               );
+//               localStorage.setItem(
+//                 "globalntn",
+//                 JSON.stringify(locationdata[0].tntnnum || "")
+//               );
+//               localStorage.setItem(
+//                 "globalstn",
+//                 JSON.stringify(yeardata[0].tstnnum || "")
+//               );
+//               localStorage.setItem(
+//                 "globalfbrtoken",
+//                 JSON.stringify(locationdata[0].tpostkn || "")
+//               );
+
+//               toast.success(`${message}`, { autoClose: 3000 });
+
+//               // Navigate to MainPage
+//               setTimeout(() => {
+//                 navigate("/MainPage");
+//               }, 2000);
+//             } catch (fetchError) {
+//               toast.error("Failed to fetch user data. Please try again.", {
+//                 autoClose: 3000,
+//               });
+//               console.error("Fetch error:", fetchError);
+//             }
+//           } else if (organisation.code === "CRYSTAL") {
+//             try {
+//               // Fetch location and year data
+//               await dispatch(
+//                 fetchGetActiveUserLocation(user?.tusrid, organisation.code)
+//               );
+//               await dispatch(
+//                 fetchGetActiveUserYear(user?.tusrid, organisation.code)
+//               );
+
+//               localStorage.setItem("isLoggedIn", "true");
+//               localStorage.setItem("user", JSON.stringify(user));
+//               localStorage.setItem(
+//                 "organisation",
+//                 JSON.stringify(organisation)
+//               );
+
+//               toast.success(`${message}`, { autoClose: 3000 });
+
+//               setTimeout(() => {
+//                 navigate("/MainPage");
+//               }, 2000);
+//             } catch (fetchError) {
+//               toast.error("Failed to fetch user data. Please try again.", {
+//                 autoClose: 3000,
+//               });
+//               console.error("Fetch error:", fetchError);
+//             }
+//           } else {
+//             toast.error(
+//               `You have no access to login to the ERP software. Please contact the ${codeValue} support team.`,
+//               { autoClose: 3000 }
+//             );
+//           }
+//         } else if (user.tusrsts === "C") {
+//           toast.error(
+//             `Your account has been cancelled. Please contact the ${codeValue} support team.`,
+//             { autoClose: 3000 }
+//           );
+//         } else if (user.tusrsts === "S") {
+//           toast.error(
+//             `Your account has been suspended. Please contact the ${codeValue} support team.`,
+//             { autoClose: 3000 }
+//           );
+//         } else {
+//           toast.error(
+//             `Unknown account status. Please contact the ${codeValue} support team.`,
+//             { autoClose: 3000 }
+//           );
+//         }
+//       } else {
+//         toast.error(`${message}`, { autoClose: 3000 });
+//       }
+//     } catch (error) {
+//       toast.dismiss("login-process");
+//       toast.error("An error occurred during login. Please try again.", {
+//         autoClose: 3000,
+//       });
+//       console.error("Login error:", error);
+//     }
+//   }
+
+//   useEffect(() => {
+//     if (userid.current) {
+//       userid.current.focus();
+//     }
+//   }, []);
+
+//   const Enter1 = useRef(null);
+//   const Enter2 = useRef(null);
+//   const Enter3 = useRef(null);
+
+//   const focusNextInput = (ref) => {
+//     if (ref.current) {
+//       ref.current.focus();
+//     }
+//   };
+
+//   const handleEnterKeyPress = (ref, e) => {
+//     if (e.key === "Enter") {
+//       e.preventDefault();
+//       focusNextInput(ref);
+//     }
+//   };
+
+//   const handleFocus = (codeparam) => {
+//     if (codeparam.current) {
+//       codeparam.current.style.backgroundColor = "orange";
+//     }
+//   };
+
+//   const handleBlur = (codeparam) => {
+//     if (codeparam.current) {
+//       codeparam.current.style.backgroundColor = "#3368B5";
+//     }
+//   };
+
+//   const toggleSignUp = () => {
+//     setIsSignUp(!isSignUp);
+//   };
+//   const [showPassword, setShowPassword] = useState(false);
+
+//   const togglePassword = () => {
+//     setShowPassword(!showPassword);
+//   };
+
+//   return (
+//     <>
+//       <ToastContainer />
+//       <div className="loginPageWrapper">
+//         {/* TOP LOGO */}
+//         <div className="topLogoArea">
+//           <img src={logocrystal} alt="Logo" className="logo" />
+//         </div>
+//         {/* MAIN SECTION LEFT + RIGHT */}
+//         <div className="mainSection">
+//           {/* LEFT TEXT */}
+//           <div className="leftInfo">
+//             <img
+//               src={logocrystal}
+//               alt="Crystal Solutions"
+//               className="innerLogo"
+//             />
+//             <h1>A Complete ERP System</h1>
+//             <p>
+//               Crystal Solutions ERP is Pakistan’s most reliable business
+//               software, designed for companies of all sizes. Our ERP helps you
+//               manage business operations, accounts, inventory, billing,
+//               customers, and reporting with complete accuracy and high
+//               performance.
+//             </p>
+
+//             {/* Module Cards */}
+//             <div className="cardsSectionOuter">
+//               <div className="cardsSection">
+//                 <div className="moduleCard">
+//                   <h3>Electronics Trading Module</h3>
+//                   <p>Best solution for complete trading business management.</p>
+//                 </div>
+//                 <div className="moduleCard">
+//                   <h3>Installment Module</h3>
+//                   <p>
+//                     Digital Installment management with reporting & tracking.
+//                   </p>
+//                 </div>
+//                 <div className="moduleCard">
+//                   <h3>Gym Module</h3>
+//                   <p>Gym member billing, attendance & package handling.</p>
+//                 </div>
+//                 <div className="moduleCard">
+//                   <h3>Restaurant Module</h3>
+//                   <p>
+//                     POS based Restaurant billing with table & delivery support.
+//                   </p>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* RIGHT LOGIN FORM */}
+//           <div className="rightForm">
+//             <form autoComplete="off">
+//               <h2>Login to Continue</h2>
+
+//               <input
+//                 type="text"
+//                 placeholder="User ID"
+//                 ref={userid}
+//                 className="inputField"
+//               />
+
+//               <div className="passwordContainer">
+//                 <input
+//                   type={showPassword ? "text" : "password"}
+//                   placeholder="Password"
+//                   ref={password}
+//                   className="inputField"
+//                 />
+//                 <span className="eyeBtn" onClick={togglePassword}>
+//                   {showPassword ? (
+//                     <i className="fa fa-eye"></i>
+//                   ) : (
+//                     <i className="fa fa-eye-slash"></i>
+//                   )}
+//                 </span>
+//               </div>
+
+//               <input
+//                 type="password"
+//                 placeholder="Code"
+//                 ref={Code}
+//                 className="inputField"
+//               />
+
+//               <button className="loginBtn text-white" onClick={UserLogin}>
+//                 Sign In
+//               </button>
+//             </form>
+//           </div>
+//         </div>
+//       </div>
+//     </>
+//   );
+// }
+
+// export default Loginn;
+
+
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Loginn/Login.css";
