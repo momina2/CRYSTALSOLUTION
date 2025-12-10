@@ -1367,7 +1367,9 @@ const AmericanDashboard = () => {
       try {
         setLoading(true);
 
-        // form-data bodies
+        // ======================================
+        // FORM DATA
+        // ======================================
         const adminFormData = new FormData();
         adminFormData.append("code", "AMRELEC");
 
@@ -1389,7 +1391,9 @@ const AmericanDashboard = () => {
         americanAggingFormData.append("code", "AMRELEC");
         americanAggingFormData.append("FRepDat", getAggingDateFormatted());
 
-        // API
+        // ======================================
+        // API CALLS (Parallel)
+        // ======================================
         const [
           adminResponse,
           monthlyResponse,
@@ -1404,13 +1408,19 @@ const AmericanDashboard = () => {
           axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
         ]);
 
-        // ---- Admin Data ----
+        // ======================================
+        // 1) ADMIN DATA
+        // ======================================
         setAdminData(adminResponse?.data || {});
 
-        // ---- Monthly Data ----
+        // ======================================
+        // 2) MONTHLY DATA
+        // ======================================
         setMonthlyData(monthlyResponse?.data || []);
 
-        // ---- Daily Data ----
+        // ======================================
+        // 3) DAILY DATA
+        // ======================================
         let dailyResponseData = null;
         if (
           Array.isArray(dailyResponse?.data) &&
@@ -1422,7 +1432,9 @@ const AmericanDashboard = () => {
         }
         setDailyData(dailyResponseData || {});
 
-        // ---- Daily Web Data ----
+        // ======================================
+        // 4) DAILY WEB DATA
+        // ======================================
         let dailyWebResponseData = null;
         if (
           Array.isArray(dailyWebResponse?.data) &&
@@ -1434,19 +1446,31 @@ const AmericanDashboard = () => {
         }
         setDailyWebData(dailyWebResponseData || {});
 
-        // ---- Aged Outstanding / Agging ----
-        let aggingResponseData = null;
-        if (
-          Array.isArray(dailyAggingResponse?.data) &&
-          dailyAggingResponse.data.length > 0
-        ) {
-          aggingResponseData = dailyAggingResponse.data[0];
-        } else {
-          aggingResponseData = dailyAggingResponse?.data;
-        }
-        setAggingData(aggingResponseData || {});
+        // ======================================
+        // 5) AGGING DATA (MOST IMPORTANT)
+        // ======================================
+        const aggingRaw = dailyAggingResponse?.data || {};
+
+        const formattedAggingData = {
+          Amt001: aggingRaw?.Amt001 || "0",
+          Amt002: aggingRaw?.Amt002 || "0",
+          Amt003: aggingRaw?.Amt003 || "0",
+          Amt004: aggingRaw?.Amt004 || "0",
+          Amt005: aggingRaw?.Amt005 || "0",
+          Amt006: aggingRaw?.Amt006 || "0",
+          Total: aggingRaw?.Total || "0",
+
+          Nos001: aggingRaw?.Nos001 || "0",
+          Nos002: aggingRaw?.Nos002 || "0",
+          Nos003: aggingRaw?.Nos003 || "0",
+          Nos004: aggingRaw?.Nos004 || "0",
+          Nos005: aggingRaw?.Nos005 || "0",
+          Nos006: aggingRaw?.Nos006 || "0",
+        };
+
+        setAggingData(formattedAggingData);
       } catch (err) {
-        console.error("API Error:", err);
+        console.error("🔥 API Error:", err);
       } finally {
         setLoading(false);
       }
