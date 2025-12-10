@@ -172,7 +172,7 @@ import AmericanOutstanding from "./Component/AmericanDashboard/reports/AmericanO
 import CustomerBalance from "./Component/AmericanDashboard/reports/CustomerBalance.jsx";
 import AmericanNonActive from "./Component/AmericanDashboard/reports/AmericanNonActive.jsx";
 import TotalCustomers from "./Component/AmericanDashboard/reports/AmericanTotalCustomers.jsx";
-// import "../../../Utils/helpers.js";
+import AmericanCustomerLedger from "./Component/AmericanDashboard/reports/AmericanCustomerLedger.jsx";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -384,6 +384,12 @@ function App() {
                   exact
                   path="/TotalCustomers"
                   element={<TotalCustomers />}
+                ></Route>
+
+                <Route
+                  exact
+                  path="/AmericanCustomerLedger"
+                  element={<AmericanCustomerLedger />}
                 ></Route>
 
                 {/* /////////////////////////////////////////////////////////////////////////////
@@ -693,16 +699,16 @@ function App() {
                   element={<DailyStatusReport />}
                 />
                 <Route exact path="/SaleReport" element={<DailySaleReport />} />
-                {/* <Route
-                  exact
-                  path="/MemberCollectionReport"
-                  element={<MemberCollectionReport />}
-                /> */}
                 <Route
                   exact
                   path="/MemberCollectionReport"
-                  element={<AmericanDashbaord />}
+                  element={<MemberCollectionReport />}
                 />
+                {/* <Route
+                  exact
+                  path="/MemberCollectionReport"
+                  element={<AmericanDashbaord />}
+                /> */}
                 <Route
                   exact
                   path="/MemberCollectionSummary"

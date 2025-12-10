@@ -577,7 +577,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
               )
             }
           >
-            {formatValue("Non Active Amount")}
+            N/A
           </p>
         </div>
 
@@ -622,7 +622,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
               )
             }
           >
-            {formatValue("Nil Amount")}
+            N/A
           </p>
         </div>
 
@@ -1295,11 +1295,79 @@ const AmericanDashboard = () => {
     });
   };
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       setLoading(true);
+
+  //       const adminFormData = new FormData();
+  //       adminFormData.append("code", "AMRELEC");
+
+  //       const monthlyFormData = new FormData();
+  //       monthlyFormData.append("code", "AMRELEC");
+  //       monthlyFormData.append("FRepYer", "2025");
+
+  //       const dailyFormData = new FormData();
+  //       dailyFormData.append("code", "AMRELEC");
+  //       dailyFormData.append("FRepDat", currentDate);
+  //       dailyFormData.append("FLocCod", "001");
+
+  //       const dailyWebFormData = new FormData();
+  //       dailyWebFormData.append("code", "AMRELEC");
+  //       dailyWebFormData.append("FRepDat", currentDate);
+  //       dailyWebFormData.append("FLocCod", "001");
+
+  //       const americanAggingFormData = new FormData();
+  //       americanAggingFormData.append("code", "AMRELEC");
+  //       americanAggingFormData.append("FRepDat", getAggingDateFormatted());
+
+  //       const [
+  //         adminResponse,
+  //         monthlyResponse,
+  //         dailyResponse,
+  //         dailyWebResponse,
+  //         dailyAggingResponse,
+  //       ] = await Promise.all([
+  //         axios.post(ADMIN_INFO_API_URL, adminFormData),
+  //         axios.post(MONTHLY_COMPARISON_API_URL, monthlyFormData),
+  //         axios.post(DASHBOARD_DAILY, dailyFormData),
+  //         axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData),
+  //         axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
+  //       ]);
+
+  //       setAdminData(adminResponse.data);
+  //       setMonthlyData(monthlyResponse.data);
+
+  //       const dailyResponseData = Array.isArray(dailyResponse.data)
+  //         ? dailyResponse.data[0]
+  //         : dailyResponse.data;
+  //       setDailyData(dailyResponseData);
+
+  //       const dailyWebResponseData = Array.isArray(dailyWebResponse.data)
+  //         ? dailyWebResponse.data[0]
+  //         : dailyWebResponse.data;
+  //       setDailyWebData(dailyWebResponseData);
+
+  //       const aggingResponseData = Array.isArray(dailyAggingResponse.data)
+  //         ? dailyAggingResponse.data[0]
+  //         : dailyAggingResponse.data;
+  //       setAggingData(aggingResponseData);
+  //     } catch (err) {
+  //       console.error("API Error:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
+        // form-data bodies
         const adminFormData = new FormData();
         adminFormData.append("code", "AMRELEC");
 
@@ -1321,6 +1389,7 @@ const AmericanDashboard = () => {
         americanAggingFormData.append("code", "AMRELEC");
         americanAggingFormData.append("FRepDat", getAggingDateFormatted());
 
+        // API
         const [
           adminResponse,
           monthlyResponse,
@@ -1335,23 +1404,47 @@ const AmericanDashboard = () => {
           axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
         ]);
 
-        setAdminData(adminResponse.data);
-        setMonthlyData(monthlyResponse.data);
+        // ---- Admin Data ----
+        setAdminData(adminResponse?.data || {});
 
-        const dailyResponseData = Array.isArray(dailyResponse.data)
-          ? dailyResponse.data[0]
-          : dailyResponse.data;
-        setDailyData(dailyResponseData);
+        // ---- Monthly Data ----
+        setMonthlyData(monthlyResponse?.data || []);
 
-        const dailyWebResponseData = Array.isArray(dailyWebResponse.data)
-          ? dailyWebResponse.data[0]
-          : dailyWebResponse.data;
-        setDailyWebData(dailyWebResponseData);
+        // ---- Daily Data ----
+        let dailyResponseData = null;
+        if (
+          Array.isArray(dailyResponse?.data) &&
+          dailyResponse.data.length > 0
+        ) {
+          dailyResponseData = dailyResponse.data[0];
+        } else {
+          dailyResponseData = dailyResponse?.data;
+        }
+        setDailyData(dailyResponseData || {});
 
-        const aggingResponseData = Array.isArray(dailyAggingResponse.data)
-          ? dailyAggingResponse.data[0]
-          : dailyAggingResponse.data;
-        setAggingData(aggingResponseData);
+        // ---- Daily Web Data ----
+        let dailyWebResponseData = null;
+        if (
+          Array.isArray(dailyWebResponse?.data) &&
+          dailyWebResponse.data.length > 0
+        ) {
+          dailyWebResponseData = dailyWebResponse.data[0];
+        } else {
+          dailyWebResponseData = dailyWebResponse?.data;
+        }
+        setDailyWebData(dailyWebResponseData || {});
+
+        // ---- Aged Outstanding / Agging ----
+        let aggingResponseData = null;
+        if (
+          Array.isArray(dailyAggingResponse?.data) &&
+          dailyAggingResponse.data.length > 0
+        ) {
+          aggingResponseData = dailyAggingResponse.data[0];
+        } else {
+          aggingResponseData = dailyAggingResponse?.data;
+        }
+        setAggingData(aggingResponseData || {});
       } catch (err) {
         console.error("API Error:", err);
       } finally {
