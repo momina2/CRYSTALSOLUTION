@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
   LineElement,
-  PointElement,
+  PointElement,LineController, 
 } from "chart.js";
 
 // Register Chart.js components
@@ -26,7 +26,8 @@ ChartJS.register(
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  LineController      
 );
 
 // API URLs
@@ -577,7 +578,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
               )
             }
           >
-            N/A
+            {formatValue("Non Active Amount")}
           </p>
         </div>
 
@@ -622,7 +623,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
               )
             }
           >
-            N/A
+            {formatValue("Nil Amount")}
           </p>
         </div>
 
@@ -1273,7 +1274,7 @@ const CustomerDistributionChart = ({ mainData }) => {
 // ----------------------
 // DASHBOARD MAIN COMPONENT
 // ----------------------
-const AmericanDashboard = () => {
+const ElectronicsDashboard = () => {
   const [adminData, setAdminData] = useState(null);
   const [monthlyData, setMonthlyData] = useState(null);
   const [dailyData, setDailyData] = useState(null);
@@ -1295,189 +1296,102 @@ const AmericanDashboard = () => {
     });
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       setLoading(true);
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const adminFormData = new FormData();
+      adminFormData.append("code", "AMRELEC");
 
-  //       const adminFormData = new FormData();
-  //       adminFormData.append("code", "AMRELEC");
+      const monthlyFormData = new FormData();
+      monthlyFormData.append("code", "AMRELEC");
+      monthlyFormData.append("FRepYer", "2025");
 
-  //       const monthlyFormData = new FormData();
-  //       monthlyFormData.append("code", "AMRELEC");
-  //       monthlyFormData.append("FRepYer", "2025");
+      const dailyFormData = new FormData();
+      dailyFormData.append("code", "AMRELEC");
+      dailyFormData.append("FRepDat", currentDate);
+      dailyFormData.append("FLocCod", "001");
 
-  //       const dailyFormData = new FormData();
-  //       dailyFormData.append("code", "AMRELEC");
-  //       dailyFormData.append("FRepDat", currentDate);
-  //       dailyFormData.append("FLocCod", "001");
+      const dailyWebFormData = new FormData();
+      dailyWebFormData.append("code", "AMRELEC");
+      dailyWebFormData.append("FRepDat", currentDate);
+      dailyWebFormData.append("FLocCod", "001");
 
-  //       const dailyWebFormData = new FormData();
-  //       dailyWebFormData.append("code", "AMRELEC");
-  //       dailyWebFormData.append("FRepDat", currentDate);
-  //       dailyWebFormData.append("FLocCod", "001");
+      const americanAggingFormData = new FormData();
+      americanAggingFormData.append("code", "AMRELEC");
+      americanAggingFormData.append("FRepDat", getAggingDateFormatted());
+      const [
+        adminResponse,
+        monthlyResponse,
+        dailyResponse,
+        dailyWebResponse,
+        dailyAggingResponse,
+      ] = await Promise.all([
+        axios.post(ADMIN_INFO_API_URL, adminFormData),
+        axios.post(MONTHLY_COMPARISON_API_URL, monthlyFormData),
+        axios.post(DASHBOARD_DAILY, dailyFormData),
+        axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData),
+        axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
+      ]);
 
-  //       const americanAggingFormData = new FormData();
-  //       americanAggingFormData.append("code", "AMRELEC");
-  //       americanAggingFormData.append("FRepDat", getAggingDateFormatted());
-
-  //       const [
-  //         adminResponse,
-  //         monthlyResponse,
-  //         dailyResponse,
-  //         dailyWebResponse,
-  //         dailyAggingResponse,
-  //       ] = await Promise.all([
-  //         axios.post(ADMIN_INFO_API_URL, adminFormData),
-  //         axios.post(MONTHLY_COMPARISON_API_URL, monthlyFormData),
-  //         axios.post(DASHBOARD_DAILY, dailyFormData),
-  //         axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData),
-  //         axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
-  //       ]);
-
-  //       setAdminData(adminResponse.data);
-  //       setMonthlyData(monthlyResponse.data);
-
-  //       const dailyResponseData = Array.isArray(dailyResponse.data)
-  //         ? dailyResponse.data[0]
-  //         : dailyResponse.data;
-  //       setDailyData(dailyResponseData);
-
-  //       const dailyWebResponseData = Array.isArray(dailyWebResponse.data)
-  //         ? dailyWebResponse.data[0]
-  //         : dailyWebResponse.data;
-  //       setDailyWebData(dailyWebResponseData);
-
-  //       const aggingResponseData = Array.isArray(dailyAggingResponse.data)
-  //         ? dailyAggingResponse.data[0]
-  //         : dailyAggingResponse.data;
-  //       setAggingData(aggingResponseData);
-  //     } catch (err) {
-  //       console.error("API Error:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        // ======================================
-        // FORM DATA
-        // ======================================
-        const adminFormData = new FormData();
-        adminFormData.append("code", "AMRELEC");
-
-        const monthlyFormData = new FormData();
-        monthlyFormData.append("code", "AMRELEC");
-        monthlyFormData.append("FRepYer", "2025");
-
-        const dailyFormData = new FormData();
-        dailyFormData.append("code", "AMRELEC");
-        dailyFormData.append("FRepDat", currentDate);
-        dailyFormData.append("FLocCod", "001");
-
-        const dailyWebFormData = new FormData();
-        dailyWebFormData.append("code", "AMRELEC");
-        dailyWebFormData.append("FRepDat", currentDate);
-        dailyWebFormData.append("FLocCod", "001");
-
-        const americanAggingFormData = new FormData();
-        americanAggingFormData.append("code", "AMRELEC");
-        americanAggingFormData.append("FRepDat", getAggingDateFormatted());
-
-        // ======================================
-        // API CALLS (Parallel)
-        // ======================================
-        const [
-          adminResponse,
-          monthlyResponse,
-          dailyResponse,
-          dailyWebResponse,
-          dailyAggingResponse,
-        ] = await Promise.all([
-          axios.post(ADMIN_INFO_API_URL, adminFormData),
-          axios.post(MONTHLY_COMPARISON_API_URL, monthlyFormData),
-          axios.post(DASHBOARD_DAILY, dailyFormData),
-          axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData),
-          axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
-        ]);
-
-        // ======================================
-        // 1) ADMIN DATA
-        // ======================================
-        setAdminData(adminResponse?.data || {});
-
-        // ======================================
-        // 2) MONTHLY DATA
-        // ======================================
-        setMonthlyData(monthlyResponse?.data || []);
-
-        // ======================================
-        // 3) DAILY DATA
-        // ======================================
-        let dailyResponseData = null;
-        if (
-          Array.isArray(dailyResponse?.data) &&
-          dailyResponse.data.length > 0
-        ) {
-          dailyResponseData = dailyResponse.data[0];
-        } else {
-          dailyResponseData = dailyResponse?.data;
-        }
-        setDailyData(dailyResponseData || {});
-
-        // ======================================
-        // 4) DAILY WEB DATA
-        // ======================================
-        let dailyWebResponseData = null;
-        if (
-          Array.isArray(dailyWebResponse?.data) &&
-          dailyWebResponse.data.length > 0
-        ) {
-          dailyWebResponseData = dailyWebResponse.data[0];
-        } else {
-          dailyWebResponseData = dailyWebResponse?.data;
-        }
-        setDailyWebData(dailyWebResponseData || {});
-
-        // ======================================
-        // 5) AGGING DATA (MOST IMPORTANT)
-        // ======================================
-        const aggingRaw = dailyAggingResponse?.data || {};
-
-        const formattedAggingData = {
-          Amt001: aggingRaw?.Amt001 || "0",
-          Amt002: aggingRaw?.Amt002 || "0",
-          Amt003: aggingRaw?.Amt003 || "0",
-          Amt004: aggingRaw?.Amt004 || "0",
-          Amt005: aggingRaw?.Amt005 || "0",
-          Amt006: aggingRaw?.Amt006 || "0",
-          Total: aggingRaw?.Total || "0",
-
-          Nos001: aggingRaw?.Nos001 || "0",
-          Nos002: aggingRaw?.Nos002 || "0",
-          Nos003: aggingRaw?.Nos003 || "0",
-          Nos004: aggingRaw?.Nos004 || "0",
-          Nos005: aggingRaw?.Nos005 || "0",
-          Nos006: aggingRaw?.Nos006 || "0",
-        };
-
-        setAggingData(formattedAggingData);
-      } catch (err) {
-        console.error("🔥 API Error:", err);
-      } finally {
-        setLoading(false);
+      let admin = adminResponse.data;
+      if (Array.isArray(admin)) {
+        admin = admin.length ? admin[0] : {};
       }
-    };
+      if (typeof admin !== "object") admin = {};
+      setAdminData(admin);
 
-    fetchData();
-  }, []);
+      let monthly = monthlyResponse.data;
+      if (!monthly || typeof monthly !== "object") monthly = {};
+      setMonthlyData(monthly);
+
+      let daily = dailyResponse.data;
+      if (Array.isArray(daily)) {
+        daily = daily.length ? daily[0] : {};
+      }
+      if (!daily || typeof daily !== "object") daily = {};
+      setDailyData(daily);
+      let web = dailyWebResponse.data;
+      if (Array.isArray(web)) {
+        web = web.length ? web[0] : {};
+      }
+      if (!web || typeof web !== "object") web = {};
+      web = {
+        SalesMan: web.SalesMan || "0",
+        Stores: web.Stores || web.City || "0",
+        Region: web.Region || "0",
+        Managers: web.Managers || "0",
+        ...web,
+      };
+
+      setDailyWebData(web);
+      let agging = dailyAggingResponse.data;
+
+      if (agging && agging.Detail) {
+        agging = agging;
+      } else if (Array.isArray(agging)) {
+        agging = agging.length ? agging[0] : {};
+      } else {
+        agging = {};
+      }
+
+      setAggingData(agging);
+
+    } catch (err) {
+      console.error("API Error:", err);
+      setAdminData({});
+      setMonthlyData({});
+      setDailyData({});
+      setDailyWebData({});
+      setAggingData({});
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   if (loading)
     return (
@@ -1535,7 +1449,7 @@ const AmericanDashboard = () => {
   const collectionData = parseData(monthlyData, "C");
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper" style={{marginTop:"-10vh"}}>
       <div className="american-dashboard">
         <div
           className="dashboard-zoom"
@@ -1815,4 +1729,4 @@ const AmericanDashboard = () => {
   );
 };
 
-export default AmericanDashboard;
+export default ElectronicsDashboard;

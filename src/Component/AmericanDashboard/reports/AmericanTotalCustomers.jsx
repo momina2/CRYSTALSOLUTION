@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useTheme } from "../../../ThemeContext";
 import NavComponent from "../../MainComponent/Navform/navbarform";
@@ -10,6 +11,7 @@ import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
+import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Total Customers";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
@@ -57,6 +59,22 @@ const columnsConfig = [
     excelWidth: 18,
   },
   {
+    header: "Ledger",
+    key: "ledgerBtn",
+    alignment: "center",
+    uiWidth: 100,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
+    header: "P.R",
+    key: "progressBtn",
+    alignment: "center",
+    uiWidth: 100,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
     header: "",
     key: "scrollSpacer",
     alignment: "center",
@@ -71,6 +89,7 @@ function useQueryParams() {
 }
 
 export default function TotalCustomers() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -96,7 +115,6 @@ export default function TotalCustomers() {
     getdatafontsize,
   } = useTheme();
 
-  // ----------- FETCH API (same as pehle) -----------
   // === API CALL =====
   useEffect(() => {
     fetchData();
@@ -161,7 +179,9 @@ export default function TotalCustomers() {
     }
 
     // --------- TABLE HEADER ---------
-    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    const pdfColumns = columnsConfig.filter(
+      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn"
+    );
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
@@ -464,38 +484,20 @@ export default function TotalCustomers() {
   }, [rows, searchQuery, sortConfig]);
 
   const filteredData = useMemo(() => {
-    let data = rows;
+    if (!searchQuery) return sortedTableData;
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      data = data.filter((row) => {
-        return (
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
-        );
-      });
-    }
+    const search = searchQuery.toLowerCase();
 
-    if (sortConfig.key) {
-      data = [...data].sort((a, b) => {
-        const valueA = a[sortConfig.key] ?? "";
-        const valueB = b[sortConfig.key] ?? "";
-
-        if (!isNaN(valueA) && !isNaN(valueB)) {
-          return sortConfig.direction === "asc"
-            ? Number(valueA) - Number(valueB)
-            : Number(valueB) - Number(valueA);
-        }
-
-        return sortConfig.direction === "asc"
-          ? String(valueA).localeCompare(String(valueB))
-          : String(valueB).localeCompare(String(valueA));
-      });
-    }
-
-    return data;
-  }, [rows, searchQuery, sortConfig]);
+    return sortedTableData.filter((row) => {
+      // Convert full row to one searchable string
+      return Object.values(row)
+        .map((v) =>
+          v !== null && v !== undefined ? String(v).toLowerCase() : ""
+        )
+        .join(" ")
+        .includes(search);
+    });
+  }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
@@ -680,97 +682,79 @@ export default function TotalCustomers() {
               }}
             >
               <tbody>
-                {isLoading ? (
-                  <>
-                    <tr
-                      style={{
-                        backgroundColor: getcolor,
-                        color: fontcolor,
-                      }}
-                    >
+                {filteredData.map((item, i) => (
+                  <tr
+                    key={i}
+                    style={{
+                      color: fontcolor,
+                      backgroundColor: i % 2 === 0 ? getcolor : "#f8f9ff",
+                    }}
+                  >
+                    {columnsConfig.map((column, index) => (
                       <td
-                        colSpan={columnsConfig.length}
-                        className="text-center"
-                        style={{ padding: "10px" }}
-                      >
-                        Fetching data...
-                      </td>
-                    </tr>
-                    {Array.from({ length: 20 }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-loading-${rowIndex}`}
+                        key={index}
+                        className={getAlignmentClass(column.alignment)}
                         style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
+                          width: column.uiWidth,
+                          padding: "8px 6px",
+                          borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                         }}
                       >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-loading-${rowIndex}-${colIndex}`}>
-                            &nbsp;
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {sortedTableData.map((item, i) => (
-                      <tr
-                        key={i}
-                        style={{
-                          color: fontcolor,
-                          backgroundColor: i % 2 === 0 ? getcolor : "#f8f9ff",
-                          transition: "background-color 0.2s ease",
-                        }}
-                      >
-                        {columnsConfig.map((column, index) => (
-                          <td
-                            key={index}
-                            className={getAlignmentClass(column.alignment)}
+                        {column.key === "scrollSpacer" ? (
+                          ""
+                        ) : column.key === "balance" ? (
+                          Number(item[column.key] || 0).toLocaleString()
+                        ) : column.key === "progressBtn" ? (
+                          <div
                             style={{
-                              width: column.uiWidth,
-                              padding: "8px 6px",
-                              borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                              display: "flex",
+                              justifyContent: "center",
                             }}
                           >
-                            {column.key === "scrollSpacer"
-                              ? "" // ➤ empty column
-                              : column.key === "balance"
-                              ? Number(item[column.key] || 0).toLocaleString()
-                              : item[column.key]}
-                          </td>
-                        ))}
-                      </tr>
+                            <FaClipboardList
+                              size={20}
+                              style={{ cursor: "pointer", color: "#17a2b8" }}
+                              onClick={() =>
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanProgressReport?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                )
+                              }
+                            />
+                          </div>
+                        ) : column.key === "ledgerBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaFileInvoiceDollar
+                              size={20}
+                              style={{ cursor: "pointer", color: "#28a745" }}
+                              onClick={() =>
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanCustomerLedger?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                )
+                              }
+                            />
+                          </div>
+                        ) : (
+                          item[column.key]
+                        )}
+                      </td>
                     ))}
-
-                    {/* Blank rows to keep table height nice */}
-                    {Array.from({
-                      length: Math.max(0, 27 - sortedTableData.length),
-                    }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-${rowIndex}`}
-                        style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
-                        }}
-                      >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                        ))}
-                      </tr>
-                    ))}
-
-                    {/* Dummy row to keep widths */}
-                    <tr>
-                      {columnsConfig.map((column, index) => (
-                        <td
-                          key={`dummy-bottom-${index}`}
-                          style={{ width: column.uiWidth }}
-                        ></td>
-                      ))}
-                    </tr>
-                  </>
-                )}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -786,7 +770,7 @@ export default function TotalCustomers() {
             }}
           >
             {columnsConfig.map((column, index) => {
-              const isTotalColumn = index === columnsConfig.length - 2; // ⭐ BALANCE is now 2nd last
+              const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
                 isTotalColumn ? "right" : "left"
@@ -827,7 +811,6 @@ export default function TotalCustomers() {
             })}
           </div>
 
-          {/* ACTION BUTTONS – Only PDF & Excel */}
           <div
             style={{
               margin: "5px",

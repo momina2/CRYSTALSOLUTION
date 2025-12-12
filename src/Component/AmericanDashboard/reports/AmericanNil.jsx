@@ -31,14 +31,6 @@ const columnsConfig = [
     pdfWidth: 80,
     excelWidth: 40,
   },
-  //  {
-  //   header: "Salesman",
-  //   key: "SalesMan",
-  //   alignment: "left",
-  //   uiWidth: 200,
-  //   pdfWidth: 35,
-  //   excelWidth: 30,
-  // },
   {
     header: "Mobile",
     key: "SalesManMobile",
