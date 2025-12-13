@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { useTheme } from "../../../ThemeContext";
@@ -39,7 +38,7 @@ const columnsConfig = [
     pdfWidth: 25,
     excelWidth: 20,
   },
- 
+
   {
     header: "Balance",
     key: "balance",
@@ -76,8 +75,8 @@ export default function AmericanNil() {
     getdatafontsize,
   } = useTheme();
 
-  // ----------- FETCH API (same as pehle) -----------
-   // === API CALL =====
+  // ----------- FETCH API-----------
+  // === API CALL =====
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,12 +86,12 @@ export default function AmericanNil() {
         form.append("code", "AMRELEC");
 
         const res = await axios.post(
-          "https://crystalsolutions.com.pk/api/NilCustomers.php",
+          "https://crystalsolutions.com.pk/api/AmericanNilCustomers.php",
           form,
           { timeout: 20000 }
         );
 
-        const arr = res?.data?.Detail ?? [];
+        const arr = res?.data ?? [];
         setRows(arr);
       } catch (err) {
         console.error("NilFetchError:", err);
@@ -345,62 +344,62 @@ export default function AmericanNil() {
     }
   };
 
-    const getSortIcon = (key) => {
-      // Selected column
-      if (sortConfig.key === key) {
-        return sortConfig.direction === "ascending" ? (
-          <FaSortUp
-            style={{
-              marginLeft: "5px",
-              color: "#e74c3c",
-              transition: "0.3s",
-            }}
-          />
-        ) : (
-          <FaSortDown
-            style={{
-              marginLeft: "5px",
-              color: "#e74c3c",
-              transition: "0.3s",
-            }}
-          />
-        );
-      }
-  
-      // Default (unselected)
-      return (
+  const getSortIcon = (key) => {
+    // Selected column
+    if (sortConfig.key === key) {
+      return sortConfig.direction === "ascending" ? (
+        <FaSortUp
+          style={{
+            marginLeft: "5px",
+            color: "#e74c3c",
+            transition: "0.3s",
+          }}
+        />
+      ) : (
         <FaSortDown
           style={{
             marginLeft: "5px",
-            color: "white",
-            opacity: 0.4,
+            color: "#e74c3c",
+            transition: "0.3s",
           }}
         />
       );
-    };
-  
-  
-    const requestSort = (key) => {
-      let direction = "ascending";
-  
-      if (sortConfig.key === key && sortConfig.direction === "ascending") {
-        direction = "descending";
-      }
-  
-      setSortConfig({ key, direction });
-    };
+    }
+
+    // Default (unselected)
+    return (
+      <FaSortDown
+        style={{
+          marginLeft: "5px",
+          color: "white",
+          opacity: 0.4,
+        }}
+      />
+    );
+  };
+
+  const requestSort = (key) => {
+    let direction = "ascending";
+
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+
+    setSortConfig({ key, direction });
+  };
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
     let data = [...rows];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.tcstcod?.toLowerCase().includes(q) || // Code
+          row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name
+          row.SalesManMobile?.toLowerCase().includes(q) || // Mobile
+          row.balance?.toString().includes(q) // ✅ Balance
       );
     }
 
@@ -431,12 +430,13 @@ export default function AmericanNil() {
     let data = rows;
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter((row) => {
         return (
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.tcstcod?.toLowerCase().includes(q) || // Code
+          row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name
+          row.SalesManMobile?.toLowerCase().includes(q) || // Mobile
+          row.balance?.toString().includes(q) // ✅ Balance
         );
       });
     }

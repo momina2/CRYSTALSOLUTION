@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { useTheme } from "../../../ThemeContext";
@@ -74,9 +72,40 @@ const columnsConfig = [
 ];
 
 // Agging Bar Card (amt001..amt006)
+// const HorizontalAggingRangeCard = ({ stats }) => (
+//   <div
+//     style={{
+//       width: "100%",
+//       backgroundColor: "white",
+//       border: "1px solid #dadada",
+//       borderRadius: "6px",
+//       padding: "4px",
+//       marginBottom: "6px",
+//     }}
+//   >
+//     <div
+//       style={{
+//         display: "flex",
+//         justifyContent: "space-between",
+//         textAlign: "center",
+//         paddingTop: "2px",
+//       }}
+//     >
+//       {stats.map((s, i) => (
+//         <div key={i} style={{ flex: 1 }}>
+//           <p style={{ marginBottom: "4px", fontSize: "12px" }}>{s.range}</p>
+//           <p style={{ fontSize: "13px", fontWeight: 600, color: "#3f379b" }}>
+//             {Number(s.amount || 0).toLocaleString()}
+//           </p>
+//         </div>
+//       ))}
+//     </div>
+//   </div>
+// );
 const HorizontalAggingRangeCard = ({ stats }) => (
   <div
     style={{
+      height: "50%",
       width: "100%",
       backgroundColor: "white",
       border: "1px solid #dadada",
@@ -88,15 +117,38 @@ const HorizontalAggingRangeCard = ({ stats }) => (
     <div
       style={{
         display: "flex",
-        justifyContent: "space-between",
         textAlign: "center",
-        paddingTop: "2px",
       }}
     >
       {stats.map((s, i) => (
-        <div key={i} style={{ flex: 1 }}>
-          <p style={{ marginBottom: "4px", fontSize: "12px" }}>{s.range}</p>
-          <p style={{ fontSize: "13px", fontWeight: 600, color: "#3f379b" }}>
+        <div
+          key={i}
+          style={{
+            flex: 1,
+            padding: "6px 2px",
+            borderRight: i !== stats.length - 1 ? "1px solid #dadada" : "none", // 🔹 vertical grid
+          }}
+        >
+          {/* Range */}
+          <p
+            style={{
+              marginBottom: "4px",
+              fontSize: "12px",
+              borderBottom: "1px solid #dadada", // 🔹 horizontal grid
+              paddingBottom: "3px",
+            }}
+          >
+            {s.range}
+          </p>
+
+          {/* Amount */}
+          <p
+            style={{
+              fontSize: "13px",
+              fontWeight: 600,
+              color: "#3f379b",
+            }}
+          >
             {Number(s.amount || 0).toLocaleString()}
           </p>
         </div>
@@ -386,60 +438,142 @@ export default function AmericanProgressReport() {
 
   // PDF EXPORT
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
-
-    doc.setFontSize(15);
-    doc.text(COMPANY_NAME, 105, 12, { align: "center" });
-    doc.text(REPORT_NAME, 105, 20, { align: "center" });
-    doc.text(`Customer: ${headerCode} | ${headerName || ""}`, 10, 12);
-    doc.text(`Date: ${toApiDate(cusDate)}`, 10, 18);
-    doc.setFontSize(9);
-
-    let y = 30;
-    const pdfCols = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-    const headers = pdfCols.map((c) => c.header);
-
-    headers.forEach((h, i) => {
-      doc.text(h, 10 + i * 30, y);
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
     });
 
-    y += 6;
-    filteredData.forEach((r) => {
-      const row = pdfCols.map((c) => {
-        const key = c.key;
-        if (["debit", "credit", "balance"].includes(key)) {
-          return Number(r[key] || 0).toLocaleString();
+    const pageWidth = 210;
+    const rowHeight = 6;
+    const headerHeight = 8;
+    const maxY = 280;
+
+    // ===== TITLE =====
+    const drawTitle = () => {
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 16, { align: "center" });
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(13);
+      doc.text(REPORT_NAME, pageWidth / 2, 24, { align: "center" });
+    };
+
+    // ===== TABLE CONFIG =====
+    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    const keys = pdfColumns.map((c) => c.key);
+    const headers = pdfColumns.map((c) => c.header);
+    const colWidths = pdfColumns.map((c) => c.pdfWidth);
+
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+    const startX = (pageWidth - tableWidth) / 2;
+    let y = 32;
+
+    // ===== HEADER =====
+    const drawHeader = () => {
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(9);
+
+      let x = startX;
+      headers.forEach((h, i) => {
+        const w = colWidths[i];
+        doc.setFillColor(220);
+        doc.rect(x, y, w, headerHeight, "F");
+        doc.rect(x, y, w, headerHeight);
+        doc.text(h, x + w / 2, y + 5.5, { align: "center" });
+        x += w;
+      });
+
+      y += headerHeight;
+    };
+
+    // ===== ROW =====
+    const drawRow = (row, isTotal = false) => {
+      let x = startX;
+      doc.setFont("Helvetica", isTotal ? "bold" : "normal");
+      doc.setFontSize(8);
+
+      row.forEach((cell, i) => {
+        const w = colWidths[i];
+        doc.rect(x, y, w, rowHeight);
+
+        if (["debit", "credit", "balance"].includes(keys[i])) {
+          doc.text(String(cell), x + w - 2, y + 4.5, { align: "right" });
+        } else {
+          doc.text(String(cell), x + 2, y + 4.5);
         }
-        return r[key] ?? "";
+
+        x += w;
       });
 
-      row.forEach((val, i) => {
-        doc.text(String(val), 10 + i * 30, y);
-      });
-      y += 6;
-      if (y > 280) {
+      y += rowHeight;
+    };
+
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y > maxY) {
         doc.addPage();
-        y = 30;
+        drawTitle();
+        y = 32;
+        drawHeader();
       }
+    };
+
+    // ===== START =====
+    drawTitle();
+    drawHeader();
+
+    const bodyRows = filteredData.map((r) =>
+      keys.map((k) =>
+        ["debit", "credit", "balance"].includes(k)
+          ? Number(r[k] || 0).toLocaleString()
+          : r[k] ?? ""
+      )
+    );
+
+    // ===== TOTAL ROW (FIXED) =====
+    const totalRow = new Array(keys.length).fill("");
+    totalRow[0] = filteredData.length.toString();
+    totalRow[1] = "Total";
+    totalRow[keys.indexOf("debit")] = totalDebit.toLocaleString();
+    totalRow[keys.indexOf("credit")] = totalCredit.toLocaleString();
+    totalRow[keys.indexOf("balance")] = totalBalance.toLocaleString();
+
+    [...bodyRows, totalRow].forEach((row, i, arr) => {
+      checkPageBreak();
+      drawRow(row, i === arr.length - 1);
     });
 
-    // total row
-    y += 4;
-    doc.text(`Total Debit: ${totalDebit.toLocaleString()}`, 10, y);
-    y += 5;
-    doc.text(
-      `Total Credit: ${totalCredit.toLocaleString()}${
-        creditAmount != null
-          ? ` (Credit Amount: ${Number(creditAmount || 0).toLocaleString()})`
-          : ""
-      }`,
-      10,
-      y
-    );
-    y += 5;
-    doc.text(`Total Balance: ${totalBalance.toLocaleString()}`, 10, y);
+    // ===== AGING CARD (PDF VERSION) =====
+    if (apiData) {
+      y += 10;
 
-    doc.save(`${REPORT_NAME}_${headerCode || ""}.pdf`);
+      const boxWidth = 28;
+      const boxHeight = 14;
+      const gap = 2;
+      const totalBoxWidth = stats.length * boxWidth + (stats.length - 1) * gap;
+      let x = (pageWidth - totalBoxWidth) / 2;
+
+      doc.setFontSize(8);
+
+      stats.forEach((stat) => {
+        doc.rect(x, y, boxWidth, boxHeight);
+        doc.text(stat.range, x + boxWidth / 2, y + 5, { align: "center" });
+        doc.setFont("Helvetica", "bold");
+        doc.text(
+          Number(stat.amount || 0).toLocaleString(),
+          x + boxWidth / 2,
+          y + 11,
+          { align: "center" }
+        );
+        doc.setFont("Helvetica", "normal");
+        x += boxWidth + gap;
+      });
+    }
+
+    // ===== SAVE =====
+    doc.save(`${REPORT_NAME}.pdf`);
   };
 
   // EXCEL EXPORT
@@ -995,7 +1129,7 @@ export default function AmericanProgressReport() {
               <div
                 style={{
                   padding: "8px",
-                  width: "70%", // ⭐ width same rahegi
+                  width: "auto",
                   margin: "0 auto", // ⭐ THIS centers the whole card irrespective of width
                 }}
               >

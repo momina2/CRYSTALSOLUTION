@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./AmericanDashboard.css";
 import { Bar } from "react-chartjs-2";
+import { Chart } from "react-google-charts";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,7 +12,8 @@ import {
   Tooltip,
   Legend,
   LineElement,
-  PointElement,LineController, 
+  PointElement,
+  LineController,
 } from "chart.js";
 
 // Register Chart.js components
@@ -27,7 +29,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  LineController      
+  LineController
 );
 
 // API URLs
@@ -75,7 +77,6 @@ const getAggingDateFormatted = () => {
 
 const currentDate = getCurrentDateFormatted(); // Used for APIs needing dd-mm-yyyy format
 
-// --- ** Soft Color Palette for Charts ** ---
 const ChartColors = {
   Sales: "rgba(79, 109, 255, 0.8)", // Softer, professional blue
   Purchase: "rgba(255, 126, 149, 0.8)", // Muted pink/red
@@ -362,7 +363,6 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
 //               numericValues.receivable,
 //               numericValues.expense,
 //             ][ctx.dataIndex];
-
 //             return `${
 //               ctx.label
 //             }: ${original.toLocaleString()} (${percentage}%)`;
@@ -371,7 +371,6 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
 //       },
 //     },
 //   };
-
 //   return (
 //     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-center items-center">
 //       <div className="w-[85%] h-[85%]">
@@ -381,27 +380,44 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
 //   );
 // };
 
+
 const FinancialPieChart = ({ webData, balanceData }) => {
   if (!webData || !balanceData) return null;
 
-  const rawValues = {
-    receivable: webData?.Receivable || "0",
-    payable: webData?.Payable || "0",
-    stock: webData?.["Total Stock"] || "0",
-    expense: webData?.Expense || "0",
-    cash: balanceData?.CashBal || "0",
-    bank: balanceData?.BankBal || "0",
-  };
+  // ===== HELPER =====
+  const toNumber = (val) =>
+    Number((val || "0").toString().replace(/,/g, "")) || 0;
 
-  const numericValues = {
-    receivable: Number(rawValues.receivable.replace(/,/g, "")) || 0,
-    payable: Number(rawValues.payable.replace(/,/g, "")) || 0,
-    stock: Number(rawValues.stock.replace(/,/g, "")) || 0,
-    expense: Number(rawValues.expense.replace(/,/g, "")) || 0,
-    cash: Number(rawValues.cash.replace(/,/g, "")) || 0,
-    bank: Number(rawValues.bank.replace(/,/g, "")) || 0,
-  };
+  const safeValue = (val) => Math.abs(val || 0);
 
+  // ===== RAW VALUES (CAN BE NEGATIVE) =====
+  const receivableRaw = toNumber(webData?.Receivable);
+  const payableRaw = toNumber(webData?.Payable);
+  const stockRaw = toNumber(webData?.["Total Stock"]);
+  const expenseRaw = toNumber(webData?.Expense);
+  const cashRaw = toNumber(balanceData?.CashBal);
+  const bankRaw = toNumber(balanceData?.BankBal);
+
+  // ===== SAFE VALUES FOR PIE (NO NEGATIVES) =====
+  const receivable = safeValue(receivableRaw);
+  const payable = safeValue(payableRaw);
+  const stock = safeValue(stockRaw);
+  const expense = safeValue(expenseRaw);
+  const cash = safeValue(cashRaw);
+  const bank = safeValue(bankRaw);
+
+  // ===== GOOGLE CHART DATA =====
+  const chartData = [
+    ["Type", "Amount"],
+    ["Receivable", receivable],
+    ["Payable", payable],
+    ["Stock", stock],
+    ["Expense", expense],
+    ["Cash", cash],
+    ["Bank", bank],
+  ];
+
+  // ===== COLORS (VALID FOR GOOGLE CHARTS) =====
   const colors = [
     "#4F6DFF", // Receivable
     "#FF7E95", // Payable
@@ -411,69 +427,69 @@ const FinancialPieChart = ({ webData, balanceData }) => {
     "#6FCF97", // Bank
   ];
 
-  const data = {
-    labels: ["Receive", "Payable", "Stock", "Expense", "Cash", "Bank"],
-    datasets: [
-      {
-        data: [
-          numericValues.receivable,
-          numericValues.payable,
-          numericValues.stock,
-          numericValues.expense,
-          numericValues.cash,
-          numericValues.bank,
-        ],
-        backgroundColor: colors,
-        borderWidth: 2,
-        borderColor: "#fff",
-      },
-    ],
-  };
-
+  // ===== CHART OPTIONS (REAL 3D) =====
   const options = {
-    maintainAspectRatio: false,
-    cutout: "60%",
-    plugins: {
-      legend: {
-        display: false, // hiding below text labels
-      },
-      tooltip: {
-        callbacks: {
-          label: function (ctx) {
-            const dataset = ctx.dataset.data;
-            const total = dataset.reduce((a, b) => a + b, 0);
-            const value = dataset[ctx.dataIndex];
-            const percentage = ((value / total) * 100).toFixed(1);
-
-            const originalValue = [
-              numericValues.receivable,
-              numericValues.payable,
-              numericValues.stock,
-              numericValues.expense,
-              numericValues.cash,
-              numericValues.bank,
-            ][ctx.dataIndex];
-
-            return `${
-              ctx.label
-            } : ${originalValue.toLocaleString()} (${percentage}%)`;
-          },
-        },
-      },
+    is3D: true,
+    pieHole: 0.35,
+    pieStartAngle: 100,
+    legend: "none", // custom legend
+    colors,
+    chartArea: {
+      width: "95%",
+      height: "90%",
     },
   };
 
   return (
-    <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-center">
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-[90%] h-[90%]">
-          <Pie data={data} options={options} />
-        </div>
+    <div className="w-full h-[170px] bg-white shadow-md border border-gray-200 p-2 rounded-xl flex">
+      {/* ===== LEFT SIDE VERTICAL LEGEND ===== */}
+      <div className="w-[40%] flex flex-col justify-center space-y-2 pr-2">
+        {[
+          { label: "Receivable", raw: receivableRaw, color: colors[0] },
+          { label: "Payable", raw: payableRaw, color: colors[1] },
+          { label: "Stock", raw: stockRaw, color: colors[2] },
+          { label: "Expense", raw: expenseRaw, color: colors[3] },
+          { label: "Cash", raw: cashRaw, color: colors[4] },
+          { label: "Bank", raw: bankRaw, color: colors[5] },
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
+            {/* Color Dot */}
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+
+            {/* Label */}
+            <span className="text-[11px] text-gray-600 truncate">
+              {item.label}
+            </span>
+
+            {/* Actual Value (±) */}
+            {/* <span
+              className={`ml-auto text-[11px] font-semibold ${
+                item.raw < 0 ? "text-red-600" : "text-gray-900"
+              }`}
+            >
+              {item.raw < 0 ? "-" : ""}
+              {Math.abs(item.raw).toLocaleString()}
+            </span> */}
+          </div>
+        ))}
+      </div>
+
+      {/* ===== RIGHT SIDE REAL 3D PIE ===== */}
+      <div className="w-[60%] h-full">
+        <Chart
+          chartType="PieChart"
+          data={chartData}
+          options={options}
+          width="100%"
+          height="100%"
+        />
       </div>
     </div>
   );
 };
-
 const FinanceSummaryCard = ({ webData }) => {
   if (!webData) return null;
 
@@ -1211,61 +1227,84 @@ const formatPKR = (value) => {
 const CustomerDistributionChart = ({ mainData }) => {
   if (!mainData) return null;
 
-  const rawValues = {
-    outstanding: mainData?.["OutStanding Customer"] || "0",
-    nil: mainData?.["Nil Customer"] || "0",
-    advance: mainData?.["Advance Customer"] || "0",
+  const outstanding =
+    Number(
+      (mainData?.["OutStanding Customer"] || "0").toString().replace(/,/g, "")
+    ) || 0;
 
-    nonActive: mainData?.["Non Active"] || "0",
-  };
+  const nil =
+    Number((mainData?.["Nil Customer"] || "0").toString().replace(/,/g, "")) ||
+    0;
 
-  const numericValues = {
-    outstanding:
-      Number(rawValues.outstanding.toString().replace(/,/g, "")) || 0,
-    nil: Number(rawValues.nil.toString().replace(/,/g, "")) || 0,
-    advance: Number(rawValues.advance.toString().replace(/,/g, "")) || 0,
-    nonActive: Number(rawValues.nonActive.toString().replace(/,/g, "")) || 0,
-  };
+  const advance =
+    Number(
+      (mainData?.["Advance Customer"] || "0").toString().replace(/,/g, "")
+    ) || 0;
 
-  const colors = ["#109744ff", "#805620ff", "#FFD66B", "#B3BBC6"];
+  const nonActive =
+    Number((mainData?.["Non Active"] || "0").toString().replace(/,/g, "")) || 0;
 
-  const data = {
-    labels: ["Outstanding", "Nil", "Advance", "NonActive"],
-    datasets: [
-      {
-        data: [
-          numericValues.outstanding,
-          numericValues.nil,
-          numericValues.advance,
-          numericValues.nonActive,
-        ],
-        backgroundColor: colors,
-        borderWidth: 2,
-        borderColor: "#fff",
-      },
-    ],
-  };
+  const chartData = [
+    ["Customer Type", "Count"],
+    ["Outstanding", outstanding],
+    ["Nil", nil],
+    ["Advance", advance],
+    ["Non Active", nonActive],
+  ];
+
+  const colors = ["#109744", "#805620", "#FFD66B", "#B3BBC6"];
 
   const options = {
-    maintainAspectRatio: false,
-    cutout: "52%",
-    plugins: {
-      legend: { display: false }, // 👈 REMOVE LABELS
-      tooltip: {
-        callbacks: {
-          label: (ctx) => {
-            const val = ctx.dataset.data[ctx.dataIndex];
-            return `${ctx.label}: ${val.toLocaleString()}`;
-          },
-        },
-      },
+    is3D: true,
+    pieHole: 0.35,
+    pieStartAngle: 100,
+    legend: "none", // ❌ disable default legend
+    colors,
+    chartArea: {
+      width: "95%",
+      height: "90%",
     },
   };
 
   return (
-    <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-center items-center">
-      <div className="w-[90%] h-[90%]">
-        <Pie data={data} options={options} />
+    <div className="w-full h-[170px] bg-white shadow-md border border-gray-200 p-2 rounded-lg flex">
+      {/* LEFT SIDE VERTICAL LABELS */}
+      <div className="w-[40%] flex flex-col justify-center space-y-2 pr-2">
+        {[
+          { label: "Outstanding", value: outstanding, color: colors[0] },
+          { label: "Nil", value: nil, color: colors[1] },
+          { label: "Advance", value: advance, color: colors[2] },
+          { label: "Non Active", value: nonActive, color: colors[3] },
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
+            {/* Color Dot */}
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+
+            {/* Label */}
+            <span className="text-[11px] text-gray-600 truncate">
+              {item.label}
+            </span>
+
+            {/* Value */}
+            {/* <span className="ml-auto text-[11px] font-semibold text-gray-900">
+              {item.value.toLocaleString()}
+            </span> */}
+          </div>
+        ))}
+      </div>
+
+      {/* RIGHT SIDE 3D PIE */}
+      <div className="w-[50%] h-full">
+        <Chart
+          chartType="PieChart"
+          data={chartData}
+          options={options}
+          width="100%"
+          height="100%"
+        />
       </div>
     </div>
   );
@@ -1296,102 +1335,100 @@ const ElectronicsDashboard = () => {
     });
   };
 
- useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const adminFormData = new FormData();
-      adminFormData.append("code", "AMRELEC");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const adminFormData = new FormData();
+        adminFormData.append("code", "AMRELEC");
 
-      const monthlyFormData = new FormData();
-      monthlyFormData.append("code", "AMRELEC");
-      monthlyFormData.append("FRepYer", "2025");
+        const monthlyFormData = new FormData();
+        monthlyFormData.append("code", "AMRELEC");
+        monthlyFormData.append("FRepYer", "2025");
 
-      const dailyFormData = new FormData();
-      dailyFormData.append("code", "AMRELEC");
-      dailyFormData.append("FRepDat", currentDate);
-      dailyFormData.append("FLocCod", "001");
+        const dailyFormData = new FormData();
+        dailyFormData.append("code", "AMRELEC");
+        dailyFormData.append("FRepDat", currentDate);
+        dailyFormData.append("FLocCod", "001");
 
-      const dailyWebFormData = new FormData();
-      dailyWebFormData.append("code", "AMRELEC");
-      dailyWebFormData.append("FRepDat", currentDate);
-      dailyWebFormData.append("FLocCod", "001");
+        const dailyWebFormData = new FormData();
+        dailyWebFormData.append("code", "AMRELEC");
+        dailyWebFormData.append("FRepDat", currentDate);
+        dailyWebFormData.append("FLocCod", "001");
 
-      const americanAggingFormData = new FormData();
-      americanAggingFormData.append("code", "AMRELEC");
-      americanAggingFormData.append("FRepDat", getAggingDateFormatted());
-      const [
-        adminResponse,
-        monthlyResponse,
-        dailyResponse,
-        dailyWebResponse,
-        dailyAggingResponse,
-      ] = await Promise.all([
-        axios.post(ADMIN_INFO_API_URL, adminFormData),
-        axios.post(MONTHLY_COMPARISON_API_URL, monthlyFormData),
-        axios.post(DASHBOARD_DAILY, dailyFormData),
-        axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData),
-        axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
-      ]);
+        const americanAggingFormData = new FormData();
+        americanAggingFormData.append("code", "AMRELEC");
+        americanAggingFormData.append("FRepDat", getAggingDateFormatted());
+        const [
+          adminResponse,
+          monthlyResponse,
+          dailyResponse,
+          dailyWebResponse,
+          dailyAggingResponse,
+        ] = await Promise.all([
+          axios.post(ADMIN_INFO_API_URL, adminFormData),
+          axios.post(MONTHLY_COMPARISON_API_URL, monthlyFormData),
+          axios.post(DASHBOARD_DAILY, dailyFormData),
+          axios.post(DASHBOARD_DAILY_WEB, dailyWebFormData),
+          axios.post(AMERICAN_AGGING_API_URL, americanAggingFormData),
+        ]);
 
-      let admin = adminResponse.data;
-      if (Array.isArray(admin)) {
-        admin = admin.length ? admin[0] : {};
+        let admin = adminResponse.data;
+        if (Array.isArray(admin)) {
+          admin = admin.length ? admin[0] : {};
+        }
+        if (typeof admin !== "object") admin = {};
+        setAdminData(admin);
+
+        let monthly = monthlyResponse.data;
+        if (!monthly || typeof monthly !== "object") monthly = {};
+        setMonthlyData(monthly);
+
+        let daily = dailyResponse.data;
+        if (Array.isArray(daily)) {
+          daily = daily.length ? daily[0] : {};
+        }
+        if (!daily || typeof daily !== "object") daily = {};
+        setDailyData(daily);
+        let web = dailyWebResponse.data;
+        if (Array.isArray(web)) {
+          web = web.length ? web[0] : {};
+        }
+        if (!web || typeof web !== "object") web = {};
+        web = {
+          SalesMan: web.SalesMan || "0",
+          Stores: web.Stores || web.City || "0",
+          Region: web.Region || "0",
+          Managers: web.Managers || "0",
+          ...web,
+        };
+
+        setDailyWebData(web);
+        let agging = dailyAggingResponse.data;
+
+        if (agging && agging.Detail) {
+          agging = agging;
+        } else if (Array.isArray(agging)) {
+          agging = agging.length ? agging[0] : {};
+        } else {
+          agging = {};
+        }
+
+        setAggingData(agging);
+      } catch (err) {
+        console.error("API Error:", err);
+        setAdminData({});
+        setMonthlyData({});
+        setDailyData({});
+        setDailyWebData({});
+        setAggingData({});
+      } finally {
+        setLoading(false);
       }
-      if (typeof admin !== "object") admin = {};
-      setAdminData(admin);
+    };
 
-      let monthly = monthlyResponse.data;
-      if (!monthly || typeof monthly !== "object") monthly = {};
-      setMonthlyData(monthly);
-
-      let daily = dailyResponse.data;
-      if (Array.isArray(daily)) {
-        daily = daily.length ? daily[0] : {};
-      }
-      if (!daily || typeof daily !== "object") daily = {};
-      setDailyData(daily);
-      let web = dailyWebResponse.data;
-      if (Array.isArray(web)) {
-        web = web.length ? web[0] : {};
-      }
-      if (!web || typeof web !== "object") web = {};
-      web = {
-        SalesMan: web.SalesMan || "0",
-        Stores: web.Stores || web.City || "0",
-        Region: web.Region || "0",
-        Managers: web.Managers || "0",
-        ...web,
-      };
-
-      setDailyWebData(web);
-      let agging = dailyAggingResponse.data;
-
-      if (agging && agging.Detail) {
-        agging = agging;
-      } else if (Array.isArray(agging)) {
-        agging = agging.length ? agging[0] : {};
-      } else {
-        agging = {};
-      }
-
-      setAggingData(agging);
-
-    } catch (err) {
-      console.error("API Error:", err);
-      setAdminData({});
-      setMonthlyData({});
-      setDailyData({});
-      setDailyWebData({});
-      setAggingData({});
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []);
-
+    fetchData();
+  }, []);
 
   if (loading)
     return (
@@ -1449,7 +1486,7 @@ const ElectronicsDashboard = () => {
   const collectionData = parseData(monthlyData, "C");
 
   return (
-    <div className="dashboard-wrapper" style={{marginTop:"-10vh"}}>
+    <div className="dashboard-wrapper" style={{ marginTop: "-10vh" }}>
       <div className="american-dashboard">
         <div
           className="dashboard-zoom"

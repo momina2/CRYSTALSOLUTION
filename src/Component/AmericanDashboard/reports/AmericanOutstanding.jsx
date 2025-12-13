@@ -351,7 +351,6 @@ export default function AmericanOutstanding() {
     }
   };
 
-
   const getSortIcon = (key) => {
     // Selected column
     if (sortConfig.key === key) {
@@ -386,7 +385,6 @@ export default function AmericanOutstanding() {
     );
   };
 
-
   const requestSort = (key) => {
     let direction = "ascending";
 
@@ -402,12 +400,14 @@ export default function AmericanOutstanding() {
     let data = [...rows];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.tcstcod?.toLowerCase().includes(q) || // Code
+          row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name
+          row.tmobnum?.toLowerCase().includes(q) || // Mobile
+          row.SalesMan?.toLowerCase().includes(q) || // Salesman
+          row.balance?.toString().includes(q) // ✅ Balance
       );
     }
 
@@ -438,12 +438,14 @@ export default function AmericanOutstanding() {
     let data = rows;
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter((row) => {
         return (
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.tcstcod?.toLowerCase().includes(q) || // Code
+          row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name
+          row.tmobnum?.toLowerCase().includes(q) || // Mobile
+          row.SalesMan?.toLowerCase().includes(q) || // Salesman
+          row.balance?.toString().includes(q) // ✅ Balance
         );
       });
     }

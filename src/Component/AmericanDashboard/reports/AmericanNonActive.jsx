@@ -16,7 +16,7 @@ const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 const columnsConfig = [
   {
     header: "Code",
-    key: "tcstcod",
+    key: "tacccod",
     alignment: "left",
     uiWidth: 80,
     pdfWidth: 20,
@@ -49,7 +49,7 @@ const columnsConfig = [
 
   {
     header: "Balance",
-    key: "balance",
+    key: "Balance",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
@@ -397,17 +397,56 @@ export default function AmericanNonActive() {
   };
 
   // ----------- FILTER + SORT DATA -----------
+  // const sortedTableData = useMemo(() => {
+  //   let data = [...rows];
+
+  //   if (searchQuery) {
+  //     const q = searchQuery.toLowerCase();
+  //     data = data.filter(
+  //       (row) =>
+  //         row.tcstcod?.toLowerCase().includes(q) ||
+  //         row.tmobnum?.toLowerCase().includes(q) ||
+  //         row.SalesMan?.toLowerCase().includes(q)
+  //     );
+  //   }
+
+  //   if (sortConfig.key) {
+  //     data.sort((a, b) => {
+  //       const aVal = a[sortConfig.key] ?? "";
+  //       const bVal = b[sortConfig.key] ?? "";
+
+  //       // Balance numeric sort
+  //       if (sortConfig.key === "balance") {
+  //         const aNum = parseFloat(aVal) || 0;
+  //         const bNum = parseFloat(bVal) || 0;
+  //         return sortConfig.direction === "ascending"
+  //           ? aNum - bNum
+  //           : bNum - aNum;
+  //       }
+
+  //       return sortConfig.direction === "ascending"
+  //         ? String(aVal).localeCompare(String(bVal))
+  //         : String(bVal).localeCompare(String(aVal));
+  //     });
+  //   }
+
+  //   return data;
+  // }, [rows, searchQuery, sortConfig]);
+
   const sortedTableData = useMemo(() => {
     let data = [...rows];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      data = data.filter(
-        (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
-      );
+      const q = searchQuery.toLowerCase().trim();
+
+      data = data.filter((row) => {
+        return (
+          row.tacccod?.toLowerCase().includes(q) || // ✅ Code
+          row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name (FIXED)
+          row.tmobnum?.toLowerCase().includes(q) || // ✅ Mobile
+          row.Balance?.toString().includes(q) // ✅ Balance
+        );
+      });
     }
 
     if (sortConfig.key) {
@@ -415,13 +454,10 @@ export default function AmericanNonActive() {
         const aVal = a[sortConfig.key] ?? "";
         const bVal = b[sortConfig.key] ?? "";
 
-        // Balance numeric sort
-        if (sortConfig.key === "balance") {
-          const aNum = parseFloat(aVal) || 0;
-          const bNum = parseFloat(bVal) || 0;
+        if (sortConfig.key === "Balance") {
           return sortConfig.direction === "ascending"
-            ? aNum - bNum
-            : bNum - aNum;
+            ? parseFloat(aVal || 0) - parseFloat(bVal || 0)
+            : parseFloat(bVal || 0) - parseFloat(aVal || 0);
         }
 
         return sortConfig.direction === "ascending"
@@ -440,9 +476,10 @@ export default function AmericanNonActive() {
       const q = searchQuery.toLowerCase();
       data = data.filter((row) => {
         return (
-          row.tcstcod?.toLowerCase().includes(q) ||
+          row.tacccod?.toLowerCase().includes(q) ||
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.tcstdsc?.toLowerCase().includes(q) ||
+          row.Balance?.toString().includes(q)
         );
       });
     }
@@ -469,7 +506,7 @@ export default function AmericanNonActive() {
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.balance ?? 0);
+      const value = parseFloat(row.Balance ?? 0);
       return sum + (isNaN(value) ? 0 : value);
     }, 0);
   }, [sortedTableData]);

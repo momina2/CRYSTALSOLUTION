@@ -25,7 +25,7 @@ const columnsConfig = [
     key: "code",
     alignment: "left",
     uiWidth: 80,
-    pdfWidth: 20,
+    pdfWidth: 16,
     excelWidth: 15,
   },
   {
@@ -33,7 +33,7 @@ const columnsConfig = [
     key: "ttrndat",
     alignment: "left",
     uiWidth: 90,
-    pdfWidth: 20,
+    pdfWidth: 16,
     excelWidth: 15,
   },
   {
@@ -41,7 +41,7 @@ const columnsConfig = [
     key: "ttrntyp",
     alignment: "left",
     uiWidth: 70,
-    pdfWidth: 18,
+    pdfWidth: 14,
     excelWidth: 15,
   },
   {
@@ -49,7 +49,7 @@ const columnsConfig = [
     key: "ttrnnum",
     alignment: "left",
     uiWidth: 80,
-    pdfWidth: 18,
+    pdfWidth: 16,
     excelWidth: 15,
   },
   {
@@ -57,7 +57,7 @@ const columnsConfig = [
     key: "ttrndsc",
     alignment: "left",
     uiWidth: 160,
-    pdfWidth: 70,
+    pdfWidth: 65,
     excelWidth: 40,
   },
   {
@@ -65,7 +65,7 @@ const columnsConfig = [
     key: "titmqnt",
     alignment: "right",
     uiWidth: 80,
-    pdfWidth: 20,
+    pdfWidth: 12,
     excelWidth: 10,
   },
   {
@@ -73,7 +73,7 @@ const columnsConfig = [
     key: "tsalrat",
     alignment: "right",
     uiWidth: 80,
-    pdfWidth: 20,
+    pdfWidth: 14,
     excelWidth: 10,
   },
   {
@@ -81,7 +81,7 @@ const columnsConfig = [
     key: "debit",
     alignment: "right",
     uiWidth: 80,
-    pdfWidth: 25,
+    pdfWidth: 16,
     excelWidth: 18,
   },
   {
@@ -89,7 +89,7 @@ const columnsConfig = [
     key: "credit",
     alignment: "right",
     uiWidth: 80,
-    pdfWidth: 25,
+    pdfWidth: 16,
     excelWidth: 18,
   },
   {
@@ -97,7 +97,7 @@ const columnsConfig = [
     key: "balance",
     alignment: "right",
     uiWidth: 80,
-    pdfWidth: 25,
+    pdfWidth: 18,
     excelWidth: 18,
   },
   {
@@ -110,11 +110,10 @@ const columnsConfig = [
   },
 ];
 
-// Agging Bar Card (keep as is)
 const HorizontalAggingRangeCard = ({ stats }) => (
   <div
     style={{
-      width: "40%",
+      width: "60%",
       backgroundColor: "white",
       border: "1px solid #dadada",
       borderRadius: "6px",
@@ -125,15 +124,37 @@ const HorizontalAggingRangeCard = ({ stats }) => (
     <div
       style={{
         display: "flex",
-        justifyContent: "space-between",
         textAlign: "center",
         paddingTop: "2px",
       }}
     >
       {stats.map((s, i) => (
-        <div key={i} style={{ flex: 1 }}>
-          <p style={{ marginBottom: "4px", fontSize: "12px" }}>{s.range}</p>
-          <p style={{ fontSize: "13px", fontWeight: 600, color: "#3f379b" }}>
+        <div
+          key={i}
+          style={{
+            flex: 1,
+            padding: "4px 2px",
+            borderRight: i !== stats.length - 1 ? "1px solid #dadada" : "none", // vertical grid
+          }}
+        >
+          <p
+            style={{
+              marginBottom: "4px",
+              fontSize: "12px",
+              borderBottom: "1px solid #dadada", // horizontal grid
+              paddingBottom: "2px",
+            }}
+          >
+            {s.range}
+          </p>
+
+          <p
+            style={{
+              fontSize: "13px",
+              fontWeight: 600,
+              color: "#3f379b",
+            }}
+          >
             {Number(s.amount || 0).toLocaleString()}
           </p>
         </div>
@@ -167,7 +188,7 @@ export default function AmericanCustomerLedger() {
   const dd = String(today.getDate()).padStart(2, "0");
 
   const defaultToDate = `${yyyy}-${mm}-${dd}`;
-  const defaultFromDate = `${yyyy}-${mm}-01`;
+  const defaultFromDate = `${yyyy}-01-01`;
 
   const [fromDate, setFromDate] = useState(defaultFromDate);
   const [toDate, setToDate] = useState(defaultToDate);
@@ -262,7 +283,6 @@ export default function AmericanCustomerLedger() {
   }, []);
 
   useEffect(() => {
-    // jab fromDate ya toDate change ho → API automatically fire ho
     if (fromDate && toDate) {
       fetchLedger();
     }
@@ -411,48 +431,222 @@ export default function AmericanCustomerLedger() {
     : [];
 
   // PDF EXPORT (simple)
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF({ orientation: "portrait" });
+
+  //   doc.setFontSize(15);
+  //   doc.text(COMPANY_NAME, 105, 12, { align: "center" });
+  //   doc.text(REPORT_NAME, 105, 20, { align: "center" });
+  //   doc.text(`Customer: ${custCode || ""}`, 10, 12);
+  //   doc.text(`From: ${toApiDate(fromDate)}  To: ${toApiDate(toDate)}`, 10, 18);
+  //   doc.setFontSize(9);
+
+  //   let y = 30;
+  //   const pdfCols = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+  //   const headers = pdfCols.map((c) => c.header);
+
+  //   headers.forEach((h, i) => {
+  //     doc.text(h, 10 + i * 22, y);
+  //   });
+
+  //   y += 6;
+  //   filteredData.forEach((r) => {
+  //     const row = pdfCols.map((c) => {
+  //       const key = c.key;
+  //       if (key === "code") return custCode || "";
+  //       if (
+  //         ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
+  //       ) {
+  //         return Number(r[key] || 0).toLocaleString();
+  //       }
+  //       return r[key] ?? "";
+  //     });
+
+  //     row.forEach((val, i) => {
+  //       doc.text(String(val), 10 + i * 22, y);
+  //     });
+  //     y += 6;
+  //     if (y > 280) {
+  //       doc.addPage();
+  //       y = 30;
+  //     }
+  //   });
+
+  //   doc.save(`${REPORT_NAME}_${custCode || ""}.pdf`);
+  // };
+
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
-
-    doc.setFontSize(15);
-    doc.text(COMPANY_NAME, 105, 12, { align: "center" });
-    doc.text(REPORT_NAME, 105, 20, { align: "center" });
-    doc.text(`Customer: ${custCode || ""}`, 10, 12);
-    doc.text(`From: ${toApiDate(fromDate)}  To: ${toApiDate(toDate)}`, 10, 18);
-    doc.setFontSize(9);
-
-    let y = 30;
-    const pdfCols = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-    const headers = pdfCols.map((c) => c.header);
-
-    headers.forEach((h, i) => {
-      doc.text(h, 10 + i * 22, y);
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
     });
 
-    y += 6;
-    filteredData.forEach((r) => {
-      const row = pdfCols.map((c) => {
-        const key = c.key;
-        if (key === "code") return custCode || "";
+    // ===== CONFIG =====
+    const pageWidth = 210;
+    const rowHeight = 6;
+    const headerHeight = 8;
+    const maxY = 280;
+
+    // ===== TITLE =====
+    const drawTitle = () => {
+      // ===== MAIN TITLE =====
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 16, { align: "center" });
+
+      // ===== REPORT NAME =====
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(13);
+      doc.text(REPORT_NAME, pageWidth / 2, 24, { align: "center" });
+
+      // ===== META INFO (LEFT) =====
+      doc.setFontSize(9);
+      doc.text(`Customer: ${headerCode || ""} | ${headerName || ""}`, 10, 30);
+      doc.text(
+        `From: ${toApiDate(fromDate)}   To: ${toApiDate(toDate)}`,
+        10,
+        35
+      );
+    };
+
+    // ===== COLUMNS =====
+    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    const keys = pdfColumns.map((c) => c.key);
+    const headers = pdfColumns.map((c) => c.header);
+    const colWidths = pdfColumns.map((c) => c.pdfWidth);
+
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+    const startX = (pageWidth - tableWidth) / 2;
+    let y = 42;
+
+    // ===== TABLE HEADER =====
+    const drawHeader = () => {
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(9);
+
+      let x = startX;
+      headers.forEach((h, i) => {
+        const w = colWidths[i];
+        doc.setFillColor(220);
+        doc.rect(x, y, w, headerHeight, "F");
+        doc.rect(x, y, w, headerHeight);
+        doc.text(h, x + w / 2, y + 5.5, { align: "center" });
+        x += w;
+      });
+
+      y += headerHeight;
+    };
+
+    // ===== ROW =====
+    const drawRow = (row, isTotal = false) => {
+      let x = startX;
+      doc.setFont("Helvetica", isTotal ? "bold" : "normal");
+      doc.setFontSize(7);
+
+      row.forEach((cell, i) => {
+        const w = colWidths[i];
+        const key = keys[i];
+        doc.rect(x, y, w, rowHeight);
+
+        // 🔹 Numeric columns → right aligned
         if (
           ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
         ) {
-          return Number(r[key] || 0).toLocaleString();
+          doc.text(String(cell), x + w - 2, y + 4.5, { align: "right" });
         }
-        return r[key] ?? "";
+
+        // 🔹 Description column → trimmed to avoid overflow
+        else if (key === "ttrndsc") {
+          const safeText =
+            String(cell || "").length > 45
+              ? String(cell).substring(0, 45) + "…"
+              : String(cell || "");
+
+          doc.text(safeText, x + 2, y + 4.5);
+        }
+
+        // 🔹 Normal text
+        else {
+          doc.text(String(cell || ""), x + 2, y + 4.5);
+        }
+
+        x += w;
       });
 
-      row.forEach((val, i) => {
-        doc.text(String(val), 10 + i * 22, y);
-      });
-      y += 6;
-      if (y > 280) {
+      y += rowHeight;
+    };
+
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y > maxY) {
         doc.addPage();
-        y = 30;
+        drawTitle();
+        y = 32;
+        drawHeader();
       }
+    };
+
+    // ===== START =====
+    drawTitle();
+    drawHeader();
+
+    const bodyRows = filteredData.map((r) =>
+      keys.map((k) => {
+        if (k === "code") return headerCode || "";
+        if (["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(k)) {
+          return Number(r[k] || 0).toLocaleString();
+        }
+        return r[k] ?? "";
+      })
+    );
+
+    // ===== TOTAL ROW =====
+    const totalRow = new Array(keys.length).fill("");
+    totalRow[0] = filteredData.length.toString();
+    totalRow[keys.indexOf("debit")] = totalDebit.toLocaleString();
+    totalRow[keys.indexOf("credit")] = totalCredit.toLocaleString();
+    totalRow[keys.indexOf("balance")] = totalBalance.toLocaleString();
+
+    [...bodyRows, totalRow].forEach((row, idx, arr) => {
+      checkPageBreak();
+      drawRow(row, idx === arr.length - 1);
     });
 
-    doc.save(`${REPORT_NAME}_${custCode || ""}.pdf`);
+    // ===== AGING CARD (PDF) =====
+    if (apiData && stats.length) {
+      y += 10;
+
+      const boxWidth = 28;
+      const boxHeight = 14;
+      const gap = 2;
+      const totalBoxWidth = stats.length * boxWidth + (stats.length - 1) * gap;
+      let x = (pageWidth - totalBoxWidth) / 2;
+
+      doc.setFontSize(8);
+
+      stats.forEach((stat) => {
+        doc.rect(x, y, boxWidth, boxHeight);
+
+        doc.text(stat.range, x + boxWidth / 2, y + 5, {
+          align: "center",
+        });
+
+        doc.setFont("Helvetica", "bold");
+        doc.text(
+          Number(stat.amount || 0).toLocaleString(),
+          x + boxWidth / 2,
+          y + 11,
+          { align: "center" }
+        );
+
+        doc.setFont("Helvetica", "normal");
+        x += boxWidth + gap;
+      });
+    }
+
+    // ===== SAVE =====
+    doc.save(`${REPORT_NAME}_${headerCode || ""}.pdf`);
   };
 
   // EXCEL EXPORT (Advance style)

@@ -397,12 +397,14 @@ export default function AmericanAdvance() {
     let data = [...rows];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.tcstcod?.toLowerCase().includes(q) || 
+          row.tcstdsc?.toLowerCase().includes(q) || 
+          row.tmobnum?.toLowerCase().includes(q) || 
+          row.SalesMan?.toLowerCase().includes(q) || 
+          row.balance?.toString().includes(q) 
       );
     }
 
@@ -433,12 +435,14 @@ export default function AmericanAdvance() {
     let data = rows;
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter((row) => {
         return (
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.tcstcod?.toLowerCase().includes(q) || 
+          row.tcstdsc?.toLowerCase().includes(q) || 
+          row.tmobnum?.toLowerCase().includes(q) || 
+          row.SalesMan?.toLowerCase().includes(q) || 
+          row.balance?.toString().includes(q) 
         );
       });
     }

@@ -18,6 +18,22 @@ const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
 const columnsConfig = [
   {
+    header: "Lgr",
+    key: "ledgerBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
+    header: "P.R",
+    key: "progressBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
     header: "Code",
     key: "tcstcod",
     alignment: "left",
@@ -58,22 +74,7 @@ const columnsConfig = [
     pdfWidth: 25,
     excelWidth: 18,
   },
-  {
-    header: "Ledger",
-    key: "ledgerBtn",
-    alignment: "center",
-    uiWidth: 100,
-    pdfWidth: 0,
-    excelWidth: 0,
-  },
-  {
-    header: "P.R",
-    key: "progressBtn",
-    alignment: "center",
-    uiWidth: 100,
-    pdfWidth: 0,
-    excelWidth: 0,
-  },
+
   {
     header: "",
     key: "scrollSpacer",
@@ -280,7 +281,9 @@ export default function TotalCustomers() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Report");
 
-    const excelColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    const excelColumns = columnsConfig.filter(
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+    );
 
     const headers = excelColumns.map((c) => c.header);
     const keys = excelColumns.map((c) => c.key);
@@ -403,36 +406,18 @@ export default function TotalCustomers() {
   };
 
   const getSortIcon = (key) => {
-    // Selected column
+    if (nonSortableKeys.includes(key)) return null; // ❌ no arrows on buttons
+
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
-        <FaSortUp
-          style={{
-            marginLeft: "5px",
-            color: "#e74c3c",
-            transition: "0.3s",
-          }}
-        />
+        <FaSortUp style={{ marginLeft: "5px", color: "#e74c3c" }} />
       ) : (
-        <FaSortDown
-          style={{
-            marginLeft: "5px",
-            color: "#e74c3c",
-            transition: "0.3s",
-          }}
-        />
+        <FaSortDown style={{ marginLeft: "5px", color: "#e74c3c" }} />
       );
     }
 
-    // Default (unselected)
     return (
-      <FaSortDown
-        style={{
-          marginLeft: "5px",
-          color: "white",
-          opacity: 0.4,
-        }}
-      />
+      <FaSortDown style={{ marginLeft: "5px", color: "white", opacity: 0.4 }} />
     );
   };
 
@@ -445,18 +430,21 @@ export default function TotalCustomers() {
 
     setSortConfig({ key, direction });
   };
+  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
     let data = [...rows];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
           row.tcstcod?.toLowerCase().includes(q) ||
+          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q)
+          row.SalesMan?.toLowerCase().includes(q) ||
+          row.balance?.toString().includes(q) // ✅ BALANCE
       );
     }
 
@@ -486,16 +474,16 @@ export default function TotalCustomers() {
   const filteredData = useMemo(() => {
     if (!searchQuery) return sortedTableData;
 
-    const search = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
 
     return sortedTableData.filter((row) => {
-      // Convert full row to one searchable string
-      return Object.values(row)
-        .map((v) =>
-          v !== null && v !== undefined ? String(v).toLowerCase() : ""
-        )
-        .join(" ")
-        .includes(search);
+      return (
+        row.tcstcod?.toLowerCase().includes(q) ||
+        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tmobnum?.toLowerCase().includes(q) ||
+        row.SalesMan?.toLowerCase().includes(q) ||
+        row.balance?.toString().includes(q) // ✅ BALANCE
+      );
     });
   }, [sortedTableData, searchQuery]);
 
@@ -642,8 +630,15 @@ export default function TotalCustomers() {
                   {columnsConfig.map((column, index) => (
                     <td
                       key={index}
-                      onClick={() => requestSort(column.key)}
+                      onClick={() =>
+                        nonSortableKeys.includes(column.key)
+                          ? null
+                          : requestSort(column.key)
+                      }
                       style={{
+                        cursor: nonSortableKeys.includes(column.key)
+                          ? "default"
+                          : "pointer",
                         width: column.uiWidth,
                         padding: "8px 6px",
                         borderBottom: `2px solid ${softTableStyles.softBorderColor}`,
@@ -755,6 +750,32 @@ export default function TotalCustomers() {
                     ))}
                   </tr>
                 ))}
+
+                {/* ----------- ADD FIXED EMPTY ROWS TO MAKE TOTAL 25 ----------- */}
+                {Array.from({ length: 25 - filteredData.length }).map(
+                  (_, idx) => (
+                    <tr
+                      key={`empty-${idx}`}
+                      style={{
+                        backgroundColor: idx % 2 === 0 ? getcolor : "#f8f9ff",
+                      }}
+                    >
+                      {columnsConfig.map((column, index) => (
+                        <td
+                          key={index}
+                          style={{
+                            width: column.uiWidth,
+                            padding: "8px 6px",
+                            height: "24px",
+                            borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                          }}
+                        >
+                          {/* empty cell */}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>
