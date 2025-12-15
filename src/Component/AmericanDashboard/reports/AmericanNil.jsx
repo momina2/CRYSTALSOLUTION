@@ -61,6 +61,8 @@ export default function AmericanNil() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -681,9 +683,16 @@ export default function AmericanNil() {
                     {sortedTableData.map((item, i) => (
                       <tr
                         key={i}
+                        onClick={() => setSelectedRowIndex(i)}
                         style={{
-                          color: fontcolor,
-                          backgroundColor: i % 2 === 0 ? getcolor : "#f8f9ff",
+                          cursor: "pointer",
+                          color: selectedRowIndex === i ? "white" : fontcolor,
+                          backgroundColor:
+                            selectedRowIndex === i
+                              ? getnavbarbackgroundcolor // ✅ theme color
+                              : i % 2 === 0
+                              ? getcolor
+                              : "#f8f9ff",
                           transition: "background-color 0.2s ease",
                         }}
                       >

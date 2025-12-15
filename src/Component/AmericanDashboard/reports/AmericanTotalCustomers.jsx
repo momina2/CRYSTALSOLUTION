@@ -94,12 +94,14 @@ export default function TotalCustomers() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
   const query = useQueryParams();
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
   const minParam = query.get("min") || "0";
   const maxParam = query.get("max") || "99999999";
@@ -680,9 +682,17 @@ export default function TotalCustomers() {
                 {filteredData.map((item, i) => (
                   <tr
                     key={i}
+                    onClick={() => setSelectedRowIndex(i)}
                     style={{
-                      color: fontcolor,
-                      backgroundColor: i % 2 === 0 ? getcolor : "#f8f9ff",
+                      cursor: "pointer",
+                      color: selectedRowIndex === i ? "white" : fontcolor,
+                      backgroundColor:
+                        selectedRowIndex === i
+                          ? getnavbarbackgroundcolor // ✅ theme color
+                          : i % 2 === 0
+                          ? getcolor
+                          : "#f8f9ff",
+                      transition: "background-color 0.2s ease",
                     }}
                   >
                     {columnsConfig.map((column, index) => (
@@ -709,16 +719,17 @@ export default function TotalCustomers() {
                             <FaClipboardList
                               size={20}
                               style={{ cursor: "pointer", color: "#17a2b8" }}
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 window.open(
                                   `${
                                     window.location.origin
-                                  }/crystalsol/AmericanProgressReport?code=${
+                                  }/crystalsol/AmericanProgressReportDashboard?code=${
                                     item.tcstcod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
-                                )
-                              }
+                                );
+                              }}
                             />
                           </div>
                         ) : column.key === "ledgerBtn" ? (
@@ -731,16 +742,17 @@ export default function TotalCustomers() {
                             <FaFileInvoiceDollar
                               size={20}
                               style={{ cursor: "pointer", color: "#28a745" }}
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 window.open(
                                   `${
                                     window.location.origin
-                                  }/crystalsol/AmericanCustomerLedger?code=${
+                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
                                     item.tcstcod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
-                                )
-                              }
+                                );
+                              }}
                             />
                           </div>
                         ) : (
@@ -751,7 +763,6 @@ export default function TotalCustomers() {
                   </tr>
                 ))}
 
-                {/* ----------- ADD FIXED EMPTY ROWS TO MAKE TOTAL 25 ----------- */}
                 {Array.from({ length: 25 - filteredData.length }).map(
                   (_, idx) => (
                     <tr
@@ -780,7 +791,6 @@ export default function TotalCustomers() {
             </table>
           </div>
 
-          {/* TOTAL ROW (bottom of table) */}
           <div
             style={{
               borderBottom: `1px solid ${softTableStyles.softBorderColor}`,

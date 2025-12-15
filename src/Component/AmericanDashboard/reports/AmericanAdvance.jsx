@@ -68,6 +68,8 @@ export default function AmericanAdvance() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -107,115 +109,247 @@ export default function AmericanAdvance() {
     fetchData();
   }, []);
 
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF({ orientation: "portrait" });
+
+  //   // -------- PDF CONFIG ----------
+  //   const topMargin = 16; // top space for header
+  //   const rowHeight = 5; // normal row height
+  //   const headerHeight = 8; // table header height
+  //   const maxRowY = 280; // printable area before adding new page
+
+  //   // ------- TITLE --------
+  //   function drawTitle() {
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(20);
+  //     doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+
+  //     doc.setFont("Helvetica", "normal");
+  //     doc.setFontSize(13);
+  //     doc.text(REPORT_NAME, 105, 24, { align: "center" });
+  //   }
+
+  //   // --------- TABLE HEADER ---------
+  //   const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+  //   const keys = pdfColumns.map((c) => c.key);
+  //   const headers = pdfColumns.map((c) => c.header);
+  //   const colWidths = pdfColumns.map((c) => c.pdfWidth);
+
+  //   const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+  //   const startX = (210 - tableWidth) / 2; // page width 210mm
+  //   let y = 32;
+
+  //   function drawHeader() {
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(9);
+  //     let curX = startX;
+
+  //     headers.forEach((header, i) => {
+  //       let w = colWidths[i];
+  //       doc.setFillColor(220);
+  //       doc.rect(curX, y, w, headerHeight, "F");
+  //       doc.rect(curX, y, w, headerHeight);
+  //       doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
+  //         align: "center",
+  //       });
+  //       curX += w;
+  //     });
+
+  //     y += headerHeight;
+  //   }
+
+  //   // ---------- DRAW ONE ROW ----------
+  //   function drawRow(row, isTotal) {
+  //     let curX = startX;
+
+  //     row.forEach((cell, cIndex) => {
+  //       let w = colWidths[cIndex];
+  //       doc.rect(curX, y, w, rowHeight);
+
+  //       doc.setFont("Helvetica", isTotal ? "bold" : "normal");
+  //       doc.setFontSize(8);
+
+  //       if (cIndex === colWidths.length - 1) {
+  //         doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+  //           align: "right",
+  //         });
+  //       } else {
+  //         doc.text(String(cell), curX + 2, y + rowHeight - 2);
+  //       }
+  //       curX += w;
+  //     });
+
+  //     y += rowHeight;
+  //   }
+
+  //   // ---------- PAGE BREAK HANDLER -----------
+  //   function checkPageBreak() {
+  //     if (y > maxRowY) {
+  //       doc.addPage();
+  //       y = topMargin;
+  //       drawTitle();
+  //       y = 32;
+  //       drawHeader();
+  //     }
+  //   }
+
+  //   // ---------- START PRINT ----------
+  //   drawTitle();
+  //   y = 32;
+  //   drawHeader();
+
+  //   const dataRows = sortedTableData.map((row) =>
+  //     keys.map((key) => row[key] ?? "")
+  //   );
+  //   const totalRow = new Array(keys.length).fill("");
+  //   totalRow[0] = sortedTableData.length.toString();
+
+  //   totalRow[keys.length - 1] = totalBalance.toLocaleString();
+  //   const rowsPDF = [...dataRows, totalRow];
+
+  //   rowsPDF.forEach((row, index) => {
+  //     const isTotal = index === rowsPDF.length - 1;
+  //     checkPageBreak();
+  //     drawRow(row, isTotal);
+  //   });
+
+  //   // ---------- SAVE ----------
+  //   doc.save(`${REPORT_NAME}.pdf`);
+  // };
+
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF("p", "mm", "a4");
+    const pageWidth = 210;
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16; // top space for header
-    const rowHeight = 5; // normal row height
-    const headerHeight = 8; // table header height
-    const maxRowY = 280; // printable area before adding new page
+    let y = 40; // table start Y
 
-    // ------- TITLE --------
-    function drawTitle() {
+    // ===== COLORS =====
+    const COLORS = {
+      orange: [233, 102, 45],
+      blue: [30, 136, 229],
+      border: [230, 140, 110],
+      lightRow: [255, 240, 235],
+      pointsBg: [255, 225, 215],
+      text: [40, 40, 40],
+    };
+
+    // ===== DRAW BORDER =====
+    const drawOuterBorder = () => {
+      doc.setDrawColor(...COLORS.border);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(10, 20, 190, 260, 4, 4);
+    };
+
+    // ===== DRAW HEADER + FRAME =====
+    const drawPageFrame = () => {
+      // Header
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+      doc.setTextColor(...COLORS.orange);
+      doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 18, { align: "center" });
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(REPORT_NAME, 105, 24, { align: "center" });
-    }
+      doc.setFontSize(12);
+      doc.setTextColor(0);
+      doc.text(REPORT_NAME, pageWidth / 2, 26, { align: "center" });
 
-    // --------- TABLE HEADER ---------
+      // Border
+      drawOuterBorder();
+
+      // Reset table Y
+      y = 40;
+    };
+
+    // ===== TABLE CONFIG =====
     const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; // page width 210mm
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
 
-    function drawHeader() {
+    // ===== TABLE HEADER =====
+    const drawTableHeader = () => {
+      let x = startX;
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(9);
-      let curX = startX;
+      doc.setTextColor(...COLORS.orange);
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-          align: "center",
-        });
-        curX += w;
+      headers.forEach((h, i) => {
+        doc.text(h.toUpperCase(), x + 2, y);
+        x += colWidths[i];
       });
 
-      y += headerHeight;
-    }
+      y += 3;
+      doc.setDrawColor(...COLORS.border);
+      doc.line(startX, y, startX + tableWidth, y);
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
-      let curX = startX;
+      y += 4;
+    };
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
-        doc.rect(curX, y, w, rowHeight);
+    // ===== ROW =====
+    const drawRow = (row, index, isTotal) => {
+      let x = startX;
+
+      // zebra background
+      if (!isTotal && index % 2 === 0) {
+        doc.setFillColor(...COLORS.lightRow);
+        doc.rect(startX, y - 4, tableWidth, 6, "F");
+      }
+
+      row.forEach((cell, i) => {
+        // points column highlight
+        if (i === row.length - 1) {
+          doc.setFillColor(...COLORS.pointsBg);
+          doc.rect(x, y - 4, colWidths[i], 6, "F");
+        }
 
         doc.setFont("Helvetica", isTotal ? "bold" : "normal");
         doc.setFontSize(8);
+        doc.setTextColor(...COLORS.text);
 
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
-            align: "right",
-          });
-        } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
-        }
-        curX += w;
+        doc.text(
+          String(cell),
+          i === row.length - 1 ? x + colWidths[i] - 2 : x + 2,
+          y,
+          { align: i === row.length - 1 ? "right" : "left" }
+        );
+
+        x += colWidths[i];
       });
 
-      y += rowHeight;
-    }
+      y += 6;
+    };
 
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y > 275) {
         doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
+        drawPageFrame();
+        drawTableHeader();
       }
-    }
+    };
 
-    // ---------- START PRINT ----------
-    drawTitle();
-    y = 32;
-    drawHeader();
+    // ===== START PDF =====
+    drawPageFrame();
+    drawTableHeader();
 
     const dataRows = sortedTableData.map((row) =>
       keys.map((key) => row[key] ?? "")
     );
+
     const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = sortedTableData.length.toString();
-
+    totalRow[0] = "TOTAL";
     totalRow[keys.length - 1] = totalBalance.toLocaleString();
-    const rowsPDF = [...dataRows, totalRow];
 
-    rowsPDF.forEach((row, index) => {
-      const isTotal = index === rowsPDF.length - 1;
+    [...dataRows, totalRow].forEach((row, index) => {
       checkPageBreak();
-      drawRow(row, isTotal);
+      drawRow(row, index, index === dataRows.length);
     });
 
-    // ---------- SAVE ----------
+    // ===== SAVE =====
     doc.save(`${REPORT_NAME}.pdf`);
   };
-
-  // ======================= EXCEL EXPORT =======================
 
   async function exportCSV({
     rows,
@@ -400,11 +534,11 @@ export default function AmericanAdvance() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) || 
-          row.tcstdsc?.toLowerCase().includes(q) || 
-          row.tmobnum?.toLowerCase().includes(q) || 
-          row.SalesMan?.toLowerCase().includes(q) || 
-          row.balance?.toString().includes(q) 
+          row.tcstcod?.toLowerCase().includes(q) ||
+          row.tcstdsc?.toLowerCase().includes(q) ||
+          row.tmobnum?.toLowerCase().includes(q) ||
+          row.SalesMan?.toLowerCase().includes(q) ||
+          row.balance?.toString().includes(q)
       );
     }
 
@@ -438,11 +572,11 @@ export default function AmericanAdvance() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter((row) => {
         return (
-          row.tcstcod?.toLowerCase().includes(q) || 
-          row.tcstdsc?.toLowerCase().includes(q) || 
-          row.tmobnum?.toLowerCase().includes(q) || 
-          row.SalesMan?.toLowerCase().includes(q) || 
-          row.balance?.toString().includes(q) 
+          row.tcstcod?.toLowerCase().includes(q) ||
+          row.tcstdsc?.toLowerCase().includes(q) ||
+          row.tmobnum?.toLowerCase().includes(q) ||
+          row.SalesMan?.toLowerCase().includes(q) ||
+          row.balance?.toString().includes(q)
         );
       });
     }
@@ -687,9 +821,16 @@ export default function AmericanAdvance() {
                     {sortedTableData.map((item, i) => (
                       <tr
                         key={i}
+                        onClick={() => setSelectedRowIndex(i)}
                         style={{
-                          color: fontcolor,
-                          backgroundColor: i % 2 === 0 ? getcolor : "#f8f9ff",
+                          cursor: "pointer",
+                          color: selectedRowIndex === i ? "white" : fontcolor,
+                          backgroundColor:
+                            selectedRowIndex === i
+                              ? getnavbarbackgroundcolor // ✅ theme ka color
+                              : i % 2 === 0
+                              ? getcolor
+                              : "#f8f9ff",
                           transition: "background-color 0.2s ease",
                         }}
                       >

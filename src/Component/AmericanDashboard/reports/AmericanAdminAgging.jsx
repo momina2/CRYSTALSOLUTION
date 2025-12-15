@@ -9,51 +9,84 @@ import "../AmericanDashboard.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { useLocation } from "react-router-dom";
 
-const REPORT_NAME = "American Non-Active Customers";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const REPORT_NAME = "Admin Agging";
+const COMPANY_NAME = "American Electronics";
 
 const columnsConfig = [
   {
     header: "Code",
-    key: "tacccod",
+    key: "Code",
     alignment: "left",
     uiWidth: 80,
     pdfWidth: 20,
     excelWidth: 15,
   },
   {
-    header: "Name",
-    key: "tcstdsc",
+    header: "Customer",
+    key: "Customer",
     alignment: "left",
-    uiWidth: 360,
+    uiWidth: 320,
     pdfWidth: 80,
     excelWidth: 40,
   },
-  // {
-  //   header: "Salesman",
-  //   key: "SalesMan",
-  //   alignment: "left",
-  //   uiWidth: 200,
-  //   pdfWidth: 35,
-  //   excelWidth: 30,
-  // },
   {
-    header: "Mobile",
-    key: "tmobnum",
-    alignment: "left",
-    uiWidth: 110,
-    pdfWidth: 25,
-    excelWidth: 20,
+    header: "Amt001",
+    key: "Amt001",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 20,
+    excelWidth: 10,
+  },
+  {
+    header: "Amt002",
+    key: "Amt002",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 20,
+    excelWidth: 10,
   },
 
   {
-    header: "Balance",
-    key: "Balance",
+    header: "Amt003",
+    key: "Amt003",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 20,
+    excelWidth: 10,
+  },
+  {
+    header: "Amt004",
+    key: "Amt004",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 20,
+    excelWidth: 10,
+  },
+  {
+    header: "Amt005",
+    key: "Amt005",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 20,
+    excelWidth: 10,
+  },
+  {
+    header: "Amt006",
+    key: "Amt006",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 20,
+    excelWidth: 10,
+  },
+  {
+    header: "Total",
+    key: "Total",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
-    excelWidth: 18,
+    excelWidth: 10,
   },
   {
     header: "",
@@ -64,8 +97,12 @@ const columnsConfig = [
     excelWidth: 0,
   },
 ];
+function useQueryParams() {
+  const { search } = useLocation();
+  return useMemo(() => new URLSearchParams(search), [search]);
+}
 
-export default function AmericanNonActive() {
+export default function AmericanAdminAgging() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -76,6 +113,14 @@ export default function AmericanNonActive() {
     direction: "ascending",
   });
 
+  const query = useQueryParams();
+
+  const NumDays = query.get("min") || "0";
+  //   const maxParam = query.get("max") || "99999999";
+  const labelParam = query.get("label") || "";
+
+  const [errorMessage, setErrorMessage] = useState("");
+
   const {
     isSidebarVisible,
     getcolor,
@@ -85,32 +130,73 @@ export default function AmericanNonActive() {
     getdatafontsize,
   } = useTheme();
 
+  // 👉 Single date picker: cusDate (default = today)
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const defaultDate = `${yyyy}-${mm}-${dd}`;
+  const [RepDate, setRepDate] = useState(defaultDate);
+  const [columnTotals, setColumnTotals] = useState({});
+
+  const toApiDate = (input) => {
+    if (!input) return "";
+    const [y, m, d] = input.split("-");
+    return `${y}-${m}-${d}`;
+  };
+
   // ----------- FETCH API (same as pehle) -----------
   // === API CALL =====
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-
-        const form = new FormData();
-        form.append("code", "AMRELEC");
-
-        const res = await axios.post(
-          "https://crystalsolutions.com.pk/api/NonActiveCustomers.php",
-          form,
-          { timeout: 20000 }
-        );
-
-        const arr = res?.data?.Detail ?? [];
-        setRows(arr);
-      } catch (err) {
-        console.error("FetchError:", err);
-        setRows([]);
-      }
-      setIsLoading(false);
-    };
     fetchData();
-  }, []);
+  }, [NumDays]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const form = new FormData();
+      form.append("code", "AMRELEC");
+      form.append("FRepDat", toApiDate(RepDate));
+      form.append("FDayNum", NumDays);
+
+      const res = await axios.post(
+        "https://crystalsolutions.com.pk/api/AmericanAdminAgging.php",
+        form
+      );
+
+      let dataRows = [];
+
+      if (Array.isArray(res.data.Detail)) {
+        dataRows = res.data.Detail;
+      } else if (Array.isArray(res.data)) {
+        dataRows = res.data;
+      }
+
+      const mapped = dataRows.map((row) => ({
+        ...row,
+      }));
+
+      setRows(mapped);
+      setColumnTotals({
+        Amt001: res.data.Amt001,
+        Amt002: res.data.Amt002,
+        Amt003: res.data.Amt003,
+        Amt004: res.data.Amt004,
+        Amt005: res.data.Amt005,
+        Amt006: res.data.Amt006,
+        Total: res.data.Total,
+      });
+      setErrorMessage("");
+    } catch (err) {
+      console.error("API error:", err);
+      setErrorMessage("Unable to retrieve data. Please try again.");
+      setRows([]);
+    }
+
+    setIsLoading(false);
+  };
 
   // const exportPDFHandler = () => {
   //   const doc = new jsPDF({ orientation: "portrait" });
@@ -220,78 +306,93 @@ export default function AmericanNonActive() {
   //   doc.save(`${REPORT_NAME}.pdf`);
   // };
 
-  // ======================= EXCEL EXPORT =======================
-
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
 
-    // -------- PDF CONFIG ----------
+    const pageWidth = doc.internal.pageSize.getWidth();
+
     const topMargin = 16;
     const rowHeight = 5;
     const headerHeight = 8;
-    const maxRowY = 280;
+    const maxRowY = 190;
 
-    // ------- TITLE --------
+    const numericKeys = [
+      "Amt001",
+      "Amt002",
+      "Amt003",
+      "Amt004",
+      "Amt005",
+      "Amt006",
+      "Total",
+    ];
+
     function drawTitle() {
-      // Company name (FORMAT-2 style)
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+      doc.setFontSize(18);
+      doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 14, { align: "center" });
 
-      // Report name
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(REPORT_NAME, 105, 24, { align: "center" });
+      doc.text(REPORT_NAME, pageWidth / 2, 22, { align: "center" });
     }
 
-    // --------- TABLE HEADER ---------
     const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2;
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
+
+    let y = 30;
 
     function drawHeader() {
-      doc.setFont("Helvetica", "bold"); // FORMAT-2 header font
+      doc.setFont("Helvetica", "bold");
       doc.setFontSize(9);
 
       let curX = startX;
-      headers.forEach((header, i) => {
+      headers.forEach((h, i) => {
         const w = colWidths[i];
+        doc.setFillColor(230);
+        doc.rect(curX, y, w, headerHeight, "F");
         doc.rect(curX, y, w, headerHeight);
-        doc.text(
-          String(header).toUpperCase(),
-          curX + w / 2,
-          y + headerHeight - 3,
-          { align: "center" }
-        );
+        doc.text(h, curX + w / 2, y + headerHeight - 3, { align: "center" });
         curX += w;
       });
 
       y += headerHeight;
     }
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+    function checkPageBreak() {
+      if (y + rowHeight > maxRowY) {
+        doc.addPage();
+        drawTitle();
+        y = 30;
+        drawHeader();
+      }
+    }
+
+    function drawRow(row, isTotal = false) {
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        const w = colWidths[cIndex];
-        doc.rect(curX, y, w, rowHeight);
+      row.forEach((cell, i) => {
+        const w = colWidths[i];
+        const key = keys[i];
 
-        // FORMAT-2 row font logic
+        doc.rect(curX, y, w, rowHeight);
         doc.setFont("Helvetica", isTotal ? "bold" : "normal");
         doc.setFontSize(8);
 
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+        if (numericKeys.includes(key)) {
+          doc.text(String(cell || ""), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+          doc.text(String(cell || ""), curX + 2, y + rowHeight - 2);
         }
 
         curX += w;
@@ -300,41 +401,114 @@ export default function AmericanNonActive() {
       y += rowHeight;
     }
 
-    // ---------- PAGE BREAK HANDLER ----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        drawTitle();
-        y = 32;
-        drawHeader();
-      }
-    }
-
-    // ---------- START PRINT ----------
+    // ===== START =====
     drawTitle();
     drawHeader();
 
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? "")
-    );
-
-    const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = "TOTAL";
-    totalRow[keys.length - 1] = totalBalance.toLocaleString();
-
-    [...dataRows, totalRow].forEach((row, index) => {
+    sortedTableData.forEach((row) => {
       checkPageBreak();
-      drawRow(row, index === dataRows.length);
+      drawRow(keys.map((k) => row[k] ?? ""));
     });
 
-    // ---------- SAVE ----------
+    // ===== TOTAL ROW =====
+    const totalRow = keys.map((key) => {
+      if (key === "Code") return sortedTableData.length.toString();
+      if (columnTotals?.[key]) return columnTotals[key];
+      return "";
+    });
+
+    checkPageBreak();
+    drawRow(totalRow, true);
+
     doc.save(`${REPORT_NAME}.pdf`);
   };
+
+  // ======================= EXCEL EXPORT =======================
+
+  // async function exportCSV({
+  //   rows,
+  //   columnsConfig,
+  //   totalCollection,
+  //   companyName,
+  //   reportName,
+  // }) {
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet("Report");
+
+  //   const excelColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+
+  //   const headers = excelColumns.map((c) => c.header);
+  //   const keys = excelColumns.map((c) => c.key);
+
+  //   worksheet.addRow([companyName]);
+  //   worksheet.mergeCells(1, 1, 1, headers.length);
+  //   worksheet.getRow(1).font = { bold: true, size: 16 };
+  //   worksheet.getRow(1).alignment = { horizontal: "center" };
+
+  //   worksheet.addRow([reportName]);
+  //   worksheet.mergeCells(2, 1, 2, headers.length);
+  //   worksheet.getRow(2).alignment = { horizontal: "center" };
+  //   worksheet.addRow([]);
+
+  //   const headerRow = worksheet.addRow(headers);
+  //   headerRow.eachCell((cell) => {
+  //     cell.font = { bold: true };
+  //     cell.alignment = { horizontal: "center" };
+  //     cell.border = {
+  //       top: { style: "thin" },
+  //       left: { style: "thin" },
+  //       bottom: { style: "thin" },
+  //       right: { style: "thin" },
+  //     };
+  //   });
+
+  //   rows.forEach((item) => {
+  //     const row = worksheet.addRow(keys.map((key) => item[key]));
+  //     row.eachCell((cell, index) => {
+  //       cell.border = {
+  //         top: { style: "thin" },
+  //         left: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         right: { style: "thin" },
+  //       };
+  //       cell.alignment = {
+  //         horizontal: "left",
+  //       };
+  //     });
+  //   });
+
+  //   const totalRowData = new Array(headers.length).fill("");
+  //   totalRowData[0] = rows.length.toString();
+  //   totalRowData[headers.length - 1] = totalCollection.toLocaleString();
+  //   const totalRow = worksheet.addRow(totalRowData);
+
+  //   totalRow.eachCell((cell) => {
+  //     cell.font = { bold: true };
+  //     cell.border = {
+  //       top: { style: "double" },
+  //       left: { style: "thin" },
+  //       bottom: { style: "double" },
+  //       right: { style: "thin" },
+  //     };
+  //   });
+
+  //   excelColumns.forEach((col, i) => {
+  //     worksheet.getColumn(i + 1).width = col.excelWidth || col.uiWidth || 20;
+  //   });
+
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   saveAs(
+  //     new Blob([buffer], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     }),
+  //     `${reportName}.xlsx`
+  //   );
+  // }
 
   async function exportCSV({
     rows,
     columnsConfig,
-    totalCollection,
+    columnTotals, // ⭐ ADD THIS
     companyName,
     reportName,
   }) {
@@ -346,6 +520,7 @@ export default function AmericanNonActive() {
     const headers = excelColumns.map((c) => c.header);
     const keys = excelColumns.map((c) => c.key);
 
+    // ===== TITLE =====
     worksheet.addRow([companyName]);
     worksheet.mergeCells(1, 1, 1, headers.length);
     worksheet.getRow(1).font = { bold: true, size: 16 };
@@ -356,6 +531,7 @@ export default function AmericanNonActive() {
     worksheet.getRow(2).alignment = { horizontal: "center" };
     worksheet.addRow([]);
 
+    // ===== HEADER =====
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => {
       cell.font = { bold: true };
@@ -368,27 +544,40 @@ export default function AmericanNonActive() {
       };
     });
 
+    // ===== DATA ROWS =====
     rows.forEach((item) => {
       const row = worksheet.addRow(keys.map((key) => item[key]));
       row.eachCell((cell, index) => {
+        const key = keys[index];
+
         cell.border = {
           top: { style: "thin" },
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" },
         };
+
         cell.alignment = {
-          horizontal: "left",
+          horizontal:
+            key && (key.startsWith("Amt") || key === "Total")
+              ? "right"
+              : "left",
         };
       });
     });
 
-    const totalRowData = new Array(headers.length).fill("");
-    totalRowData[0] = rows.length.toString();
-    totalRowData[headers.length - 1] = totalCollection.toLocaleString();
+    // ===== TOTAL ROW (COLUMN-WISE) =====
+    const totalRowData = keys.map((key) => {
+      if (key === "Code") return rows.length.toString();
+      if (columnTotals?.[key]) return columnTotals[key];
+      return "";
+    });
+
     const totalRow = worksheet.addRow(totalRowData);
 
-    totalRow.eachCell((cell) => {
+    totalRow.eachCell((cell, index) => {
+      const key = keys[index];
+
       cell.font = { bold: true };
       cell.border = {
         top: { style: "double" },
@@ -396,8 +585,14 @@ export default function AmericanNonActive() {
         bottom: { style: "double" },
         right: { style: "thin" },
       };
+
+      cell.alignment = {
+        horizontal:
+          key && (key.startsWith("Amt") || key === "Total") ? "left" : "right",
+      };
     });
 
+    // ===== COLUMN WIDTHS =====
     excelColumns.forEach((col, i) => {
       worksheet.getColumn(i + 1).width = col.excelWidth || col.uiWidth || 20;
     });
@@ -508,56 +703,23 @@ export default function AmericanNonActive() {
   };
 
   // ----------- FILTER + SORT DATA -----------
-  // const sortedTableData = useMemo(() => {
-  //   let data = [...rows];
-
-  //   if (searchQuery) {
-  //     const q = searchQuery.toLowerCase();
-  //     data = data.filter(
-  //       (row) =>
-  //         row.tcstcod?.toLowerCase().includes(q) ||
-  //         row.tmobnum?.toLowerCase().includes(q) ||
-  //         row.SalesMan?.toLowerCase().includes(q)
-  //     );
-  //   }
-
-  //   if (sortConfig.key) {
-  //     data.sort((a, b) => {
-  //       const aVal = a[sortConfig.key] ?? "";
-  //       const bVal = b[sortConfig.key] ?? "";
-
-  //       // Balance numeric sort
-  //       if (sortConfig.key === "balance") {
-  //         const aNum = parseFloat(aVal) || 0;
-  //         const bNum = parseFloat(bVal) || 0;
-  //         return sortConfig.direction === "ascending"
-  //           ? aNum - bNum
-  //           : bNum - aNum;
-  //       }
-
-  //       return sortConfig.direction === "ascending"
-  //         ? String(aVal).localeCompare(String(bVal))
-  //         : String(bVal).localeCompare(String(aVal));
-  //     });
-  //   }
-
-  //   return data;
-  // }, [rows, searchQuery, sortConfig]);
-
   const sortedTableData = useMemo(() => {
     let data = [...rows];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase().trim();
-
-      data = data.filter((row) => {
-        return (
-          row.tacccod?.toLowerCase().includes(q) || // ✅ Code
-          row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name (FIXED)
-          row.tmobnum?.toLowerCase().includes(q) || // ✅ Mobile
-          row.Balance?.toString().includes(q) // ✅ Balance
-        );
-      });
+      const q = searchQuery.toLowerCase();
+      data = data.filter(
+        (row) =>
+          row.Code?.toLowerCase().includes(q) ||
+          row.Amt001?.toLowerCase().includes(q) ||
+          row.Amt002?.toLowerCase().includes(q) ||
+          row.Amt003?.toLowerCase().includes(q) ||
+          row.Amt004?.toLowerCase().includes(q) ||
+          row.Amt005?.toLowerCase().includes(q) ||
+          row.Amt006?.toLowerCase().includes(q) ||
+          row.Customer?.toLowerCase().includes(q) ||
+          row.Total?.toLowerCase().includes(q)
+      );
     }
 
     if (sortConfig.key) {
@@ -565,10 +727,13 @@ export default function AmericanNonActive() {
         const aVal = a[sortConfig.key] ?? "";
         const bVal = b[sortConfig.key] ?? "";
 
-        if (sortConfig.key === "Balance") {
+        // Balance numeric sort
+        if (sortConfig.key === "balance") {
+          const aNum = parseFloat(aVal) || 0;
+          const bNum = parseFloat(bVal) || 0;
           return sortConfig.direction === "ascending"
-            ? parseFloat(aVal || 0) - parseFloat(bVal || 0)
-            : parseFloat(bVal || 0) - parseFloat(aVal || 0);
+            ? aNum - bNum
+            : bNum - aNum;
         }
 
         return sortConfig.direction === "ascending"
@@ -587,10 +752,15 @@ export default function AmericanNonActive() {
       const q = searchQuery.toLowerCase();
       data = data.filter((row) => {
         return (
-          row.tacccod?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.tcstdsc?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q)
+          row.Code?.toLowerCase().includes(q) ||
+          row.Amt001?.toLowerCase().includes(q) ||
+          row.Amt002?.toLowerCase().includes(q) ||
+          row.Amt003?.toLowerCase().includes(q) ||
+          row.Amt004?.toLowerCase().includes(q) ||
+          row.Amt005?.toLowerCase().includes(q) ||
+          row.Amt006?.toLowerCase().includes(q) ||
+          row.Customer?.toLowerCase().includes(q) ||
+          row.Total?.toLowerCase().includes(q)
         );
       });
     }
@@ -617,7 +787,7 @@ export default function AmericanNonActive() {
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.Balance ?? 0);
+      const value = Number((row.Total || "0").toString().replace(/,/g, ""));
       return sum + (isNaN(value) ? 0 : value);
     }, 0);
   }, [sortedTableData]);
@@ -626,7 +796,7 @@ export default function AmericanNonActive() {
     exportCSV({
       rows: sortedTableData,
       columnsConfig,
-      totalCollection: totalBalance,
+      columnTotals, // ⭐ MUST
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -910,46 +1080,37 @@ export default function AmericanNonActive() {
               width: "100%",
             }}
           >
-            {columnsConfig.map((column, index) => {
-              const isTotalColumn = index === columnsConfig.length - 2; // ⭐ BALANCE is now 2nd last
-
-              const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
-              );
-
-              return (
-                <div
-                  key={`total-col-${index}`}
-                  className={alignmentClass}
-                  style={{
-                    width: column.uiWidth,
-                    background: getcolor,
-                    borderRight:
-                      index < columnsConfig.length - 1
-                        ? `1px solid ${softTableStyles.softBorderColor}`
-                        : "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: isTotalColumn ? "flex-end" : "flex-start",
-                    paddingRight: isTotalColumn ? "5px" : "0px",
-                    paddingLeft: isTotalColumn ? "0px" : "5px",
-                    fontWeight: "bold",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                >
-                  {column.key === "balance" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
-                  ) : index === 0 ? (
-                    <span>{filteredData.length}</span>
-                  ) : column.key === "scrollSpacer" ? (
-                    ""
-                  ) : (
-                    ""
-                  )}
-                </div>
-              );
-            })}
+            {columnsConfig.map((column, index) => (
+              <div
+                key={`total-col-${index}`}
+                className={getAlignmentClass(column.alignment)}
+                style={{
+                  width: column.uiWidth,
+                  background: getcolor,
+                  borderRight:
+                    index < columnsConfig.length - 1
+                      ? `1px solid ${softTableStyles.softBorderColor}`
+                      : "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent:
+                    column.alignment === "right" ? "flex-end" : "flex-start",
+                  padding: "0 6px",
+                  fontWeight: "bold",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                }}
+              >
+                {/* ⭐ column specific total */}
+                {columnTotals[column.key]
+                  ? Number(
+                      columnTotals[column.key].toString().replace(/,/g, "")
+                    ).toLocaleString()
+                  : column.key === "Code"
+                  ? filteredData.length
+                  : ""}
+              </div>
+            ))}
           </div>
 
           {/* ACTION BUTTONS – Only PDF & Excel */}
@@ -959,7 +1120,7 @@ export default function AmericanNonActive() {
               marginBottom: "2px",
             }}
           >
-            <SingleButton
+            {/* <SingleButton
               text="PDF"
               onClick={exportPDFHandler}
               onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
@@ -974,6 +1135,21 @@ export default function AmericanNonActive() {
               onBlur={(e) =>
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }
+            /> */}
+            <SingleButton
+              text="PDF"
+              onClick={(e) => {
+                e.preventDefault(); // ✅ STOP SUBMIT
+                exportPDFHandler();
+              }}
+            />
+
+            <SingleButton
+              text="Excel"
+              onClick={(e) => {
+                e.preventDefault(); // ✅ STOP SUBMIT
+                handleCSV();
+              }}
             />
           </div>
         </div>

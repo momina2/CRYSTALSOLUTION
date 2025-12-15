@@ -380,7 +380,6 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
 //   );
 // };
 
-
 const FinancialPieChart = ({ webData, balanceData }) => {
   if (!webData || !balanceData) return null;
 
@@ -1129,6 +1128,28 @@ const HorizontalRangeCard = ({ stats }) => {
   );
 };
 
+const aggingDayMapping = {
+  "≤ 30": 1,
+  "≤ 60": 2,
+  "≤ 90": 3,
+  "≤ 120": 4,
+  "≤ 180M": 5,
+  "> 180M": 6,
+};
+
+const handleAggingClick = (rangeLabel) => {
+  const dayNum = aggingDayMapping[rangeLabel];
+  if (!dayNum) return;
+
+  const url =
+    window.location.origin +
+    `/crystalsol/AmericanAdminAgging?min=${dayNum}&label=${encodeURIComponent(
+      rangeLabel
+    )}`;
+
+  window.open(url, "_blank");
+};
+
 const HorizontalAggingRangeCard = ({ stats }) => (
   <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
     {/* HEADER */}
@@ -1141,6 +1162,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
       {stats.map((stat) => (
         <div
           key={stat.range}
+          onClick={() => handleAggingClick(stat.range)}
           className="flex-1 flex flex-col items-center justify-evenly cursor-pointer hover:bg-gray-50 transition"
         >
           <p className="text-[12px] font-medium text-gray-600 leading-none">
@@ -1741,7 +1763,7 @@ const ElectronicsDashboard = () => {
                               x: { grid: { display: false } },
                               y: {
                                 ticks: {
-                                  callback: (value) => value + "M",
+                                  callback: (value) => `${value / 1_000_000}M`,
                                   color: "#6b7280",
                                 },
                                 grid: { color: "rgba(0,0,0,0.04)" },

@@ -172,7 +172,9 @@ import AmericanOutstanding from "./Component/AmericanDashboard/reports/AmericanO
 import CustomerBalance from "./Component/AmericanDashboard/reports/CustomerBalance.jsx";
 import AmericanNonActive from "./Component/AmericanDashboard/reports/AmericanNonActive.jsx";
 import TotalCustomers from "./Component/AmericanDashboard/reports/AmericanTotalCustomers.jsx";
-import AmericanCustomerLedger from "./Component/AmericanDashboard/reports/AmericanCustomerLedger.jsx";
+import AmericanCustomerLedgerDashboard from "./Component/AmericanDashboard/reports/AmericanCustomerLedgerDashboard.jsx";
+import AmericanProgressReportDashboard from "./Component/AmericanDashboard/reports/AmericanProgressReportDashboard.jsx";
+import AmericanAdminAgging from "./Component/AmericanDashboard/reports/AmericanAdminAgging.jsx";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -388,10 +390,19 @@ function App() {
 
                 <Route
                   exact
-                  path="/AmericanCustomerLedger"
-                  element={<AmericanCustomerLedger />}
+                  path="/AmericanCustomerLedgerDashboard"
+                  element={<AmericanCustomerLedgerDashboard />}
                 ></Route>
-
+                <Route
+                  exact
+                  path="/AmericanProgressReportDashboard"
+                  element={<AmericanProgressReportDashboard />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanAdminAgging"
+                  element={<AmericanAdminAgging />}
+                ></Route>
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////   FILE //////////////////////////
@@ -699,16 +710,16 @@ function App() {
                   element={<DailyStatusReport />}
                 />
                 <Route exact path="/SaleReport" element={<DailySaleReport />} />
-                <Route
-                  exact
-                  path="/MemberCollectionReport"
-                  element={<MemberCollectionReport />}
-                />
                 {/* <Route
                   exact
                   path="/MemberCollectionReport"
-                  element={<AmericanDashbaord />}
+                  element={<MemberCollectionReport />}
                 /> */}
+                <Route
+                  exact
+                  path="/MemberCollectionReport"
+                  element={<AmericanDashbaord />}
+                />
                 <Route
                   exact
                   path="/MemberCollectionSummary"
