@@ -37,10 +37,10 @@ const columnsConfig = [
     excelWidth: 15,
   },
   {
-    header: "Type",
+    header: "Typ",
     key: "ttrntyp",
     alignment: "left",
-    uiWidth: 70,
+    uiWidth: 50,
     pdfWidth: 14,
     excelWidth: 15,
   },
@@ -48,7 +48,7 @@ const columnsConfig = [
     header: "Trn#",
     key: "ttrnnum",
     alignment: "left",
-    uiWidth: 80,
+    uiWidth: 60,
     pdfWidth: 16,
     excelWidth: 15,
   },
@@ -56,7 +56,7 @@ const columnsConfig = [
     header: "Description",
     key: "ttrndsc",
     alignment: "left",
-    uiWidth: 200,
+    uiWidth: 360,
     pdfWidth: 65,
     excelWidth: 40,
   },
@@ -64,7 +64,7 @@ const columnsConfig = [
     header: "Qty",
     key: "titmqnt",
     alignment: "right",
-    uiWidth: 80,
+    uiWidth: 60,
     pdfWidth: 12,
     excelWidth: 10,
   },
@@ -163,7 +163,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
   </div>
 );
 
-export default function AmericanProgressReportDashboard() {
+export default function AmericanCustomerLedgerDashboard() {
   const query = useQueryParams();
   const custCode = query.get("code");
   const custName = query.get("name");

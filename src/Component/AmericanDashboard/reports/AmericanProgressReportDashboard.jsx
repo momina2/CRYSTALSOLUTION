@@ -146,7 +146,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
             style={{
               fontSize: "13px",
               fontWeight: 600,
-              color: "#3f379b",
+              color: "#000",
             }}
           >
             {Number(s.amount || 0).toLocaleString()}
