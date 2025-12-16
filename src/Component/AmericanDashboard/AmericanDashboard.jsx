@@ -176,47 +176,47 @@ const YearlySPCGraph = ({ apiData }) => {
   );
 };
 
-const StaffSummaryCard = ({ webData }) => {
-  if (!webData) return null;
+// const StaffSummaryCard = ({ webData }) => {
+//   if (!webData) return null;
 
-  return (
-    <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
-      {/* HEADER */}
-      <p className="text-[16px] font-medium text-black">Staff Summary</p>
+//   return (
+//     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
+//       {/* HEADER */}
+//       <p className="text-[16px] font-medium text-black">Staff Summary</p>
 
-      {/* GRID */}
-      <div className="grid grid-cols-2 grid-rows-2 text-center leading-tight flex-1">
-        <div className="flex flex-col justify-center border-r border-b border-gray-200 p-1">
-          <p className="text-[10px] text-gray-500">SalesMan</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
-            {webData?.SalesMan || "-"}
-          </h4>
-        </div>
+//       {/* GRID */}
+//       <div className="grid grid-cols-2 grid-rows-2 text-center leading-tight flex-1">
+//         <div className="flex flex-col justify-center border-r border-b border-gray-200 p-1">
+//           <p className="text-[10px] text-gray-500">SalesMan</p>
+//           <h4 className="text-[15px] font-semibold text-indigo-800">
+//             {webData?.SalesMan || "-"}
+//           </h4>
+//         </div>
 
-        <div className="flex flex-col justify-center border-b border-gray-200 p-1">
-          <p className="text-[10px] text-gray-500">City</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
-            {webData?.Stores || "-"}
-          </h4>
-        </div>
+//         <div className="flex flex-col justify-center border-b border-gray-200 p-1">
+//           <p className="text-[10px] text-gray-500">City</p>
+//           <h4 className="text-[15px] font-semibold text-indigo-800">
+//             {webData?.Stores || "-"}
+//           </h4>
+//         </div>
 
-        <div className="flex flex-col justify-center border-r border-gray-200 p-1">
-          <p className="text-[10px] text-gray-500">Region</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
-            {webData?.Region || "-"}
-          </h4>
-        </div>
+//         <div className="flex flex-col justify-center border-r border-gray-200 p-1">
+//           <p className="text-[10px] text-gray-500">Region</p>
+//           <h4 className="text-[15px] font-semibold text-indigo-800">
+//             {webData?.Region || "-"}
+//           </h4>
+//         </div>
 
-        <div className="flex flex-col justify-center p-1">
-          <p className="text-[10px] text-gray-500">Managers</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
-            {webData?.Managers || "-"}
-          </h4>
-        </div>
-      </div>
-    </div>
-  );
-};
+//         <div className="flex flex-col justify-center p-1">
+//           <p className="text-[10px] text-gray-500">Managers</p>
+//           <h4 className="text-[15px] font-semibold text-indigo-800">
+//             {webData?.Managers || "-"}
+//           </h4>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 const StaffCashSummaryCard = ({ balanceData, webData }) => {
   if (!balanceData || !webData) return null;
@@ -258,7 +258,15 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
         <div className="flex flex-col justify-center border-r border-b border-gray-100 p-1">
           <p className="text-[14px] text-gray-800">
             SalesMan:
-            <span className="text-[16px] font-semibold text-sky-700 pl-1">
+            <span
+              className="text-[16px] font-semibold text-sky-700 pl-1 cursor-pointer hover:underline"
+              onClick={() =>
+                window.open(
+                  window.location.origin + "/crystalsol/AmericanSalesManReport",
+                  "_blank"
+                )
+              }
+            >
               {webData?.SalesMan || "-"}
             </span>
           </p>
