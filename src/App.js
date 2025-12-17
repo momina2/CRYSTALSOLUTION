@@ -177,6 +177,8 @@ import AmericanProgressReportDashboard from "./Component/AmericanDashboard/repor
 import AmericanAdminAgging from "./Component/AmericanDashboard/reports/AmericanAdminAgging.jsx";
 import AmericanSalesManReport from "./Component/AmericanDashboard/reports/AmericanSalesManReport.jsx";
 import AmericanSalesManDetailsReport from "./Component/AmericanDashboard/reports/AmericanSalesManDetailsReport.jsx";
+import AmericanCityReport from "./Component/AmericanDashboard/reports/AmericanCityReport.jsx";
+import AmericanCityDetailsReport from "./Component/AmericanDashboard/reports/AmericanCityDetailsReport.jsx";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -413,7 +415,17 @@ function App() {
                 <Route
                   exact
                   path="/AmericanSalesManDetailsReport"
-                  element={<AmericanSalesManDetailsReport/>}
+                  element={<AmericanSalesManDetailsReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanCityReport"
+                  element={<AmericanCityReport/>}
+                ></Route>
+                   <Route
+                  exact
+                  path="/AmericanCityDetailsReport"
+                  element={<AmericanCityDetailsReport/>}
                 ></Route>
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////

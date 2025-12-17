@@ -113,9 +113,9 @@ const columnsConfig = [
 const HorizontalAggingRangeCard = ({ stats }) => (
   <div
     style={{
-      width: "100%",
+      width: "65%",
       backgroundColor: "white",
-      border: "1px solid #dadada",
+      border: "1px solid #000",
       borderRadius: "6px",
       padding: "4px",
       marginBottom: "6px",
@@ -134,14 +134,14 @@ const HorizontalAggingRangeCard = ({ stats }) => (
           style={{
             flex: 1,
             padding: "4px 2px",
-            borderRight: i !== stats.length - 1 ? "1px solid #dadada" : "none", // vertical grid
+            borderRight: i !== stats.length - 1 ? "1px solid #000" : "none", // vertical grid
           }}
         >
           <p
             style={{
               marginBottom: "4px",
               fontSize: "12px",
-              borderBottom: "1px solid #dadada", // horizontal grid
+              borderBottom: "1px solid #000", // horizontal grid
               paddingBottom: "2px",
             }}
           >

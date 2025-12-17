@@ -13,7 +13,7 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "SalesMan Report";
+const REPORT_NAME = "City Report";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
 const columnsConfig = [
@@ -27,15 +27,15 @@ const columnsConfig = [
   },
   {
     header: "Code",
-    key: "tsalcod",
+    key: "tctycod",
     alignment: "center",
     uiWidth: 60,
     pdfWidth: 10,
     excelWidth: 15,
   },
   {
-    header: "Salesman",
-    key: "SalesMan",
+    header: "City",
+    key: "City",
     alignment: "left",
     uiWidth: 200,
     pdfWidth: 35,
@@ -44,7 +44,7 @@ const columnsConfig = [
   {
     header: "Nos",
     key: "Nos",
-    alignment: "left",
+    alignment: "right",
     uiWidth: 50,
     pdfWidth: 10,
     excelWidth: 20,
@@ -73,15 +73,14 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function AmericanSalesManReport() {
+export default function AmericanCityReport() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [apiTotalBalance, setApiTotalBalance] = useState(0);
-  const [apiTotalSalesMan, setApiTotalSalesMan] = useState(0);
+  const [apiTotalCity, setApiTotalCity] = useState(0);
   const [apiTotalCustomers, setApiTotalCustomers] = useState(0);
-
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -120,7 +119,7 @@ export default function AmericanSalesManReport() {
       form.append("code", "AMRELEC");
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanSaleManInfo.php",
+        "https://crystalsolutions.com.pk/api/AmericanCityInfo.php",
         form
       );
 
@@ -136,13 +135,12 @@ export default function AmericanSalesManReport() {
         setApiTotalBalance(Number(cleanTotal) || 0);
       }
 
-      if (res.data["Total SalesMan"]) {
-        setApiTotalSalesMan(Number(res.data["Total SalesMan"]) || 0);
+      if (res.data["Total Cities"]) {
+        setApiTotalCity(Number(res.data["Total Cities"]) || 0);
       }
       if (res.data["Total Customers"]) {
         setApiTotalCustomers(Number(res.data["Total Customers"]) || 0);
       }
-
 
       const mapped = dataRows.map((row) => ({
         ...row,
@@ -269,13 +267,11 @@ export default function AmericanSalesManReport() {
     const totalRow = new Array(keys.length).fill("");
 
     // Total Customers (first column – same as UI)
-    totalRow[0] = apiTotalSalesMan.toLocaleString();
+    totalRow[0] = apiTotalCity.toLocaleString();
 
     // Total Balance (last column)
     totalRow[keys.length - 1] = apiTotalBalance.toLocaleString();
     totalRow[keys.length - 2] = apiTotalCustomers.toLocaleString();
-
-
     // totalRow[keys.length - 1] = totalBalance.toLocaleString();
     const rowsPDF = [...dataRows, totalRow];
 
@@ -460,8 +456,8 @@ export default function AmericanSalesManReport() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tsalcod?.toLowerCase().includes(q) ||
-          row.SalesMan?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+          row.tctycod?.toLowerCase().includes(q) ||
+          row.City?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.Nos?.toLowerCase().includes(q) ||
           String(row.Bal ?? "").includes(q)
       );
@@ -497,8 +493,8 @@ export default function AmericanSalesManReport() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.tsalcod?.toLowerCase().includes(q) ||
-        row.SalesMan?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tctycod?.toLowerCase().includes(q) ||
+        row.City?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.Nos?.toLowerCase().includes(q) ||
         String(row.Bal ?? "").includes(q)
       );
@@ -741,9 +737,9 @@ export default function AmericanSalesManReport() {
                                 window.open(
                                   `${
                                     window.location.origin
-                                  }/crystalsol/AmericanSalesManDetailsReport?tsalcod=${
-                                    item.tsalcod
-                                  }&name=${encodeURIComponent(item.SalesMan)}`,
+                                  }/crystalsol/AmericanCityDetailsReport?PCtyCod=${
+                                    item.tctycod
+                                  }&name=${encodeURIComponent(item.City)}`,
                                   "_blank"
                                 );
                               }}
@@ -824,11 +820,11 @@ export default function AmericanSalesManReport() {
                 >
                   {column.key === "Bal" ? (
                     <span>{apiTotalBalance.toLocaleString()}</span>
-                  ) : index === 0 ? (
-                    <span>{apiTotalSalesMan.toLocaleString()}</span>
+                  ) : index === 1 ? (
+                    <span>{apiTotalCity.toLocaleString()}</span>
                   ) : index === 3 ? (
                     <span>{apiTotalCustomers.toLocaleString()}</span>
-                  ): index === 1 ? (
+                  ) : index === 0 ? (
                     ""
                   ) : (
                     ""

@@ -11,7 +11,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 
-const REPORT_NAME = "Admin Agging";
+const REPORT_NAME = "Customer Agging";
 const COMPANY_NAME = "American Electronics";
 
 const columnsConfig = [
@@ -32,7 +32,7 @@ const columnsConfig = [
     excelWidth: 40,
   },
   {
-    header: "Amt001",
+    header: "0-30",
     key: "Amt001",
     alignment: "right",
     uiWidth: 120,
@@ -40,7 +40,7 @@ const columnsConfig = [
     excelWidth: 10,
   },
   {
-    header: "Amt002",
+    header: "30-60",
     key: "Amt002",
     alignment: "right",
     uiWidth: 120,
@@ -49,7 +49,7 @@ const columnsConfig = [
   },
 
   {
-    header: "Amt003",
+    header: "60-90",
     key: "Amt003",
     alignment: "right",
     uiWidth: 120,
@@ -57,7 +57,7 @@ const columnsConfig = [
     excelWidth: 10,
   },
   {
-    header: "Amt004",
+    header: "90-120",
     key: "Amt004",
     alignment: "right",
     uiWidth: 120,
@@ -65,7 +65,8 @@ const columnsConfig = [
     excelWidth: 10,
   },
   {
-    header: "Amt005",
+    // header: "120 ≤ 180",
+    header: "120-180",
     key: "Amt005",
     alignment: "right",
     uiWidth: 120,
@@ -73,7 +74,7 @@ const columnsConfig = [
     excelWidth: 10,
   },
   {
-    header: "Amt006",
+    header: "180+",
     key: "Amt006",
     alignment: "right",
     uiWidth: 120,

@@ -273,20 +273,46 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
         </div>
 
         {/* City */}
-        <div className="flex flex-col justify-center border-b border-gray-100 p-1">
+        {/* <div className="flex flex-col justify-center border-b border-gray-100 p-1">
           <p className="text-[14px] text-gray-800">
             City:
             <span className="text-[16px] font-semibold text-sky-700 pl-1">
               {webData?.Stores || "-"}
             </span>
           </p>
+        </div> */}
+
+          {/* City */}
+        <div className="flex flex-col justify-center border-r border-b border-gray-100 p-1">
+          <p className="text-[14px] text-gray-800">
+            City:
+            <span
+              className="text-[16px] font-semibold text-sky-700 pl-1 cursor-pointer hover:underline"
+              onClick={() =>
+                window.open(
+                  window.location.origin + "/crystalsol/AmericanCityReport",
+                  "_blank"
+                )
+              }
+            >
+              {webData?.City || "-"}
+            </span>
+          </p>
         </div>
 
         {/* Region */}
-        <div className="flex flex-col justify-center border-r border-gray-100 p-1">
+        <div className="flex flex-col justify-center border-r border-b border-gray-100 p-1">
           <p className="text-[14px] text-gray-800">
             Region:
-            <span className="text-[16px] font-semibold text-sky-700 pl-1">
+            <span
+              className="text-[16px] font-semibold text-sky-700 pl-1 cursor-pointer hover:underline"
+              onClick={() =>
+                window.open(
+                  window.location.origin + "/crystalsol/AmericanRegionReport",
+                  "_blank"
+                )
+              }
+            >
               {webData?.Region || "-"}
             </span>
           </p>
@@ -1162,7 +1188,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
   <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
     {/* HEADER */}
     <p className="text-[14px] font-semibold text-black leading-none pl-1">
-      Agging (Days)
+      Customer Agging
     </p>
 
     {/* BODY */}
@@ -1517,7 +1543,7 @@ const ElectronicsDashboard = () => {
   const collectionData = parseData(monthlyData, "C");
 
   return (
-    <div className="dashboard-wrapper" style={{ marginTop: "-10vh" }}>
+    <div className="dashboard-wrapper">
       <div className="american-dashboard">
         <div
           className="dashboard-zoom"

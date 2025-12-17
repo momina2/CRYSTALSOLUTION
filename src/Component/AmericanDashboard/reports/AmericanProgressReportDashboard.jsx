@@ -108,7 +108,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
       height: "50%",
       width: "100%",
       backgroundColor: "white",
-      border: "1px solid #dadada",
+      border: "1px solid #000",
       borderRadius: "6px",
       padding: "4px",
       marginBottom: "6px",
@@ -126,7 +126,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
           style={{
             flex: 1,
             padding: "6px 2px",
-            borderRight: i !== stats.length - 1 ? "1px solid #dadada" : "none", // 🔹 vertical grid
+            borderRight: i !== stats.length - 1 ? "1px solid #000" : "none", // 🔹 vertical grid
           }}
         >
           {/* Range */}
@@ -134,7 +134,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
             style={{
               marginBottom: "4px",
               fontSize: "12px",
-              borderBottom: "1px solid #dadada", // 🔹 horizontal grid
+              borderBottom: "1px solid #000", // 🔹 horizontal grid
               paddingBottom: "3px",
             }}
           >
@@ -206,31 +206,6 @@ export default function AmericanProgressReportDashboard() {
     softRowSeparator: "#f8f9fa",
     softSelectedColor: "#f0f8ff",
   };
-
-  // const contentStyle = {
-  //   backgroundColor: getcolor,
-  //   width: tableWidth,
-  //   position: "fixed",
-  //   top: "50%",
-  //   left: isSidebarVisible ? "50%" : "50%",
-  //   transform: "translate(-50%, -50%)",
-  //   transition: "left 0.3s ease-in-out, width 0.3s ease-in-out",
-  //   display: "flex",
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  //   overflowX: "hidden",
-  //   overflowY: "auto",
-  //   wordBreak: "break-word",
-  //   textAlign: "center",
-  //   maxWidth: "95vw",
-  //   fontSize: "15px",
-  //   fontStyle: "normal",
-  //   fontWeight: "400",
-  //   lineHeight: "23px",
-  //   fontFamily: '"Poppins", sans-serif',
-  // };
-
-  // helper: yyyy-mm-dd → dd-mm-yyyy
 
   const contentStyle = {
     backgroundColor: getcolor,

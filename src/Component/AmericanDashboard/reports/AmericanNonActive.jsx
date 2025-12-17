@@ -111,7 +111,12 @@ export default function AmericanNonActive() {
     };
     fetchData();
   }, []);
-
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////           DESIGN 1
   // const exportPDFHandler = () => {
   //   const doc = new jsPDF({ orientation: "portrait" });
 
@@ -221,30 +226,159 @@ export default function AmericanNonActive() {
   // };
 
   // ======================= EXCEL EXPORT =======================
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////           DESIGN 2
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF({ orientation: "portrait" });
 
+  //   // -------- PDF CONFIG ----------
+  //   const topMargin = 16;
+  //   const rowHeight = 5;
+  //   const headerHeight = 8;
+  //   const maxRowY = 280;
+
+  //   // ------- TITLE --------
+  //   function drawTitle() {
+  //     // Company name (FORMAT-2 style)
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(20);
+  //     doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+
+  //     // Report name
+  //     doc.setFont("Helvetica", "normal");
+  //     doc.setFontSize(12);
+  //     doc.text(REPORT_NAME, 105, 24, { align: "center" });
+  //   }
+
+  //   // --------- TABLE HEADER ---------
+  //   const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+  //   const keys = pdfColumns.map((c) => c.key);
+  //   const headers = pdfColumns.map((c) => c.header);
+  //   const colWidths = pdfColumns.map((c) => c.pdfWidth);
+
+  //   const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+  //   const startX = (210 - tableWidth) / 2;
+  //   let y = 32;
+
+  //   function drawHeader() {
+  //     doc.setFont("Helvetica", "bold"); // FORMAT-2 header font
+  //     doc.setFontSize(9);
+
+  //     let curX = startX;
+  //     headers.forEach((header, i) => {
+  //       const w = colWidths[i];
+  //       doc.rect(curX, y, w, headerHeight);
+  //       doc.text(
+  //         String(header).toUpperCase(),
+  //         curX + w / 2,
+  //         y + headerHeight - 3,
+  //         { align: "center" }
+  //       );
+  //       curX += w;
+  //     });
+
+  //     y += headerHeight;
+  //   }
+
+  //   // ---------- DRAW ONE ROW ----------
+  //   function drawRow(row, isTotal) {
+  //     let curX = startX;
+
+  //     row.forEach((cell, cIndex) => {
+  //       const w = colWidths[cIndex];
+  //       doc.rect(curX, y, w, rowHeight);
+
+  //       // FORMAT-2 row font logic
+  //       doc.setFont("Helvetica", isTotal ? "bold" : "normal");
+  //       doc.setFontSize(8);
+
+  //       if (cIndex === colWidths.length - 1) {
+  //         doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+  //           align: "right",
+  //         });
+  //       } else {
+  //         doc.text(String(cell), curX + 2, y + rowHeight - 2);
+  //       }
+
+  //       curX += w;
+  //     });
+
+  //     y += rowHeight;
+  //   }
+
+  //   // ---------- PAGE BREAK HANDLER ----------
+  //   function checkPageBreak() {
+  //     if (y > maxRowY) {
+  //       doc.addPage();
+  //       drawTitle();
+  //       y = 32;
+  //       drawHeader();
+  //     }
+  //   }
+
+  //   // ---------- START PRINT ----------
+  //   drawTitle();
+  //   drawHeader();
+
+  //   const dataRows = sortedTableData.map((row) =>
+  //     keys.map((key) => row[key] ?? "")
+  //   );
+
+  //   const totalRow = new Array(keys.length).fill("");
+  //   totalRow[0] = "TOTAL";
+  //   totalRow[keys.length - 1] = totalBalance.toLocaleString();
+
+  //   [...dataRows, totalRow].forEach((row, index) => {
+  //     checkPageBreak();
+  //     drawRow(row, index === dataRows.length);
+  //   });
+
+  //   // ---------- SAVE ----------
+  //   doc.save(`${REPORT_NAME}.pdf`);
+  // };
+
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////           DESIGN 3
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF("p", "mm", "a4");
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16;
-    const rowHeight = 5;
+    const rowHeight = 6;
     const headerHeight = 8;
     const maxRowY = 280;
 
-    // ------- TITLE --------
-    function drawTitle() {
-      // Company name (FORMAT-2 style)
+    const COLORS = {
+      headerBg: [226, 232, 240], // light navy blue
+      rowAlt: [248, 249, 255],
+      totalBg: [226, 232, 240],
+      textDark: [40, 40, 40],
+      line: [200, 200, 200],
+    };
+
+    /* ---------- TITLE (NO PURPLE BOX) ---------- */
+    const drawTitle = () => {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(20);
+      doc.setTextColor(...COLORS.textDark);
       doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
 
-      // Report name
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(REPORT_NAME, 105, 24, { align: "center" });
-    }
+      doc.text(REPORT_NAME, 105, 23, { align: "center" });
 
-    // --------- TABLE HEADER ---------
+      // soft separator line
+      doc.setDrawColor(...COLORS.line);
+      doc.line(14, 26, 196, 26);
+    };
+
+    /* ---------- TABLE CONFIG ---------- */
     const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
@@ -254,81 +388,87 @@ export default function AmericanNonActive() {
     const startX = (210 - tableWidth) / 2;
     let y = 32;
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold"); // FORMAT-2 header font
-      doc.setFontSize(9);
-
+    /* ---------- HEADER (NO BLACK BORDERS) ---------- */
+    const drawHeader = () => {
       let curX = startX;
-      headers.forEach((header, i) => {
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setFillColor(...COLORS.headerBg);
+      doc.rect(startX, y, tableWidth, headerHeight, "F");
+
+      headers.forEach((h, i) => {
         const w = colWidths[i];
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(
-          String(header).toUpperCase(),
-          curX + w / 2,
-          y + headerHeight - 3,
-          { align: "center" }
-        );
+        doc.text(String(h).toUpperCase(), curX + w / 2, y + 5, {
+          align: "center",
+        });
         curX += w;
       });
 
-      y += headerHeight;
-    }
+      // only bottom line (clean look)
+      doc.setDrawColor(...COLORS.line);
+      doc.line(startX, y + headerHeight, startX + tableWidth, y + headerHeight);
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+      y += headerHeight;
+    };
+
+    /* ---------- ROW ---------- */
+    const drawRow = (row, index, isTotal) => {
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        const w = colWidths[cIndex];
-        doc.rect(curX, y, w, rowHeight);
+      if (!isTotal && index % 2 === 0) {
+        doc.setFillColor(...COLORS.rowAlt);
+        doc.rect(startX, y, tableWidth, rowHeight, "F");
+      }
 
-        // FORMAT-2 row font logic
+      if (isTotal) {
+        doc.setFillColor(...COLORS.totalBg);
+        doc.rect(startX, y, tableWidth, rowHeight, "F");
+      }
+
+      row.forEach((cell, i) => {
+        const w = colWidths[i];
         doc.setFont("Helvetica", isTotal ? "bold" : "normal");
         doc.setFontSize(8);
 
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
-            align: "right",
-          });
-        } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
-        }
+        doc.text(
+          String(cell),
+          i === row.length - 1 ? curX + w - 2 : curX + 2,
+          y + 4,
+          { align: i === row.length - 1 ? "right" : "left" }
+        );
 
         curX += w;
       });
 
       y += rowHeight;
-    }
+    };
 
-    // ---------- PAGE BREAK HANDLER ----------
-    function checkPageBreak() {
+    /* ---------- PAGE BREAK ---------- */
+    const checkPageBreak = () => {
       if (y > maxRowY) {
         doc.addPage();
         drawTitle();
         y = 32;
         drawHeader();
       }
-    }
+    };
 
-    // ---------- START PRINT ----------
+    /* ---------- PRINT ---------- */
     drawTitle();
     drawHeader();
 
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? "")
-    );
-
+    const dataRows = sortedTableData.map((r) => keys.map((k) => r[k] ?? ""));
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = "TOTAL";
     totalRow[keys.length - 1] = totalBalance.toLocaleString();
 
-    [...dataRows, totalRow].forEach((row, index) => {
+    [...dataRows, totalRow].forEach((row, i) => {
       checkPageBreak();
-      drawRow(row, index === dataRows.length);
+      drawRow(row, i, i === dataRows.length);
     });
 
-    // ---------- SAVE ----------
-    doc.save(`${REPORT_NAME}.pdf`);
+    doc.save(`${REPORT_NAME}_Modern.pdf`);
   };
 
   async function exportCSV({
