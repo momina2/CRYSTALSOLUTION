@@ -176,48 +176,6 @@ const YearlySPCGraph = ({ apiData }) => {
   );
 };
 
-// const StaffSummaryCard = ({ webData }) => {
-//   if (!webData) return null;
-
-//   return (
-//     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
-//       {/* HEADER */}
-//       <p className="text-[16px] font-medium text-black">Staff Summary</p>
-
-//       {/* GRID */}
-//       <div className="grid grid-cols-2 grid-rows-2 text-center leading-tight flex-1">
-//         <div className="flex flex-col justify-center border-r border-b border-gray-200 p-1">
-//           <p className="text-[10px] text-gray-500">SalesMan</p>
-//           <h4 className="text-[15px] font-semibold text-indigo-800">
-//             {webData?.SalesMan || "-"}
-//           </h4>
-//         </div>
-
-//         <div className="flex flex-col justify-center border-b border-gray-200 p-1">
-//           <p className="text-[10px] text-gray-500">City</p>
-//           <h4 className="text-[15px] font-semibold text-indigo-800">
-//             {webData?.Stores || "-"}
-//           </h4>
-//         </div>
-
-//         <div className="flex flex-col justify-center border-r border-gray-200 p-1">
-//           <p className="text-[10px] text-gray-500">Region</p>
-//           <h4 className="text-[15px] font-semibold text-indigo-800">
-//             {webData?.Region || "-"}
-//           </h4>
-//         </div>
-
-//         <div className="flex flex-col justify-center p-1">
-//           <p className="text-[10px] text-gray-500">Managers</p>
-//           <h4 className="text-[15px] font-semibold text-indigo-800">
-//             {webData?.Managers || "-"}
-//           </h4>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
 const StaffCashSummaryCard = ({ balanceData, webData }) => {
   if (!balanceData || !webData) return null;
 
@@ -231,22 +189,33 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* 🔹 TOP CASH/BANK ROW */}
       <div className="flex justify-between px-1">
-        {/* <p className="text-[11px] font-medium text-black">
-          Cash:
-          <span className="text-[11px] font-semibold text-indigo-800 pl-1">
-            {formattedCash}
-          </span>
-        </p> */}
         <div className="flex flex-col justify-center p-1">
           <p className="text-[15px] font-semibold text-black">Cash</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
+          <h4
+            className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/AmericanCashReport",
+                "_blank"
+              )
+            }
+          >
             {formattedCash}
           </h4>
         </div>
 
         <div className="flex flex-col justify-center p-1">
           <p className="text-[15px] font-semibold text-black">Bank</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
+
+          <h4
+            className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/AmericanBankReport",
+                "_blank"
+              )
+            }
+          >
             {formattedBank}
           </h4>
         </div>
@@ -282,7 +251,7 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
           </p>
         </div> */}
 
-          {/* City */}
+        {/* City */}
         <div className="flex flex-col justify-center border-r border-b border-gray-100 p-1">
           <p className="text-[14px] text-gray-800">
             City:
@@ -331,88 +300,6 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
     </div>
   );
 };
-
-// const FinancialPieChart = ({ webData }) => {
-//   if (!webData) return null;
-
-//   const rawValues = {
-//     receivable: webData?.Receivable || "0",
-//     payable: webData?.Payable || "0",
-//     stock: webData?.["Total Stock"] || "0",
-//     expense: webData?.Expense || "0",
-//   };
-
-//   const numericValues = {
-//     stock: Number(rawValues.stock.replace(/,/g, "")) || 0,
-//     payable: Number(rawValues.payable.replace(/,/g, "")) || 0,
-
-//     receivable: Number(rawValues.receivable.replace(/,/g, "")) || 0,
-//     expense: Number(rawValues.expense.replace(/,/g, "")) || 0,
-//   };
-
-//   const dynamicColors = [
-//     numericValues.stock < 0 ? "#FF3B30" : "#FFD66B",
-//     numericValues.payable < 0 ? "#FF3B30" : "#FF7E95",
-
-//     numericValues.receivable < 0 ? "#FF3B30" : "#4F6DFF",
-//     numericValues.expense < 0 ? "#FF3B30" : "#2BBEB9",
-//   ];
-
-//   const data = {
-//     labels: ["Stock", "Payable", "Recievable", "Expense"],
-//     datasets: [
-//       {
-//         data: [
-//           Math.abs(numericValues.stock),
-//           Math.abs(numericValues.payable),
-//           Math.abs(numericValues.receivable),
-//           Math.abs(numericValues.expense),
-//         ],
-//         backgroundColor: dynamicColors,
-//         borderWidth: 2,
-//         borderColor: "#fff",
-//       },
-//     ],
-//   };
-
-//   const options = {
-//     maintainAspectRatio: false,
-//     cutout: "55%",
-//     plugins: {
-//       legend: {
-//         display: false, // ❌ HIDE LEGEND
-//       },
-//       tooltip: {
-//         callbacks: {
-//           label: function (ctx) {
-//             const dataset = ctx.dataset.data;
-//             const total = dataset.reduce((a, b) => a + b, 0);
-//             const value = dataset[ctx.dataIndex];
-//             const percentage = ((value / total) * 100).toFixed(1);
-
-//             const original = [
-//               numericValues.stock,
-//               numericValues.payable,
-
-//               numericValues.receivable,
-//               numericValues.expense,
-//             ][ctx.dataIndex];
-//             return `${
-//               ctx.label
-//             }: ${original.toLocaleString()} (${percentage}%)`;
-//           },
-//         },
-//       },
-//     },
-//   };
-//   return (
-//     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-center items-center">
-//       <div className="w-[85%] h-[85%]">
-//         <Pie data={data} options={options} />
-//       </div>
-//     </div>
-//   );
-// };
 
 const FinancialPieChart = ({ webData, balanceData }) => {
   if (!webData || !balanceData) return null;
@@ -496,16 +383,6 @@ const FinancialPieChart = ({ webData, balanceData }) => {
             <span className="text-[11px] text-gray-600 truncate">
               {item.label}
             </span>
-
-            {/* Actual Value (±) */}
-            {/* <span
-              className={`ml-auto text-[11px] font-semibold ${
-                item.raw < 0 ? "text-red-600" : "text-gray-900"
-              }`}
-            >
-              {item.raw < 0 ? "-" : ""}
-              {Math.abs(item.raw).toLocaleString()}
-            </span> */}
           </div>
         ))}
       </div>
@@ -573,12 +450,6 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
 
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 flex flex-col gap-1 rounded-lg transition-all duration-300 hover:shadow-md">
-      {/* {cardTitle && (
-        <h3 className="text-xs font-semibold text-gray-800 tracking-wide">
-          {cardTitle}
-        </h3>
-      )} */}
-
       <div className="flex justify-between items-end">
         <div>
           <p className="text-[16px] font-medium text-black">Customers</p>
@@ -586,13 +457,6 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             {formatValue("Total Customer")}
           </h2>
         </div>
-
-        {/* <div className="text-right">
-          <p className="text-[11px] font-medium text-gray-500">Total Balance</p>
-          <h2 className="text-xl font-semibold text-gray-900 mt-1">
-            {formatValue("Total Balance")}
-          </h2>
-        </div> */}
 
         <div className="text-right">
           <p className="text-[11px] font-medium text-gray-500">Total Balance</p>
@@ -610,7 +474,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
           </h2>
         </div>
       </div>
-
+      <div className="border-t border-gray-200 my-1"></div>
       <div className="grid grid-cols-4 gap-1 pb-1 text-center p-1">
         <div className="flex flex-col px-1">
           <p className="text-[11px] font-medium text-gray-500 mb-1">Non-Act</p>
@@ -650,13 +514,6 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
           </p>
         </div>
 
-        {/* <div className="flex flex-col px-1">
-          <p className="text-[11px] font-medium text-gray-500 mb-1">Nil</p>
-          <h4 className="text-lg font-semibold text-sky-700">
-            {formatValue("Nil Customer")}
-          </h4>
-          <p className="text-[11px] text-gray-400 mt-1">-</p>
-        </div> */}
         <div className="flex flex-col px-1">
           <p className="text-[11px] font-medium text-gray-500 mb-1">Nil</p>
           <h4 className="text-lg font-semibold text-sky-700">
@@ -1239,47 +1096,6 @@ const formatPKR = (value) => {
   }).format(number);
 };
 
-// ----------------------
-// New Cash Bank Card
-// ----------------------
-// const NewCashBankCard = ({ balanceData, cardTitle = "Cash/Bank Balance" }) => {
-//   if (!balanceData) return null;
-
-//   const cashBalance = balanceData.CashBal || "N/A";
-//   const bankBalance = balanceData.BankBal || "N/A";
-
-//   const formattedCash = formatPKR(cashBalance);
-//   const formattedBank = formatPKR(bankBalance);
-
-//   return (
-//     <div className="w-full bg-white rounded-[20px] shadow-sm border border-gray-100 p-4 flex flex-col gap-3 transition-all duration-300 hover:shadow-md">
-//       {cardTitle && (
-//         <h3 className="text-xs font-semibold text-gray-800 tracking-wide">
-//           {cardTitle}
-//         </h3>
-//       )}
-
-//       <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-xl border border-gray-100">
-//         <p className="text-[11px] font-medium text-gray-500 mb-1">
-//           Cash Balance
-//         </p>
-//         <h2 className="text-lg font-semibold text-indigo-800 text-center">
-//           {formattedCash}
-//         </h2>
-//       </div>
-
-//       <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-xl border border-gray-100">
-//         <p className="text-[11px] font-medium text-gray-500 mb-1">
-//           Bank Balance
-//         </p>
-//         <h2 className="text-lg font-semibold text-indigo-800 text-center">
-//           {formattedBank}
-//         </h2>
-//       </div>
-//     </div>
-//   );
-// };
-
 const CustomerDistributionChart = ({ mainData }) => {
   if (!mainData) return null;
 
@@ -1343,11 +1159,6 @@ const CustomerDistributionChart = ({ mainData }) => {
             <span className="text-[11px] text-gray-600 truncate">
               {item.label}
             </span>
-
-            {/* Value */}
-            {/* <span className="ml-auto text-[11px] font-semibold text-gray-900">
-              {item.value.toLocaleString()}
-            </span> */}
           </div>
         ))}
       </div>
@@ -1575,70 +1386,6 @@ const ElectronicsDashboard = () => {
               </div>
 
               {/* ⭐ ROW 2: Monthly Graph (FULL WIDTH) */}
-              {/* <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]">
-                <div className="h-[calc(100%-10px)]">
-                  {isMonthlyDataAvailable ? (
-                    <Bar
-                      data={{
-                        labels: months,
-                        datasets: [
-                          {
-                            label: "Sales",
-                            data: salesData,
-                            backgroundColor: ChartColors.Sales,
-                            borderRadius: 8,
-                          },
-                          {
-                            label: "Purchase",
-                            data: purchaseData,
-                            backgroundColor: ChartColors.Purchase,
-                            borderRadius: 8,
-                          },
-                          {
-                            label: "Expense",
-                            data: expenseData,
-                            backgroundColor: ChartColors.Expense,
-                            borderRadius: 8,
-                          },
-                          {
-                            label: "Collection",
-                            data: collectionData,
-                            backgroundColor: ChartColors.Collection,
-                            borderRadius: 8,
-                          },
-                        ],
-                      }}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "top",
-                            labels: { usePointStyle: true, padding: 16 },
-                          },
-                        },
-                        scales: {
-                          x: { grid: { display: false } },
-                          y: {
-                            ticks: {
-                              callback: (value) => value + "M",
-                              color: "#6b7280",
-                            },
-                            grid: { color: "rgba(0,0,0,0.04)" },
-                          },
-                        },
-                      }}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-                      Monthly comparison data not available.
-                    </div>
-                  )}
-                </div>
-              </div> */}
-
-              {/* ⭐ ROW 2: Monthly Graph (FULL WIDTH) */}
-              {/* <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]"> */}
               {/* <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]"> */}
               <div className="relative bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]">
                 {/* 🔽 YEAR DROPDOWN (TOP RIGHT) */}
@@ -1704,48 +1451,6 @@ const ElectronicsDashboard = () => {
                               },
 
                               // ---------- AVERAGE LINES ----------
-                              // {
-                              //   label: "Avg Sales",
-                              //   data: months.map(() => avgSales),
-                              //   type: "line",
-                              //   borderColor: ChartColors.Sales,
-                              //   borderWidth: 1.4,
-                              //   pointRadius: 0,
-                              //   fill: false,
-                              //   hidden: true, // hide from legend
-                              // },
-                              // {
-                              //   label: "Avg Purchase",
-                              //   data: months.map(() => avgPurchase),
-                              //   type: "line",
-                              //   borderColor: ChartColors.Purchase,
-                              //   borderWidth: 1.4,
-                              //   pointRadius: 0,
-                              //   fill: false,
-                              //   hidden: true,
-                              // },
-                              // {
-                              //   label: "Avg Expense",
-                              //   data: months.map(() => avgExpense),
-                              //   type: "line",
-                              //   borderColor: ChartColors.Expense,
-                              //   borderWidth: 1.4,
-                              //   pointRadius: 0,
-                              //   fill: false,
-                              //   hidden: true,
-                              // },
-                              // {
-                              //   label: "Avg Collection",
-                              //   data: months.map(() => avgCollection),
-                              //   type: "line",
-                              //   borderColor: ChartColors.Collection,
-                              //   borderWidth: 1.4,
-                              //   pointRadius: 0,
-                              //   fill: false,
-                              //   hidden: true,
-                              // },
-
-                              // ---------- AVERAGE LINES ----------
                               {
                                 label: "Sales (Avg)",
                                 data: months.map(() => avgSales),
@@ -1795,12 +1500,7 @@ const ElectronicsDashboard = () => {
                           options={{
                             responsive: true,
                             maintainAspectRatio: false,
-                            // plugins: {
-                            //   legend: {
-                            //     position: "top",
-                            //     labels: { usePointStyle: true, padding: 16 },
-                            //   },
-                            // },
+
                             plugins: {
                               legend: {
                                 position: "top",

@@ -1,864 +1,3 @@
-// import React, { useEffect, useState, useMemo } from "react";
-// import axios from "axios";
-// import { useTheme } from "../../../ThemeContext";
-// import NavComponent from "../../MainComponent/Navform/navbarform";
-// import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
-// import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-// import { FaSortUp, FaSortDown, FaSort } from "react-icons/fa";
-// import "../AmericanDashboard.css";
-// import jsPDF from "jspdf";
-// import ExcelJS from "exceljs";
-// import { saveAs } from "file-saver";
-// import { useLocation } from "react-router-dom";
-
-// const REPORT_NAME = "SalesMan Details";
-// const COMPANY_NAME = "CRYSTAL SOLUTIONS";
-
-// function useQueryParams() {
-//   const { search } = useLocation();
-//   return new URLSearchParams(search);
-// }
-
-// // 👉 Progress table columns as per API
-// const columnsConfig = [
-//   {
-//     header: "Code",
-//     key: "tcstcod",
-//     alignment: "left",
-//     uiWidth: 90,
-//     pdfWidth: 20,
-//     excelWidth: 8,
-//   },
-//   {
-//     header: "Description",
-//     key: "tcstdsc",
-//     alignment: "left",
-//     uiWidth: 360,
-//     pdfWidth: 80,
-//     excelWidth: 20,
-//   },
-//   {
-//     header: "Phone",
-//     key: "tmobnum",
-//     alignment: "right",
-//     uiWidth: 120,
-//     pdfWidth: 25,
-//     excelWidth: 15,
-//   },
-//   {
-//     header: "Balance",
-//     key: "balance",
-//     alignment: "right",
-//     uiWidth: 120,
-//     pdfWidth: 25,
-//     excelWidth: 15,
-//   },
-//   {
-//     header: "",
-//     key: "scrollSpacer",
-//     alignment: "center",
-//     uiWidth: 20,
-//     pdfWidth: 0,
-//     excelWidth: 0,
-//   },
-// ];
-
-// export default function AmericanSalesManDetailsReport() {
-//   const query = useQueryParams();
-//   const SalManCode = query.get("tsalcod");
-//   const SaleManName = query.get("name");
-
-//   const [headerCode] = useState(SalManCode);
-//   const [headerName] = useState(SaleManName);
-
-//   const [rows, setRows] = useState([]);
-//   const [apiData, setApiData] = useState(null);
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
-
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [sortConfig, setSortConfig] = useState({
-//     key: null,
-//     direction: "ascending",
-//   });
-
-//   const {
-//     isSidebarVisible,
-//     getcolor,
-//     fontcolor,
-//     getnavbarbackgroundcolor,
-//     getfontstyle,
-//     getdatafontsize,
-//   } = useTheme();
-
-//   const totalUiWidth = columnsConfig.reduce(
-//     (sum, col) => sum + Number(col.uiWidth),
-//     0
-//   );
-//   const tableWidth = `${totalUiWidth}px`;
-
-//   const softTableStyles = {
-//     softBoxShadow:
-//       "0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03)",
-//     softBorderColor: "#00000026",
-//     softRowSeparator: "#f8f9fa",
-//     softSelectedColor: "#f0f8ff",
-//   };
-
-//   const contentStyle = {
-//     backgroundColor: getcolor,
-//     width: tableWidth,
-//     position: "fixed",
-//     top: "50%",
-//     left: 0,
-//     right: 0,
-//     margin: "0 auto",
-//     transform: "translateY(-50%)",
-//     transition: "width 0.3s ease-in-out",
-//     display: "flex",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     textAlign: "center",
-//     overflowX: "hidden",
-//     overflowY: "auto",
-//     maxWidth: "95vw",
-//   };
-
-//   const fetchProgress = async () => {
-//     try {
-//       setIsLoading(true);
-
-//       const form = new FormData();
-//       form.append("code", "AMRELEC");
-//       form.append("PEmpCod", SalManCode);
-
-//       const res = await axios.post(
-//         "https://crystalsolutions.com.pk/api/AmericanSalesManCustomers.php",
-//         form
-//       );
-
-//       const DetailsList = Array.isArray(res.data) ? res.data : [];
-
-//       setRows(DetailsList);
-//     } catch (err) {
-//       console.error("Progress API error:", err);
-//       setRows([]);
-//       setApiData(null);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (SalManCode) {
-//       fetchProgress();
-//     }
-//   }, [SalManCode]);
-
-//   const getAlignmentClass = (alignment) => {
-//     switch (alignment) {
-//       case "left":
-//         return "text-start";
-//       case "right":
-//         return "text-end";
-//       case "center":
-//         return "text-center";
-//       default:
-//         return "text-start";
-//     }
-//   };
-
-//   const getSortIcon = (key) => {
-//     if (sortConfig.key === key) {
-//       return sortConfig.direction === "ascending" ? (
-//         <FaSortUp
-//           style={{
-//             marginLeft: "5px",
-//             color: "#e74c3c",
-//             transition: "0.3s",
-//           }}
-//         />
-//       ) : (
-//         <FaSortDown
-//           style={{
-//             marginLeft: "5px",
-//             color: "#e74c3c",
-//             transition: "0.3s",
-//           }}
-//         />
-//       );
-//     }
-
-//     return (
-//       <FaSort
-//         style={{
-//           marginLeft: "5px",
-//           color: "white",
-//           opacity: 0.4,
-//         }}
-//       />
-//     );
-//   };
-
-//   const requestSort = (key) => {
-//     let direction = "ascending";
-
-//     if (sortConfig.key === key && sortConfig.direction === "ascending") {
-//       direction = "descending";
-//     }
-
-//     setSortConfig({ key, direction });
-//   };
-
-//   // SORTED DATA
-//   const sortedTableData = useMemo(() => {
-//     let data = [...rows];
-
-//     if (sortConfig.key) {
-//       data.sort((a, b) => {
-//         const aVal = a[sortConfig.key] ?? "";
-//         const bVal = b[sortConfig.key] ?? "";
-
-//         const numericKeys = ["debit", "credit", "balance"];
-//         if (numericKeys.includes(sortConfig.key)) {
-//           const aNum = parseFloat(aVal) || 0;
-//           const bNum = parseFloat(bVal) || 0;
-//           return sortConfig.direction === "ascending"
-//             ? aNum - bNum
-//             : bNum - aNum;
-//         }
-
-//         return sortConfig.direction === "ascending"
-//           ? String(aVal).localeCompare(String(bVal))
-//           : String(bVal).localeCompare(String(aVal));
-//       });
-//     }
-
-//     return data;
-//   }, [rows, sortConfig]);
-
-//   // GLOBAL SEARCH on all columns
-//   const filteredData = useMemo(() => {
-//     if (!searchQuery) return sortedTableData;
-
-//     const search = searchQuery.toLowerCase();
-
-//     return sortedTableData.filter((row) => {
-//       const rowString = Object.values(row)
-//         .map((v) =>
-//           v !== null && v !== undefined ? String(v).toLowerCase() : ""
-//         )
-//         .join(" ");
-//       return rowString.includes(search);
-//     });
-//   }, [sortedTableData, searchQuery]);
-//   const totalBalance = useMemo(() => {
-//     return filteredData.reduce((sum, row) => {
-//       const value = parseFloat(row.balance ?? 0);
-//       return sum + (isNaN(value) ? 0 : value);
-//     }, 0);
-//   }, [filteredData]);
-
-//   // Aging stats (amt001..amt006)
-//   const stats = apiData
-//     ? [
-//         { range: "01-30", amount: apiData.amt001 ?? 0 },
-//         { range: "31-60", amount: apiData.amt002 ?? 0 },
-//         { range: "61-90", amount: apiData.amt003 ?? 0 },
-//         { range: "91-120", amount: apiData.amt004 ?? 0 },
-//         { range: "121-150", amount: apiData.amt005 ?? 0 },
-//         { range: "150+", amount: apiData.amt006 ?? 0 },
-//       ]
-//     : [];
-
-//   const creditAmount =
-//     apiData && Object.prototype.hasOwnProperty.call(apiData, "credit amount")
-//       ? apiData["credit amount"]
-//       : null;
-
-//   // PDF EXPORT
-//   const exportPDFHandler = () => {
-//     const doc = new jsPDF({
-//       orientation: "portrait",
-//       unit: "mm",
-//       format: "a4",
-//     });
-
-//     const pageWidth = 210;
-//     const rowHeight = 6;
-//     const headerHeight = 8;
-//     const maxY = 280;
-
-//     // ===== TITLE =====
-//     const drawTitle = () => {
-//       doc.setFont("Helvetica", "bold");
-//       doc.setFontSize(20);
-//       doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 16, { align: "center" });
-
-//       doc.setFont("Helvetica", "normal");
-//       doc.setFontSize(13);
-//       doc.text(REPORT_NAME, pageWidth / 2, 24, { align: "center" });
-//     };
-
-//     // ===== TABLE CONFIG =====
-//     const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-//     const keys = pdfColumns.map((c) => c.key);
-//     const headers = pdfColumns.map((c) => c.header);
-//     const colWidths = pdfColumns.map((c) => c.pdfWidth);
-
-//     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-//     const startX = (pageWidth - tableWidth) / 2;
-//     let y = 32;
-
-//     // ===== HEADER =====
-//     const drawHeader = () => {
-//       doc.setFont("Helvetica", "bold");
-//       doc.setFontSize(9);
-
-//       let x = startX;
-//       headers.forEach((h, i) => {
-//         const w = colWidths[i];
-//         doc.setFillColor(220);
-//         doc.rect(x, y, w, headerHeight, "F");
-//         doc.rect(x, y, w, headerHeight);
-//         doc.text(h, x + w / 2, y + 5.5, { align: "center" });
-//         x += w;
-//       });
-
-//       y += headerHeight;
-//     };
-
-//     // ===== ROW =====
-//     const drawRow = (row, isTotal = false) => {
-//       let x = startX;
-//       doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-//       doc.setFontSize(8);
-
-//       row.forEach((cell, i) => {
-//         const w = colWidths[i];
-//         doc.rect(x, y, w, rowHeight);
-
-//         if (["debit", "credit", "balance"].includes(keys[i])) {
-//           doc.text(String(cell), x + w - 2, y + 4.5, { align: "right" });
-//         } else {
-//           doc.text(String(cell), x + 2, y + 4.5);
-//         }
-
-//         x += w;
-//       });
-
-//       y += rowHeight;
-//     };
-
-//     // ===== PAGE BREAK =====
-//     const checkPageBreak = () => {
-//       if (y > maxY) {
-//         doc.addPage();
-//         drawTitle();
-//         y = 32;
-//         drawHeader();
-//       }
-//     };
-
-//     // ===== START =====
-//     drawTitle();
-//     drawHeader();
-
-//     const bodyRows = filteredData.map((r) =>
-//       keys.map((k) =>
-//         ["debit", "credit", "balance"].includes(k)
-//           ? Number(r[k] || 0).toLocaleString()
-//           : r[k] ?? ""
-//       )
-//     );
-
-//     // ===== TOTAL ROW (FIXED) =====
-//     const totalRow = new Array(keys.length).fill("");
-//     totalRow[0] = filteredData.length.toString();
-//     totalRow[keys.indexOf("balance")] = totalBalance.toLocaleString();
-
-//     [...bodyRows, totalRow].forEach((row, i, arr) => {
-//       checkPageBreak();
-//       drawRow(row, i === arr.length - 1);
-//     });
-
-//     // ===== AGING CARD (PDF VERSION) =====
-//     if (apiData) {
-//       y += 10;
-
-//       const boxWidth = 28;
-//       const boxHeight = 14;
-//       const gap = 2;
-//       const totalBoxWidth = stats.length * boxWidth + (stats.length - 1) * gap;
-//       let x = (pageWidth - totalBoxWidth) / 2;
-
-//       doc.setFontSize(8);
-
-//       stats.forEach((stat) => {
-//         doc.rect(x, y, boxWidth, boxHeight);
-//         doc.text(stat.range, x + boxWidth / 2, y + 5, { align: "center" });
-//         doc.setFont("Helvetica", "bold");
-//         doc.text(
-//           Number(stat.amount || 0).toLocaleString(),
-//           x + boxWidth / 2,
-//           y + 11,
-//           { align: "center" }
-//         );
-//         doc.setFont("Helvetica", "normal");
-//         x += boxWidth + gap;
-//       });
-//     }
-
-//     // ===== SAVE =====
-//     doc.save(`${REPORT_NAME}.pdf`);
-//   };
-
-//   // EXCEL EXPORT
-//   async function exportCSV({
-//     rows,
-//     columnsConfig,
-//     totalCollection,
-//     companyName,
-//     reportName,
-//   }) {
-//     const workbook = new ExcelJS.Workbook();
-//     const worksheet = workbook.addWorksheet("Report");
-
-//     const excelColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-
-//     const headers = excelColumns.map((c) => c.header);
-//     const keys = excelColumns.map((c) => c.key);
-
-//     worksheet.addRow([companyName]);
-//     worksheet.mergeCells(1, 1, 1, headers.length);
-//     worksheet.getRow(1).font = { bold: true, size: 16 };
-//     worksheet.getRow(1).alignment = { horizontal: "center" };
-
-//     worksheet.addRow([`${reportName} (${headerCode} | ${headerName || ""})`]);
-//     worksheet.mergeCells(2, 1, 2, headers.length);
-//     worksheet.getRow(2).alignment = { horizontal: "center" };
-
-//     // worksheet.addRow([`Date: ${toApiDate(cusDate)}`]);
-//     worksheet.mergeCells(3, 1, 3, headers.length);
-//     worksheet.getRow(3).alignment = { horizontal: "center" };
-
-//     worksheet.addRow([]);
-
-//     const headerRow = worksheet.addRow(headers);
-//     headerRow.eachCell((cell) => {
-//       cell.font = { bold: true };
-//       cell.alignment = { horizontal: "center" };
-//       cell.border = {
-//         top: { style: "thin" },
-//         left: { style: "thin" },
-//         bottom: { style: "thin" },
-//         right: { style: "thin" },
-//       };
-//     });
-
-//     rows.forEach((item) => {
-//       const row = worksheet.addRow(
-//         keys.map((key) => {
-//           if (["debit", "credit", "balance"].includes(key)) {
-//             return Number(item[key] || 0).toLocaleString();
-//           }
-//           return item[key] ?? "";
-//         })
-//       );
-//       row.eachCell((cell) => {
-//         cell.border = {
-//           top: { style: "thin" },
-//           left: { style: "thin" },
-//           bottom: { style: "thin" },
-//           right: { style: "thin" },
-//         };
-//         cell.alignment = {
-//           horizontal: "left",
-//         };
-//       });
-//     });
-
-//     const totalRowData = new Array(headers.length).fill("");
-//     totalRowData[0] = rows.length.toString();
-//     totalRowData[headers.indexOf("Balance")] = totalCollection.toLocaleString();
-
-//     totalRowData.eachCell((cell) => {
-//       cell.font = { bold: true };
-//       cell.border = {
-//         top: { style: "double" },
-//         left: { style: "thin" },
-//         bottom: { style: "double" },
-//         right: { style: "thin" },
-//       };
-//     });
-//     excelColumns.forEach((col, i) => {
-//       worksheet.getColumn(i + 1).width = col.excelWidth || col.uiWidth || 20;
-//     });
-
-//     const buffer = await workbook.xlsx.writeBuffer();
-//     saveAs(
-//       new Blob([buffer], {
-//         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-//       }),
-//       `${reportName}.xlsx`
-//     );
-//   }
-
-//   const handleCSV = () => {
-//     exportCSV({
-//       rows: filteredData,
-//       columnsConfig,
-//       totalCollection: totalBalance,
-//       companyName: COMPANY_NAME,
-//       reportName: REPORT_NAME,
-//     });
-//   };
-
-//   return (
-//     <>
-//       <style>
-//         {`
-//           .sortable-header {
-//             cursor: pointer;
-//             user-select: none;
-//             display: flex;
-//             align-items: center;
-//             justify-content: center;
-//             width: 100%;
-//           }
-
-//           .table-scroll {
-//             overflow-y: auto;
-//             overflow-x: hidden;
-//             -ms-overflow-style: auto;
-//             scrollbar-width: auto;
-//           }
-//         `}
-//       </style>
-
-//       <div style={contentStyle}>
-//         <div
-//           style={{
-//             backgroundColor: getcolor,
-//             color: fontcolor,
-//             width: "100%",
-//             border: `1px solid ${softTableStyles.softBorderColor}`,
-//             borderRadius: "12px",
-//             boxShadow: softTableStyles.softBoxShadow,
-//           }}
-//         >
-//           {/* HEADER: code | name */}
-//           <NavComponent textdata={`${headerCode} | ${headerName}`} />
-
-//           {/* SEARCH ROW */}
-//           <div
-//             className="row"
-//             style={{
-//               height: "auto",
-//               marginTop: "8px",
-//               marginBottom: "8px",
-//               display: "flex",
-//               justifyContent: "center",
-//             }}
-//           >
-//             <div
-//               style={{
-//                 width: "100%",
-//                 display: "flex",
-//                 alignItems: "center",
-//                 justifyContent: "center",
-//                 gap: "10px",
-//               }}
-//             >
-//               <div
-//                 style={{
-//                   minWidth: "260px",
-//                   maxWidth: "400px",
-//                   border: `1px solid ${softTableStyles.softBorderColor}`,
-//                   borderRadius: "20px",
-//                   backgroundColor: "white",
-//                   display: "flex",
-//                   alignItems: "center",
-//                   padding: "2px 8px",
-//                 }}
-//               >
-//                 <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
-//                 <input
-//                   type="text"
-//                   placeholder="Search..."
-//                   value={searchQuery}
-//                   onChange={(e) => setSearchQuery(e.target.value)}
-//                   style={{
-//                     flex: 1,
-//                     border: "none",
-//                     outline: "none",
-//                     paddingLeft: "6px",
-//                     fontSize: getdatafontsize,
-//                     fontFamily: getfontstyle,
-//                   }}
-//                 />
-//               </div>
-//             </div>
-//           </div>
-//           {/* TABLE HEADER (fixed) */}
-//           <div
-//             style={{
-//               overflowY: "auto",
-//               width: "100%",
-//               overflowX: "hidden",
-//             }}
-//           >
-//             <table
-//               className="myTable"
-//               style={{
-//                 fontSize: getdatafontsize,
-//                 fontFamily: getfontstyle,
-//                 width: "100%",
-//                 position: "relative",
-//                 tableLayout: "fixed",
-//               }}
-//             >
-//               <thead
-//                 style={{
-//                   fontSize: getdatafontsize,
-//                   fontFamily: getfontstyle,
-//                   fontWeight: "bold",
-//                   height: "24px",
-//                   position: "sticky",
-//                   top: 0,
-//                   boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
-//                   backgroundColor: getnavbarbackgroundcolor,
-//                 }}
-//               >
-//                 <tr
-//                   style={{
-//                     backgroundColor: getnavbarbackgroundcolor,
-//                     color: "white",
-//                   }}
-//                 >
-//                   {columnsConfig.map((column, index) => (
-//                     <td
-//                       key={index}
-//                       onClick={() =>
-//                         column.key !== "scrollSpacer" && requestSort(column.key)
-//                       }
-//                       style={{
-//                         width: column.uiWidth,
-//                         padding: "8px 6px",
-//                         borderBottom: `2px solid ${softTableStyles.softBorderColor}`,
-//                         cursor:
-//                           column.key === "scrollSpacer" ? "default" : "pointer",
-//                       }}
-//                     >
-//                       <div className="sortable-header">
-//                         {column.header}
-//                         {column.key !== "scrollSpacer" &&
-//                           getSortIcon(column.key)}
-//                       </div>
-//                     </td>
-//                   ))}
-//                 </tr>
-//               </thead>
-//             </table>
-//           </div>
-
-//           {/* TABLE BODY */}
-//           <div
-//             className="table-scroll"
-//             style={{
-//               backgroundColor: "white",
-//               borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
-//               maxHeight: "50vh",
-//               width: "100%",
-//               wordBreak: "break-word",
-//             }}
-//           >
-//             <table
-//               className="myTable"
-//               style={{
-//                 fontSize: getdatafontsize,
-//                 fontFamily: getfontstyle,
-//                 width: tableWidth,
-//                 position: "relative",
-//                 ...(filteredData.length > 0 ? { tableLayout: "fixed" } : {}),
-//               }}
-//             >
-//               <tbody>
-//                 {isLoading ? (
-//                   <>
-//                     <tr
-//                       style={{
-//                         backgroundColor: getcolor,
-//                         color: fontcolor,
-//                       }}
-//                     >
-//                       <td
-//                         colSpan={columnsConfig.length}
-//                         className="text-center"
-//                         style={{ padding: "10px" }}
-//                       >
-//                         Fetching data...
-//                       </td>
-//                     </tr>
-//                     {Array.from({ length: 20 }).map((_, rowIndex) => (
-//                       <tr
-//                         key={`blank-loading-${rowIndex}`}
-//                         style={{
-//                           backgroundColor: getcolor,
-//                           color: fontcolor,
-//                         }}
-//                       >
-//                         {columnsConfig.map((_, colIndex) => (
-//                           <td key={`blank-loading-${rowIndex}-${colIndex}`}>
-//                             &nbsp;
-//                           </td>
-//                         ))}
-//                       </tr>
-//                     ))}
-//                   </>
-//                 ) : (
-//                   <>
-//                     {filteredData.map((item, i) => (
-//                       <tr
-//                         key={i}
-//                         onClick={() => setSelectedRowIndex(i)}
-//                         style={{
-//                           cursor: "pointer",
-//                           color: selectedRowIndex === i ? "white" : fontcolor,
-//                           backgroundColor:
-//                             selectedRowIndex === i
-//                               ? getnavbarbackgroundcolor
-//                               : i % 2 === 0
-//                               ? getcolor
-//                               : "#f8f9ff",
-//                           transition: "background-color 0.2s ease",
-//                         }}
-//                       >
-//                         {columnsConfig.map((column, index) => {
-//                           const key = column.key;
-//                           let value = "";
-
-//                           if (key === "scrollSpacer") {
-//                             value = "";
-//                           } else if (
-//                             ["debit", "credit", "balance"].includes(key)
-//                           ) {
-//                             value = Number(item[key] || 0).toLocaleString();
-//                           } else {
-//                             value = item[key] ?? "";
-//                           }
-
-//                           return (
-//                             <td
-//                               key={index}
-//                               className={getAlignmentClass(column.alignment)}
-//                               style={{
-//                                 width: column.uiWidth,
-//                                 padding: "8px 6px",
-//                                 borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
-//                                 whiteSpace: "nowrap",
-//                                 overflow: "hidden",
-//                                 textOverflow: "ellipsis",
-//                               }}
-//                             >
-//                               {value}
-//                             </td>
-//                           );
-//                         })}
-//                       </tr>
-//                     ))}
-
-//                     {/* Blank rows to keep table height nice */}
-//                     {Array.from({
-//                       length: Math.max(0, 13 - filteredData.length),
-//                     }).map((_, rowIndex) => (
-//                       <tr
-//                         key={`blank-${rowIndex}`}
-//                         style={{
-//                           backgroundColor: getcolor,
-//                           color: fontcolor,
-//                         }}
-//                       >
-//                         {columnsConfig.map((_, colIndex) => (
-//                           <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-//                         ))}
-//                       </tr>
-//                     ))}
-
-//                     {/* Dummy row to keep widths */}
-//                     <tr>
-//                       {columnsConfig.map((column, index) => (
-//                         <td
-//                           key={`dummy-bottom-${index}`}
-//                           style={{ width: column.uiWidth }}
-//                         ></td>
-//                       ))}
-//                     </tr>
-//                   </>
-//                 )}
-//               </tbody>
-//             </table>
-//           </div>
-
-//           {/* TOTAL ROW (bottom of table)  + credit amount below credit col */}
-//           <div
-//             style={{
-//               borderTop: `2px solid ${softTableStyles.softBorderColor}`,
-//               height: "24px",
-//               display: "flex",
-//               width: "100%",
-//             }}
-//           >
-//             {columnsConfig.map((column, index) => {
-//               const isCodeCol = column.key === "tcstcod";
-//               const isBalanceCol = column.key === "balance";
-
-//               return (
-//                 <div
-//                   key={`total-${index}`}
-//                   className={getAlignmentClass(column.alignment)}
-//                   style={{
-//                     width: column.uiWidth,
-//                     background: getcolor,
-//                     borderRight:
-//                       index < columnsConfig.length - 1
-//                         ? `1px solid ${softTableStyles.softBorderColor}`
-//                         : "none",
-//                     display: "flex",
-//                     alignItems: "center",
-//                     justifyContent: isBalanceCol ? "flex-end" : "flex-start",
-//                     paddingRight: isBalanceCol ? "6px" : "6px",
-//                     fontWeight: "bold",
-//                     fontSize: getdatafontsize,
-//                     fontFamily: getfontstyle,
-//                   }}
-//                 >
-//                   {isCodeCol
-//                     ? filteredData.length
-//                     : isBalanceCol
-//                     ? totalBalance.toLocaleString()
-//                     : ""}
-//                 </div>
-//               );
-//             })}
-//           </div>
-
-//           {/* ACTION BUTTONS – PDF & Excel */}
-//           <div
-//             style={{
-//               margin: "5px",
-//               marginBottom: "2px",
-//             }}
-//           >
-//             <SingleButton text="PDF" onClick={exportPDFHandler} />
-//             <SingleButton text="Excel" onClick={handleCSV} />
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -874,7 +13,7 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "Total Customers";
+const REPORT_NAME = "SalesMan Details Report";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
 const columnsConfig = [
@@ -941,7 +80,7 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function TotalCustomers() {
+export default function AmericanSalesManDetailsReport() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [apiData, setApiData] = useState(null);
@@ -1390,15 +529,15 @@ export default function TotalCustomers() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -1407,14 +546,28 @@ export default function TotalCustomers() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."
@@ -1559,17 +712,17 @@ export default function TotalCustomers() {
                             <FaClipboardList
                               size={20}
                               style={{ cursor: "pointer", color: "#17a2b8" }}
-                              //   onClick={(e) => {
-                              //     e.stopPropagation();
-                              //     window.open(
-                              //       `${
-                              //         window.location.origin
-                              //       }/crystalsol/AmericanProgressReportDashboard?code=${
-                              //         item.tcstcod
-                              //       }&name=${encodeURIComponent(item.tcstdsc)}`,
-                              //       "_blank"
-                              //     );
-                              //   }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanProgressReportDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                );
+                              }}
                             />
                           </div>
                         ) : column.key === "ledgerBtn" ? (
@@ -1582,17 +735,17 @@ export default function TotalCustomers() {
                             <FaFileInvoiceDollar
                               size={20}
                               style={{ cursor: "pointer", color: "#28a745" }}
-                              //   onClick={(e) => {
-                              //     e.stopPropagation();
-                              //     window.open(
-                              //       `${
-                              //         window.location.origin
-                              //       }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                              //         item.tcstcod
-                              //       }&name=${encodeURIComponent(item.tcstdsc)}`,
-                              //       "_blank"
-                              //     );
-                              //   }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                );
+                              }}
                             />
                           </div>
                         ) : (
@@ -1670,7 +823,7 @@ export default function TotalCustomers() {
                 >
                   {column.key === "balance" ? (
                     <span>{totalBalance.toLocaleString()}</span>
-                  ) : index === 0 ? (
+                  ) : index === 2 ? (
                     <span>{filteredData.length}</span>
                   ) : column.key === "scrollSpacer" ? (
                     ""

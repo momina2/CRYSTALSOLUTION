@@ -144,10 +144,10 @@ export default function AmericanCityDetailsReport() {
     const doc = new jsPDF({ orientation: "portrait" });
 
     // -------- PDF CONFIG ----------
-    const topMargin = 16; 
-    const rowHeight = 5; 
-    const headerHeight = 8; 
-    const maxRowY = 280; 
+    const topMargin = 16;
+    const rowHeight = 5;
+    const headerHeight = 8;
+    const maxRowY = 280;
 
     // ------- TITLE --------
     function drawTitle() {
@@ -169,7 +169,7 @@ export default function AmericanCityDetailsReport() {
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; 
+    const startX = (210 - tableWidth) / 2;
     let y = 32;
 
     function drawHeader() {
@@ -529,15 +529,15 @@ export default function AmericanCityDetailsReport() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -546,14 +546,28 @@ export default function AmericanCityDetailsReport() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."
@@ -698,17 +712,17 @@ export default function AmericanCityDetailsReport() {
                             <FaClipboardList
                               size={20}
                               style={{ cursor: "pointer", color: "#17a2b8" }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(
-                                    `${
-                                      window.location.origin
-                                    }/crystalsol/AmericanProgressReportDashboard?code=${
-                                      item.tcstcod
-                                    }&name=${encodeURIComponent(item.tcstdsc )}`,
-                                    "_blank"
-                                  );
-                                }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanProgressReportDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                );
+                              }}
                             />
                           </div>
                         ) : column.key === "ledgerBtn" ? (
@@ -721,17 +735,17 @@ export default function AmericanCityDetailsReport() {
                             <FaFileInvoiceDollar
                               size={20}
                               style={{ cursor: "pointer", color: "#28a745" }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(
-                                    `${
-                                      window.location.origin
-                                    }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                      item.tcstcod
-                                    }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                    "_blank"
-                                  );
-                                }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                );
+                              }}
                             />
                           </div>
                         ) : (

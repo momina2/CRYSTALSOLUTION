@@ -37,9 +37,9 @@ const columnsConfig = [
     excelWidth: 15,
   },
   {
-    header: "Typ",
+    header: "Type",
     key: "ttrntyp",
-    alignment: "left",
+    alignment: "center",
     uiWidth: 50,
     pdfWidth: 14,
     excelWidth: 15,
@@ -48,7 +48,7 @@ const columnsConfig = [
     header: "Trn#",
     key: "ttrnnum",
     alignment: "left",
-    uiWidth: 60,
+    uiWidth: 53,
     pdfWidth: 16,
     excelWidth: 15,
   },
@@ -320,6 +320,11 @@ export default function AmericanCustomerLedgerDashboard() {
         return "text-start";
     }
   };
+  // 🔹 helper to safely convert string numbers like "1,234,567" to number
+  const toNumber = (val) => {
+    if (val === null || val === undefined || val === "") return 0;
+    return Number(String(val).replace(/,/g, "")) || 0;
+  };
 
   const getSortIcon = (key) => {
     if (sortConfig.key === key) {
@@ -450,223 +455,169 @@ export default function AmericanCustomerLedgerDashboard() {
       ]
     : [];
 
-  // PDF EXPORT (simple)
-  // const exportPDFHandler = () => {
-  //   const doc = new jsPDF({ orientation: "portrait" });
-
-  //   doc.setFontSize(15);
-  //   doc.text(COMPANY_NAME, 105, 12, { align: "center" });
-  //   doc.text(REPORT_NAME, 105, 20, { align: "center" });
-  //   doc.text(`Customer: ${custCode || ""}`, 10, 12);
-  //   doc.text(`From: ${toApiDate(fromDate)}  To: ${toApiDate(toDate)}`, 10, 18);
-  //   doc.setFontSize(9);
-
-  //   let y = 30;
-  //   const pdfCols = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-  //   const headers = pdfCols.map((c) => c.header);
-
-  //   headers.forEach((h, i) => {
-  //     doc.text(h, 10 + i * 22, y);
-  //   });
-
-  //   y += 6;
-  //   filteredData.forEach((r) => {
-  //     const row = pdfCols.map((c) => {
-  //       const key = c.key;
-  //       if (key === "code") return custCode || "";
-  //       if (
-  //         ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
-  //       ) {
-  //         return Number(r[key] || 0).toLocaleString();
-  //       }
-  //       return r[key] ?? "";
-  //     });
-
-  //     row.forEach((val, i) => {
-  //       doc.text(String(val), 10 + i * 22, y);
-  //     });
-  //     y += 6;
-  //     if (y > 280) {
-  //       doc.addPage();
-  //       y = 30;
-  //     }
-  //   });
-
-  //   doc.save(`${REPORT_NAME}_${custCode || ""}.pdf`);
-  // };
-
   const exportPDFHandler = () => {
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    });
+    const doc = new jsPDF({ orientation: "portrait" });
 
-    // ===== CONFIG =====
-    const pageWidth = 210;
-    const rowHeight = 6;
-    const headerHeight = 8;
-    const maxY = 280;
+    // ================= DATA (LEDGER – PDF ONLY) =================
+    const rows = filteredData.map((r) => [
+      r.ttrndat || "",
+      r.ttrntyp || "",
+      r.ttrnnum || "",
+      r.ttrndsc || "",
+      toNumber(r.titmqnt).toLocaleString(),
+      toNumber(r.tsalrat).toLocaleString(),
+      toNumber(r.debit).toLocaleString(),
+      toNumber(r.credit).toLocaleString(),
+      toNumber(r.balance).toLocaleString(),
+    ]);
 
-    // ===== TITLE =====
-    const drawTitle = () => {
-      // ===== MAIN TITLE =====
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 16, { align: "center" });
+    // TOTAL ROW
+    rows.push([
+      "",
+      "",
+      "",
+      "Total",
+      "",
+      "",
+      toNumber(totalDebit).toLocaleString(),
+      toNumber(totalCredit).toLocaleString(),
+      toNumber(totalBalance).toLocaleString(),
+    ]);
 
-      // ===== REPORT NAME =====
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(REPORT_NAME, pageWidth / 2, 24, { align: "center" });
+    // Dummy row for aging
+    rows.push(["", "", "", "", "", "", "", "", ""]);
 
-      // ===== META INFO (LEFT) =====
-      doc.setFontSize(9);
-      doc.text(`Customer: ${headerCode || ""} | ${headerName || ""}`, 10, 30);
-      doc.text(
-        `From: ${toApiDate(fromDate)}   To: ${toApiDate(toDate)}`,
-        10,
-        35
-      );
-    };
+    const headers = [
+      "Date",
+      "Type",
+      "Trn#",
+      "Description",
+      "Qty",
+      "Rate",
+      "Debit",
+      "Credit",
+      "Balance",
+    ];
 
-    // ===== COLUMNS =====
-    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-    const keys = pdfColumns.map((c) => c.key);
-    const headers = pdfColumns.map((c) => c.header);
-    const colWidths = pdfColumns.map((c) => c.pdfWidth);
+    const columnWidths = [18, 12, 14, 55, 12, 14, 16, 16, 18];
+    const totalWidth = columnWidths.reduce((a, b) => a + b, 0);
 
-    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (pageWidth - tableWidth) / 2;
-    let y = 42;
+    doc.setFont(getfontstyle);
+    doc.setFontSize(9);
 
-    // ===== TABLE HEADER =====
-    const drawHeader = () => {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
+    // ================= TABLE HEADER =================
+    const addTableHeaders = (startX, startY) => {
+      doc.setFont(getfontstyle, "bold");
+      doc.setFontSize(10);
 
-      let x = startX;
       headers.forEach((h, i) => {
-        const w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(x, y, w, headerHeight, "F");
-        doc.rect(x, y, w, headerHeight);
-        doc.text(h, x + w / 2, y + 5.5, { align: "center" });
-        x += w;
+        doc.rect(startX, startY, columnWidths[i], 6);
+        doc.text(h, startX + columnWidths[i] / 2, startY + 4, {
+          align: "center",
+        });
+        startX += columnWidths[i];
       });
 
-      y += headerHeight;
+      doc.setFont(getfontstyle, "normal");
     };
 
-    // ===== ROW =====
-    const drawRow = (row, isTotal = false) => {
+    // ================= AGING ROW =================
+    const drawBalanceAgingRow = (startX, startY) => {
+      const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+      const colW = tableWidth / 6;
+
+      const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
+      const values = [
+        apiData?.amt001,
+        apiData?.amt002,
+        apiData?.amt003,
+        apiData?.amt004,
+        apiData?.amt005,
+        apiData?.amt006,
+      ].map((v) => toNumber(v).toLocaleString());
+
       let x = startX;
-      doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-      doc.setFontSize(7);
+      doc.rect(startX, startY, tableWidth, 12);
 
-      row.forEach((cell, i) => {
-        const w = colWidths[i];
-        const key = keys[i];
-        doc.rect(x, y, w, rowHeight);
+      for (let i = 0; i < 6; i++) {
+        doc.rect(x, startY, colW, 12);
+        doc.line(x, startY + 6, x + colW, startY + 6);
 
-        // 🔹 Numeric columns → right aligned
-        if (
-          ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
-        ) {
-          doc.text(String(cell), x + w - 2, y + 4.5, { align: "right" });
-        }
+        doc.setFont(getfontstyle, "bold");
+        doc.setFontSize(9);
+        doc.text(labels[i], x + colW / 2, startY + 4, { align: "center" });
 
-        // 🔹 Description column → trimmed to avoid overflow
-        else if (key === "ttrndsc") {
-          const safeText =
-            String(cell || "").length > 45
-              ? String(cell).substring(0, 45) + "…"
-              : String(cell || "");
+        doc.setFont(getfontstyle, "normal");
+        doc.setFontSize(10);
+        doc.text(values[i], x + colW / 2, startY + 10, { align: "center" });
 
-          doc.text(safeText, x + 2, y + 4.5);
-        }
-
-        // 🔹 Normal text
-        else {
-          doc.text(String(cell || ""), x + 2, y + 4.5);
-        }
-
-        x += w;
-      });
-
-      y += rowHeight;
-    };
-
-    // ===== PAGE BREAK =====
-    const checkPageBreak = () => {
-      if (y > maxY) {
-        doc.addPage();
-        drawTitle();
-        y = 32;
-        drawHeader();
+        x += colW;
       }
     };
 
-    // ===== START =====
-    drawTitle();
-    drawHeader();
+    // ================= TABLE ROWS =================
+    const addRows = (startX, startY) => {
+      const rowH = 5;
 
-    const bodyRows = filteredData.map((r) =>
-      keys.map((k) => {
-        if (k === "code") return headerCode || "";
-        if (["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(k)) {
-          return Number(r[k] || 0).toLocaleString();
+      rows.forEach((row, i) => {
+        const y = startY + (i + 2) * rowH;
+
+        if (i === rows.length - 1) {
+          drawBalanceAgingRow(startX, y + 2);
+          return;
         }
-        return r[k] ?? "";
-      })
-    );
 
-    // ===== TOTAL ROW =====
-    const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = filteredData.length.toString();
-    totalRow[keys.indexOf("debit")] = totalDebit.toLocaleString();
-    totalRow[keys.indexOf("credit")] = totalCredit.toLocaleString();
-    totalRow[keys.indexOf("balance")] = totalBalance.toLocaleString();
+        let x = startX;
 
-    [...bodyRows, totalRow].forEach((row, idx, arr) => {
-      checkPageBreak();
-      drawRow(row, idx === arr.length - 1);
-    });
+        if (row[3] === "Total") {
+          doc.setFont(getfontstyle, "bold");
+        }
 
-    // ===== AGING CARD (PDF) =====
-    if (apiData && stats.length) {
-      y += 10;
+        row.forEach((cell, c) => {
+          doc.rect(x, y, columnWidths[c], rowH);
 
-      const boxWidth = 28;
-      const boxHeight = 14;
-      const gap = 2;
-      const totalBoxWidth = stats.length * boxWidth + (stats.length - 1) * gap;
-      let x = (pageWidth - totalBoxWidth) / 2;
+          doc.text(
+            String(cell),
+            c >= 4 ? x + columnWidths[c] - 2 : x + 2,
+            y + 3.5,
+            { align: c >= 4 ? "right" : "left" }
+          );
 
-      doc.setFontSize(8);
-
-      stats.forEach((stat) => {
-        doc.rect(x, y, boxWidth, boxHeight);
-
-        doc.text(stat.range, x + boxWidth / 2, y + 5, {
-          align: "center",
+          x += columnWidths[c];
         });
 
-        doc.setFont("Helvetica", "bold");
-        doc.text(
-          Number(stat.amount || 0).toLocaleString(),
-          x + boxWidth / 2,
-          y + 11,
-          { align: "center" }
-        );
-
-        doc.setFont("Helvetica", "normal");
-        x += boxWidth + gap;
+        doc.setFont(getfontstyle, "normal");
       });
-    }
+    };
 
-    // ===== SAVE =====
-    doc.save(`${REPORT_NAME}_${headerCode || ""}.pdf`);
+    // ================= HEADINGS =================
+    const pageCenter = doc.internal.pageSize.width / 2;
+    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+
+    // Company
+    doc.setFont(getfontstyle, "bold");
+    doc.setFontSize(18);
+    doc.text("AMERICAN ELECTRONICS (SMC-PVT) LTD", pageCenter, 12, {
+      align: "center",
+    });
+
+    // Report line
+    doc.setFontSize(12);
+    doc.text(`Customer Report (${toDate})`, pageCenter, 18, {
+      align: "center",
+    });
+
+    // Account (LEFT, aligned with table)
+    doc.setFont(getfontstyle, "bold");
+    doc.setFontSize(11);
+    doc.text(`Account: ${headerName}`, tableStartX, 26);
+
+    // ================= DRAW TABLE =================
+    addTableHeaders(tableStartX, 30);
+    addRows(tableStartX, 30);
+
+    // ================= SAVE =================
+    doc.save(`CustomerLedger_${toDate}.pdf`);
   };
 
   // EXCEL EXPORT (Advance style)
@@ -710,7 +661,7 @@ export default function AmericanCustomerLedgerDashboard() {
     rows.forEach((item) => {
       const row = worksheet.addRow(
         keys.map((key) => {
-          if (key === "code") return custCode || "";
+          // if (key === "code") return custCode || "";
           if (
             ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
           ) {
@@ -896,7 +847,20 @@ export default function AmericanCustomerLedgerDashboard() {
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
                 <input
                   type="text"
                   placeholder="Search..."

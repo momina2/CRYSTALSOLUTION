@@ -524,7 +524,6 @@ export default function AmericanOutstanding() {
         >
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
           <NavComponent textdata={REPORT_NAME} />
-
           {/* SEARCH ROW */}
           <div
             className="row"
@@ -533,15 +532,15 @@ export default function AmericanOutstanding() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -550,14 +549,28 @@ export default function AmericanOutstanding() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."
@@ -575,7 +588,6 @@ export default function AmericanOutstanding() {
               </div>
             </div>
           </div>
-
           {/* TABLE HEADER (fixed) */}
           <div
             style={{

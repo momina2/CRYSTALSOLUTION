@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useTheme } from "../../../ThemeContext";
 import NavComponent from "../../MainComponent/Navform/navbarform";
@@ -9,42 +10,53 @@ import "../AmericanDashboard.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { useLocation } from "react-router-dom";
+import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "American Advance Customers";
+const REPORT_NAME = "Region Details Report";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
 const columnsConfig = [
   {
+    header: "Lgr",
+    key: "ledgerBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
+    header: "P.R",
+    key: "progressBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+
+  {
     header: "Code",
     key: "tcstcod",
     alignment: "left",
-    uiWidth: 80,
+    uiWidth: 90,
     pdfWidth: 20,
-    excelWidth: 15,
+    excelWidth: 8,
   },
   {
-    header: "Name",
+    header: "Description",
     key: "tcstdsc",
     alignment: "left",
     uiWidth: 360,
     pdfWidth: 80,
-    excelWidth: 40,
-  },
-  {
-    header: "Mobile",
-    key: "tmobnum",
-    alignment: "left",
-    uiWidth: 110,
-    pdfWidth: 25,
     excelWidth: 20,
   },
   {
-    header: "Salesman",
-    key: "SalesMan",
-    alignment: "left",
-    uiWidth: 200,
-    pdfWidth: 35,
-    excelWidth: 30,
+    header: "Phone",
+    key: "tmobnum",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 25,
+    excelWidth: 15,
   },
   {
     header: "Balance",
@@ -52,7 +64,7 @@ const columnsConfig = [
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
-    excelWidth: 18,
+    excelWidth: 15,
   },
   {
     header: "",
@@ -63,17 +75,31 @@ const columnsConfig = [
     excelWidth: 0,
   },
 ];
+function useQueryParams() {
+  const { search } = useLocation();
+  return useMemo(() => new URLSearchParams(search), [search]);
+}
 
-export default function AmericanAdvance() {
+export default function AmericanRegionDetailsReport() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
+  const [apiData, setApiData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
+
+  const query = useQueryParams();
+  //   const RegCod = query.get("PRegCod") || "";
+  //   const RegName = query.get("name") || "";
+
+  const rawRegCod = query.get("PRegCod");
+  const RegCod = rawRegCod && rawRegCod !== "null" ? rawRegCod : "";
+  const RegName = query.get("name") || "";
 
   const {
     isSidebarVisible,
@@ -84,272 +110,147 @@ export default function AmericanAdvance() {
     getdatafontsize,
   } = useTheme();
 
-  // ----------- FETCH API (same as pehle) -----------
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const form = new FormData();
-        form.append("code", "AMRELEC");
+  // === API CALL =====
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
 
-        const res = await axios.post(
-          "https://crystalsolutions.com.pk/api/AmericanAdvanceCustomers.php",
-          form,
-          { timeout: 20000 }
-        );
+      const form = new FormData();
+      form.append("code", "AMRELEC");
+      form.append("PRegCod", RegCod);
 
-        setRows(res?.data || []);
-      } catch (err) {
-        console.error("Error fetching Advance Customers:", err);
-        setRows([]);
-      }
+      const res = await axios.post(
+        "https://crystalsolutions.com.pk/api/AmericanRegionCustomers.php",
+        form
+      );
+
+      const DetailsList = Array.isArray(res.data) ? res.data : [];
+
+      setRows(DetailsList);
+    } catch (err) {
+      console.error("Progress API error:", err);
+      setRows([]);
+      setApiData(null);
+    } finally {
       setIsLoading(false);
-    };
+    }
+  };
 
+  useEffect(() => {
+    if (!RegCod) return;
     fetchData();
-  }, []);
-
-  // const exportPDFHandler = () => {
-  //   const doc = new jsPDF({ orientation: "portrait" });
-
-  //   // -------- PDF CONFIG ----------
-  //   const topMargin = 16; // top space for header
-  //   const rowHeight = 5; // normal row height
-  //   const headerHeight = 8; // table header height
-  //   const maxRowY = 280; // printable area before adding new page
-
-  //   // ------- TITLE --------
-  //   function drawTitle() {
-  //     doc.setFont("Helvetica", "bold");
-  //     doc.setFontSize(20);
-  //     doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
-
-  //     doc.setFont("Helvetica", "normal");
-  //     doc.setFontSize(13);
-  //     doc.text(REPORT_NAME, 105, 24, { align: "center" });
-  //   }
-
-  //   // --------- TABLE HEADER ---------
-  //   const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-  //   const keys = pdfColumns.map((c) => c.key);
-  //   const headers = pdfColumns.map((c) => c.header);
-  //   const colWidths = pdfColumns.map((c) => c.pdfWidth);
-
-  //   const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-  //   const startX = (210 - tableWidth) / 2; // page width 210mm
-  //   let y = 32;
-
-  //   function drawHeader() {
-  //     doc.setFont("Helvetica", "bold");
-  //     doc.setFontSize(9);
-  //     let curX = startX;
-
-  //     headers.forEach((header, i) => {
-  //       let w = colWidths[i];
-  //       doc.setFillColor(220);
-  //       doc.rect(curX, y, w, headerHeight, "F");
-  //       doc.rect(curX, y, w, headerHeight);
-  //       doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-  //         align: "center",
-  //       });
-  //       curX += w;
-  //     });
-
-  //     y += headerHeight;
-  //   }
-
-  //   // ---------- DRAW ONE ROW ----------
-  //   function drawRow(row, isTotal) {
-  //     let curX = startX;
-
-  //     row.forEach((cell, cIndex) => {
-  //       let w = colWidths[cIndex];
-  //       doc.rect(curX, y, w, rowHeight);
-
-  //       doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-  //       doc.setFontSize(8);
-
-  //       if (cIndex === colWidths.length - 1) {
-  //         doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
-  //           align: "right",
-  //         });
-  //       } else {
-  //         doc.text(String(cell), curX + 2, y + rowHeight - 2);
-  //       }
-  //       curX += w;
-  //     });
-
-  //     y += rowHeight;
-  //   }
-
-  //   // ---------- PAGE BREAK HANDLER -----------
-  //   function checkPageBreak() {
-  //     if (y > maxRowY) {
-  //       doc.addPage();
-  //       y = topMargin;
-  //       drawTitle();
-  //       y = 32;
-  //       drawHeader();
-  //     }
-  //   }
-
-  //   // ---------- START PRINT ----------
-  //   drawTitle();
-  //   y = 32;
-  //   drawHeader();
-
-  //   const dataRows = sortedTableData.map((row) =>
-  //     keys.map((key) => row[key] ?? "")
-  //   );
-  //   const totalRow = new Array(keys.length).fill("");
-  //   totalRow[0] = sortedTableData.length.toString();
-
-  //   totalRow[keys.length - 1] = totalBalance.toLocaleString();
-  //   const rowsPDF = [...dataRows, totalRow];
-
-  //   rowsPDF.forEach((row, index) => {
-  //     const isTotal = index === rowsPDF.length - 1;
-  //     checkPageBreak();
-  //     drawRow(row, isTotal);
-  //   });
-
-  //   // ---------- SAVE ----------
-  //   doc.save(`${REPORT_NAME}.pdf`);
-  // };
-
+  }, [RegCod]);
   const exportPDFHandler = () => {
-    const doc = new jsPDF("p", "mm", "a4");
-    const pageWidth = 210;
+    const doc = new jsPDF({ orientation: "portrait" });
 
-    let y = 40; // table start Y
+    // -------- PDF CONFIG ----------
+    const topMargin = 16;
+    const rowHeight = 5;
+    const headerHeight = 8;
+    const maxRowY = 280;
 
-    // ===== COLORS =====
-    const COLORS = {
-      orange: [233, 102, 45],
-      blue: [30, 136, 229],
-      border: [230, 140, 110],
-      lightRow: [255, 240, 235],
-      pointsBg: [255, 225, 215],
-      text: [40, 40, 40],
-    };
-
-    // ===== DRAW BORDER =====
-    const drawOuterBorder = () => {
-      doc.setDrawColor(...COLORS.border);
-      doc.setLineWidth(0.8);
-      doc.roundedRect(10, 20, 190, 260, 4, 4);
-    };
-
-    // ===== DRAW HEADER + FRAME =====
-    const drawPageFrame = () => {
-      // Header
+    // ------- TITLE --------
+    function drawTitle() {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(20);
-      doc.setTextColor(...COLORS.orange);
-      doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 18, { align: "center" });
+      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
 
-      doc.setFontSize(12);
-      doc.setTextColor(0);
-      doc.text(REPORT_NAME, pageWidth / 2, 26, { align: "center" });
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(13);
+      doc.text(RegName, 105, 24, { align: "center" });
+    }
 
-      // Border
-      drawOuterBorder();
-
-      // Reset table Y
-      y = 40;
-    };
-
-    // ===== TABLE CONFIG =====
-    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    // --------- TABLE HEADER ---------
+    const pdfColumns = columnsConfig.filter(
+      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn"
+    );
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (pageWidth - tableWidth) / 2;
+    const startX = (210 - tableWidth) / 2;
+    let y = 32;
 
-    // ===== TABLE HEADER =====
-    const drawTableHeader = () => {
-      let x = startX;
+    function drawHeader() {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(9);
-      doc.setTextColor(...COLORS.orange);
+      let curX = startX;
 
-      headers.forEach((h, i) => {
-        doc.text(h.toUpperCase(), x + 2, y);
-        x += colWidths[i];
+      headers.forEach((header, i) => {
+        let w = colWidths[i];
+        doc.setFillColor(220);
+        doc.rect(curX, y, w, headerHeight, "F");
+        doc.rect(curX, y, w, headerHeight);
+        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
+          align: "center",
+        });
+        curX += w;
       });
 
-      y += 3;
-      doc.setDrawColor(...COLORS.border);
-      doc.line(startX, y, startX + tableWidth, y);
+      y += headerHeight;
+    }
 
-      y += 4;
-    };
+    // ---------- DRAW ONE ROW ----------
+    function drawRow(row, isTotal) {
+      let curX = startX;
 
-    // ===== ROW =====
-    const drawRow = (row, index, isTotal) => {
-      let x = startX;
-
-      // zebra background
-      if (!isTotal && index % 2 === 0) {
-        doc.setFillColor(...COLORS.lightRow);
-        doc.rect(startX, y - 4, tableWidth, 6, "F");
-      }
-
-      row.forEach((cell, i) => {
-        // points column highlight
-        if (i === row.length - 1) {
-          doc.setFillColor(...COLORS.pointsBg);
-          doc.rect(x, y - 4, colWidths[i], 6, "F");
-        }
+      row.forEach((cell, cIndex) => {
+        let w = colWidths[cIndex];
+        doc.rect(curX, y, w, rowHeight);
 
         doc.setFont("Helvetica", isTotal ? "bold" : "normal");
         doc.setFontSize(8);
-        doc.setTextColor(...COLORS.text);
 
-        doc.text(
-          String(cell),
-          i === row.length - 1 ? x + colWidths[i] - 2 : x + 2,
-          y,
-          { align: i === row.length - 1 ? "right" : "left" }
-        );
-
-        x += colWidths[i];
+        if (cIndex === colWidths.length - 1) {
+          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+            align: "right",
+          });
+        } else {
+          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+        }
+        curX += w;
       });
 
-      y += 6;
-    };
+      y += rowHeight;
+    }
 
-    // ===== PAGE BREAK =====
-    const checkPageBreak = () => {
-      if (y > 275) {
+    // ---------- PAGE BREAK HANDLER -----------
+    function checkPageBreak() {
+      if (y > maxRowY) {
         doc.addPage();
-        drawPageFrame();
-        drawTableHeader();
+        y = topMargin;
+        drawTitle();
+        y = 32;
+        drawHeader();
       }
-    };
+    }
 
-    // ===== START PDF =====
-    drawPageFrame();
-    drawTableHeader();
+    // ---------- START PRINT ----------
+    drawTitle();
+    y = 32;
+    drawHeader();
 
     const dataRows = sortedTableData.map((row) =>
       keys.map((key) => row[key] ?? "")
     );
-
     const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = "TOTAL";
-    totalRow[keys.length - 1] = totalBalance.toLocaleString();
+    totalRow[0] = sortedTableData.length.toString();
 
-    [...dataRows, totalRow].forEach((row, index) => {
+    totalRow[keys.length - 1] = totalBalance.toLocaleString();
+    const rowsPDF = [...dataRows, totalRow];
+
+    rowsPDF.forEach((row, index) => {
+      const isTotal = index === rowsPDF.length - 1;
       checkPageBreak();
-      drawRow(row, index, index === dataRows.length);
+      drawRow(row, isTotal);
     });
 
-    // ===== SAVE =====
-    doc.save(`${REPORT_NAME}.pdf`);
+    // ---------- SAVE ----------
+    doc.save(`${RegCod}|${RegName}.pdf`);
   };
+
+  // ======================= EXCEL EXPORT =======================
 
   async function exportCSV({
     rows,
@@ -361,7 +262,9 @@ export default function AmericanAdvance() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Report");
 
-    const excelColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    const excelColumns = columnsConfig.filter(
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+    );
 
     const headers = excelColumns.map((c) => c.header);
     const keys = excelColumns.map((c) => c.key);
@@ -484,36 +387,18 @@ export default function AmericanAdvance() {
   };
 
   const getSortIcon = (key) => {
-    // Selected column
+    if (nonSortableKeys.includes(key)) return null; // ❌ no arrows on buttons
+
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
-        <FaSortUp
-          style={{
-            marginLeft: "5px",
-            color: "#e74c3c",
-            transition: "0.3s",
-          }}
-        />
+        <FaSortUp style={{ marginLeft: "5px", color: "#e74c3c" }} />
       ) : (
-        <FaSortDown
-          style={{
-            marginLeft: "5px",
-            color: "#e74c3c",
-            transition: "0.3s",
-          }}
-        />
+        <FaSortDown style={{ marginLeft: "5px", color: "#e74c3c" }} />
       );
     }
 
-    // Default (unselected)
     return (
-      <FaSortDown
-        style={{
-          marginLeft: "5px",
-          color: "white",
-          opacity: 0.4,
-        }}
-      />
+      <FaSortDown style={{ marginLeft: "5px", color: "white", opacity: 0.4 }} />
     );
   };
 
@@ -526,6 +411,8 @@ export default function AmericanAdvance() {
 
     setSortConfig({ key, direction });
   };
+  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
+
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
     let data = [...rows];
@@ -535,10 +422,10 @@ export default function AmericanAdvance() {
       data = data.filter(
         (row) =>
           row.tcstcod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.toLowerCase().includes(q) ||
+          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
-          row.balance?.toString().includes(q)
+          row.balance?.toString().includes(q) // ✅ BALANCE
       );
     }
 
@@ -566,40 +453,20 @@ export default function AmericanAdvance() {
   }, [rows, searchQuery, sortConfig]);
 
   const filteredData = useMemo(() => {
-    let data = rows;
+    if (!searchQuery) return sortedTableData;
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase().trim();
-      data = data.filter((row) => {
-        return (
-          row.tcstcod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
-          row.balance?.toString().includes(q)
-        );
-      });
-    }
+    const q = searchQuery.toLowerCase().trim();
 
-    if (sortConfig.key) {
-      data = [...data].sort((a, b) => {
-        const valueA = a[sortConfig.key] ?? "";
-        const valueB = b[sortConfig.key] ?? "";
-
-        if (!isNaN(valueA) && !isNaN(valueB)) {
-          return sortConfig.direction === "asc"
-            ? Number(valueA) - Number(valueB)
-            : Number(valueB) - Number(valueA);
-        }
-
-        return sortConfig.direction === "asc"
-          ? String(valueA).localeCompare(String(valueB))
-          : String(valueB).localeCompare(String(valueA));
-      });
-    }
-
-    return data;
-  }, [rows, searchQuery, sortConfig]);
+    return sortedTableData.filter((row) => {
+      return (
+        row.tcstcod?.toLowerCase().includes(q) ||
+        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tmobnum?.toLowerCase().includes(q) ||
+        row.SalesMan?.toLowerCase().includes(q) ||
+        row.balance?.toString().includes(q) // ✅ BALANCE
+      );
+    });
+  }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
@@ -652,7 +519,7 @@ export default function AmericanAdvance() {
           }}
         >
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
-          <NavComponent textdata={REPORT_NAME} />
+          <NavComponent textdata={`${RegCod || ""} | ${RegName}`} />
 
           {/* SEARCH ROW */}
           <div
@@ -758,8 +625,15 @@ export default function AmericanAdvance() {
                   {columnsConfig.map((column, index) => (
                     <td
                       key={index}
-                      onClick={() => requestSort(column.key)}
+                      onClick={() =>
+                        nonSortableKeys.includes(column.key)
+                          ? null
+                          : requestSort(column.key)
+                      }
                       style={{
+                        cursor: nonSortableKeys.includes(column.key)
+                          ? "default"
+                          : "pointer",
                         width: column.uiWidth,
                         padding: "8px 6px",
                         borderBottom: `2px solid ${softTableStyles.softBorderColor}`,
@@ -798,109 +672,118 @@ export default function AmericanAdvance() {
               }}
             >
               <tbody>
-                {isLoading ? (
-                  <>
-                    <tr
-                      style={{
-                        backgroundColor: getcolor,
-                        color: fontcolor,
-                      }}
-                    >
+                {filteredData.map((item, i) => (
+                  <tr
+                    key={i}
+                    onClick={() => setSelectedRowIndex(i)}
+                    style={{
+                      cursor: "pointer",
+                      color: selectedRowIndex === i ? "white" : fontcolor,
+                      backgroundColor:
+                        selectedRowIndex === i
+                          ? getnavbarbackgroundcolor // ✅ theme color
+                          : i % 2 === 0
+                          ? getcolor
+                          : "#f8f9ff",
+                      transition: "background-color 0.2s ease",
+                    }}
+                  >
+                    {columnsConfig.map((column, index) => (
                       <td
-                        colSpan={columnsConfig.length}
-                        className="text-center"
-                        style={{ padding: "10px" }}
-                      >
-                        Fetching data...
-                      </td>
-                    </tr>
-                    {Array.from({ length: 20 }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-loading-${rowIndex}`}
+                        key={index}
+                        className={getAlignmentClass(column.alignment)}
                         style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
+                          width: column.uiWidth,
+                          padding: "8px 6px",
+                          borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                         }}
                       >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-loading-${rowIndex}-${colIndex}`}>
-                            &nbsp;
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {sortedTableData.map((item, i) => (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedRowIndex(i)}
-                        style={{
-                          cursor: "pointer",
-                          color: selectedRowIndex === i ? "white" : fontcolor,
-                          backgroundColor:
-                            selectedRowIndex === i
-                              ? getnavbarbackgroundcolor // ✅ theme ka color
-                              : i % 2 === 0
-                              ? getcolor
-                              : "#f8f9ff",
-                          transition: "background-color 0.2s ease",
-                        }}
-                      >
-                        {columnsConfig.map((column, index) => (
-                          <td
-                            key={index}
-                            className={getAlignmentClass(column.alignment)}
+                        {column.key === "scrollSpacer" ? (
+                          ""
+                        ) : column.key === "balance" ? (
+                          Number(item[column.key] || 0).toLocaleString()
+                        ) : column.key === "progressBtn" ? (
+                          <div
                             style={{
-                              width: column.uiWidth,
-                              padding: "8px 6px",
-                              borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                              display: "flex",
+                              justifyContent: "center",
                             }}
                           >
-                            {column.key === "scrollSpacer"
-                              ? "" // ➤ empty column
-                              : column.key === "balance"
-                              ? Number(item[column.key] || 0).toLocaleString()
-                              : item[column.key]}
-                          </td>
-                        ))}
-                      </tr>
+                            <FaClipboardList
+                              size={20}
+                              style={{ cursor: "pointer", color: "#17a2b8" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanProgressReportDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : column.key === "ledgerBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaFileInvoiceDollar
+                              size={20}
+                              style={{ cursor: "pointer", color: "#28a745" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank"
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          item[column.key]
+                        )}
+                      </td>
                     ))}
+                  </tr>
+                ))}
 
-                    {/* Blank rows to keep table height nice */}
-                    {Array.from({
-                      length: Math.max(0, 27 - sortedTableData.length),
-                    }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-${rowIndex}`}
-                        style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
-                        }}
-                      >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                        ))}
-                      </tr>
-                    ))}
-
-                    {/* Dummy row to keep widths */}
-                    <tr>
+                {Array.from({ length: 25 - filteredData.length }).map(
+                  (_, idx) => (
+                    <tr
+                      key={`empty-${idx}`}
+                      style={{
+                        backgroundColor: idx % 2 === 0 ? getcolor : "#f8f9ff",
+                      }}
+                    >
                       {columnsConfig.map((column, index) => (
                         <td
-                          key={`dummy-bottom-${index}`}
-                          style={{ width: column.uiWidth }}
-                        ></td>
+                          key={index}
+                          style={{
+                            width: column.uiWidth,
+                            padding: "8px 6px",
+                            height: "24px",
+                            borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                          }}
+                        >
+                          {/* empty cell */}
+                        </td>
                       ))}
                     </tr>
-                  </>
+                  )
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* TOTAL ROW (bottom of table) */}
           <div
             style={{
               borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
@@ -911,7 +794,7 @@ export default function AmericanAdvance() {
             }}
           >
             {columnsConfig.map((column, index) => {
-              const isTotalColumn = index === columnsConfig.length - 2; // ⭐ BALANCE is now 2nd last
+              const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
                 isTotalColumn ? "right" : "left"
@@ -952,7 +835,6 @@ export default function AmericanAdvance() {
             })}
           </div>
 
-          {/* ACTION BUTTONS – Only PDF & Excel */}
           <div
             style={{
               margin: "5px",

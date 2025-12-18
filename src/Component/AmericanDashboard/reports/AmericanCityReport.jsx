@@ -468,7 +468,7 @@ export default function AmericanCityReport() {
         const aVal = a[sortConfig.key] ?? "";
         const bVal = b[sortConfig.key] ?? "";
 
-        // Balance numeric sort
+        // ✅ Balance numeric sort
         if (sortConfig.key === "Bal") {
           const aNum = parseFloat(aVal) || 0;
           const bNum = parseFloat(bVal) || 0;
@@ -477,6 +477,16 @@ export default function AmericanCityReport() {
             : bNum - aNum;
         }
 
+        // ✅ Nos numeric sort (FIX)
+        if (sortConfig.key === "Nos") {
+          const aNum = Number(String(aVal).replace(/,/g, "")) || 0;
+          const bNum = Number(String(bVal).replace(/,/g, "")) || 0;
+          return sortConfig.direction === "ascending"
+            ? aNum - bNum
+            : bNum - aNum;
+        }
+
+        // 🔤 default string sort
         return sortConfig.direction === "ascending"
           ? String(aVal).localeCompare(String(bVal))
           : String(bVal).localeCompare(String(aVal));
@@ -562,15 +572,15 @@ export default function AmericanCityReport() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -579,14 +589,28 @@ export default function AmericanCityReport() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."

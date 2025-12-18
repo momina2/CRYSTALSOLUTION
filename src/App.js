@@ -179,6 +179,9 @@ import AmericanSalesManReport from "./Component/AmericanDashboard/reports/Americ
 import AmericanSalesManDetailsReport from "./Component/AmericanDashboard/reports/AmericanSalesManDetailsReport.jsx";
 import AmericanCityReport from "./Component/AmericanDashboard/reports/AmericanCityReport.jsx";
 import AmericanCityDetailsReport from "./Component/AmericanDashboard/reports/AmericanCityDetailsReport.jsx";
+import AmericanRegionReport from "./Component/AmericanDashboard/reports/AmericanRegionReport.jsx";
+import AmericanBankReport from "./Component/AmericanDashboard/reports/AmericanBankReport.jsx";
+import AmericanCashReport from "./Component/AmericanDashboard/reports/AmericanCashReport.jsx";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -420,12 +423,32 @@ function App() {
                 <Route
                   exact
                   path="/AmericanCityReport"
-                  element={<AmericanCityReport/>}
+                  element={<AmericanCityReport />}
                 ></Route>
-                   <Route
+                <Route
                   exact
                   path="/AmericanCityDetailsReport"
-                  element={<AmericanCityDetailsReport/>}
+                  element={<AmericanCityDetailsReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanRegionReport"
+                  element={<AmericanRegionReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanRegionDetailsReport"
+                  element={<AmericanCityDetailsReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanBankReport"
+                  element={<AmericanBankReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanCashReport"
+                  element={<AmericanCashReport />}
                 ></Route>
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////

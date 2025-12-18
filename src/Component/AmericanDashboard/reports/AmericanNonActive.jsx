@@ -232,153 +232,29 @@ export default function AmericanNonActive() {
   ///////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////           DESIGN 2
-  // const exportPDFHandler = () => {
-  //   const doc = new jsPDF({ orientation: "portrait" });
-
-  //   // -------- PDF CONFIG ----------
-  //   const topMargin = 16;
-  //   const rowHeight = 5;
-  //   const headerHeight = 8;
-  //   const maxRowY = 280;
-
-  //   // ------- TITLE --------
-  //   function drawTitle() {
-  //     // Company name (FORMAT-2 style)
-  //     doc.setFont("Helvetica", "bold");
-  //     doc.setFontSize(20);
-  //     doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
-
-  //     // Report name
-  //     doc.setFont("Helvetica", "normal");
-  //     doc.setFontSize(12);
-  //     doc.text(REPORT_NAME, 105, 24, { align: "center" });
-  //   }
-
-  //   // --------- TABLE HEADER ---------
-  //   const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-  //   const keys = pdfColumns.map((c) => c.key);
-  //   const headers = pdfColumns.map((c) => c.header);
-  //   const colWidths = pdfColumns.map((c) => c.pdfWidth);
-
-  //   const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-  //   const startX = (210 - tableWidth) / 2;
-  //   let y = 32;
-
-  //   function drawHeader() {
-  //     doc.setFont("Helvetica", "bold"); // FORMAT-2 header font
-  //     doc.setFontSize(9);
-
-  //     let curX = startX;
-  //     headers.forEach((header, i) => {
-  //       const w = colWidths[i];
-  //       doc.rect(curX, y, w, headerHeight);
-  //       doc.text(
-  //         String(header).toUpperCase(),
-  //         curX + w / 2,
-  //         y + headerHeight - 3,
-  //         { align: "center" }
-  //       );
-  //       curX += w;
-  //     });
-
-  //     y += headerHeight;
-  //   }
-
-  //   // ---------- DRAW ONE ROW ----------
-  //   function drawRow(row, isTotal) {
-  //     let curX = startX;
-
-  //     row.forEach((cell, cIndex) => {
-  //       const w = colWidths[cIndex];
-  //       doc.rect(curX, y, w, rowHeight);
-
-  //       // FORMAT-2 row font logic
-  //       doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-  //       doc.setFontSize(8);
-
-  //       if (cIndex === colWidths.length - 1) {
-  //         doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
-  //           align: "right",
-  //         });
-  //       } else {
-  //         doc.text(String(cell), curX + 2, y + rowHeight - 2);
-  //       }
-
-  //       curX += w;
-  //     });
-
-  //     y += rowHeight;
-  //   }
-
-  //   // ---------- PAGE BREAK HANDLER ----------
-  //   function checkPageBreak() {
-  //     if (y > maxRowY) {
-  //       doc.addPage();
-  //       drawTitle();
-  //       y = 32;
-  //       drawHeader();
-  //     }
-  //   }
-
-  //   // ---------- START PRINT ----------
-  //   drawTitle();
-  //   drawHeader();
-
-  //   const dataRows = sortedTableData.map((row) =>
-  //     keys.map((key) => row[key] ?? "")
-  //   );
-
-  //   const totalRow = new Array(keys.length).fill("");
-  //   totalRow[0] = "TOTAL";
-  //   totalRow[keys.length - 1] = totalBalance.toLocaleString();
-
-  //   [...dataRows, totalRow].forEach((row, index) => {
-  //     checkPageBreak();
-  //     drawRow(row, index === dataRows.length);
-  //   });
-
-  //   // ---------- SAVE ----------
-  //   doc.save(`${REPORT_NAME}.pdf`);
-  // };
-
-  ///////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////           DESIGN 3
   const exportPDFHandler = () => {
-    const doc = new jsPDF("p", "mm", "a4");
+    const doc = new jsPDF({ orientation: "portrait" });
 
-    const rowHeight = 6;
+    // -------- PDF CONFIG ----------
+    const topMargin = 16;
+    const rowHeight = 5;
     const headerHeight = 8;
     const maxRowY = 280;
 
-    const COLORS = {
-      headerBg: [226, 232, 240], // light navy blue
-      rowAlt: [248, 249, 255],
-      totalBg: [226, 232, 240],
-      textDark: [40, 40, 40],
-      line: [200, 200, 200],
-    };
-
-    /* ---------- TITLE (NO PURPLE BOX) ---------- */
-    const drawTitle = () => {
+    // ------- TITLE --------
+    function drawTitle() {
+      // Company name (FORMAT-2 style)
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(20);
-      doc.setTextColor(...COLORS.textDark);
       doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
 
+      // Report name
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(12);
-      doc.text(REPORT_NAME, 105, 23, { align: "center" });
+      doc.text(REPORT_NAME, 105, 24, { align: "center" });
+    }
 
-      // soft separator line
-      doc.setDrawColor(...COLORS.line);
-      doc.line(14, 26, 196, 26);
-    };
-
-    /* ---------- TABLE CONFIG ---------- */
+    // --------- TABLE HEADER ---------
     const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
@@ -388,88 +264,212 @@ export default function AmericanNonActive() {
     const startX = (210 - tableWidth) / 2;
     let y = 32;
 
-    /* ---------- HEADER (NO BLACK BORDERS) ---------- */
-    const drawHeader = () => {
-      let curX = startX;
-
-      doc.setFont("Helvetica", "bold");
+    function drawHeader() {
+      doc.setFont("Helvetica", "bold"); // FORMAT-2 header font
       doc.setFontSize(9);
-      doc.setFillColor(...COLORS.headerBg);
-      doc.rect(startX, y, tableWidth, headerHeight, "F");
 
-      headers.forEach((h, i) => {
+      let curX = startX;
+      headers.forEach((header, i) => {
         const w = colWidths[i];
-        doc.text(String(h).toUpperCase(), curX + w / 2, y + 5, {
-          align: "center",
-        });
+        doc.rect(curX, y, w, headerHeight);
+        doc.text(
+          String(header).toUpperCase(),
+          curX + w / 2,
+          y + headerHeight - 3,
+          { align: "center" }
+        );
         curX += w;
       });
 
-      // only bottom line (clean look)
-      doc.setDrawColor(...COLORS.line);
-      doc.line(startX, y + headerHeight, startX + tableWidth, y + headerHeight);
-
       y += headerHeight;
-    };
+    }
 
-    /* ---------- ROW ---------- */
-    const drawRow = (row, index, isTotal) => {
+    // ---------- DRAW ONE ROW ----------
+    function drawRow(row, isTotal) {
       let curX = startX;
 
-      if (!isTotal && index % 2 === 0) {
-        doc.setFillColor(...COLORS.rowAlt);
-        doc.rect(startX, y, tableWidth, rowHeight, "F");
-      }
+      row.forEach((cell, cIndex) => {
+        const w = colWidths[cIndex];
+        doc.rect(curX, y, w, rowHeight);
 
-      if (isTotal) {
-        doc.setFillColor(...COLORS.totalBg);
-        doc.rect(startX, y, tableWidth, rowHeight, "F");
-      }
-
-      row.forEach((cell, i) => {
-        const w = colWidths[i];
+        // FORMAT-2 row font logic
         doc.setFont("Helvetica", isTotal ? "bold" : "normal");
         doc.setFontSize(8);
 
-        doc.text(
-          String(cell),
-          i === row.length - 1 ? curX + w - 2 : curX + 2,
-          y + 4,
-          { align: i === row.length - 1 ? "right" : "left" }
-        );
+        if (cIndex === colWidths.length - 1) {
+          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+            align: "right",
+          });
+        } else {
+          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+        }
 
         curX += w;
       });
 
       y += rowHeight;
-    };
+    }
 
-    /* ---------- PAGE BREAK ---------- */
-    const checkPageBreak = () => {
+    // ---------- PAGE BREAK HANDLER ----------
+    function checkPageBreak() {
       if (y > maxRowY) {
         doc.addPage();
         drawTitle();
         y = 32;
         drawHeader();
       }
-    };
+    }
 
-    /* ---------- PRINT ---------- */
+    // ---------- START PRINT ----------
     drawTitle();
     drawHeader();
 
-    const dataRows = sortedTableData.map((r) => keys.map((k) => r[k] ?? ""));
+    const dataRows = sortedTableData.map((row) =>
+      keys.map((key) => row[key] ?? "")
+    );
+
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = "TOTAL";
     totalRow[keys.length - 1] = totalBalance.toLocaleString();
 
-    [...dataRows, totalRow].forEach((row, i) => {
+    [...dataRows, totalRow].forEach((row, index) => {
       checkPageBreak();
-      drawRow(row, i, i === dataRows.length);
+      drawRow(row, index === dataRows.length);
     });
 
-    doc.save(`${REPORT_NAME}_Modern.pdf`);
+    // ---------- SAVE ----------
+    doc.save(`${REPORT_NAME}.pdf`);
   };
+
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////           DESIGN 3
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF("p", "mm", "a4");
+
+  //   const rowHeight = 6;
+  //   const headerHeight = 8;
+  //   const maxRowY = 280;
+
+  //   const COLORS = {
+  //     headerBg: [226, 232, 240], // light navy blue
+  //     rowAlt: [248, 249, 255],
+  //     totalBg: [226, 232, 240],
+  //     textDark: [40, 40, 40],
+  //     line: [200, 200, 200],
+  //   };
+
+  //   /* ---------- TITLE (NO PURPLE BOX) ---------- */
+  //   const drawTitle = () => {
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(20);
+  //     doc.setTextColor(...COLORS.textDark);
+  //     doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+
+  //     doc.setFont("Helvetica", "normal");
+  //     doc.setFontSize(12);
+  //     doc.text(REPORT_NAME, 105, 23, { align: "center" });
+
+  //     // soft separator line
+  //     doc.setDrawColor(...COLORS.line);
+  //     doc.line(14, 26, 196, 26);
+  //   };
+
+  //   /* ---------- TABLE CONFIG ---------- */
+  //   const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+  //   const keys = pdfColumns.map((c) => c.key);
+  //   const headers = pdfColumns.map((c) => c.header);
+  //   const colWidths = pdfColumns.map((c) => c.pdfWidth);
+
+  //   const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+  //   const startX = (210 - tableWidth) / 2;
+  //   let y = 32;
+
+  //   /* ---------- HEADER (NO BLACK BORDERS) ---------- */
+  //   const drawHeader = () => {
+  //     let curX = startX;
+
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(9);
+  //     doc.setFillColor(...COLORS.headerBg);
+  //     doc.rect(startX, y, tableWidth, headerHeight, "F");
+
+  //     headers.forEach((h, i) => {
+  //       const w = colWidths[i];
+  //       doc.text(String(h).toUpperCase(), curX + w / 2, y + 5, {
+  //         align: "center",
+  //       });
+  //       curX += w;
+  //     });
+
+  //     // only bottom line (clean look)
+  //     doc.setDrawColor(...COLORS.line);
+  //     doc.line(startX, y + headerHeight, startX + tableWidth, y + headerHeight);
+
+  //     y += headerHeight;
+  //   };
+
+  //   /* ---------- ROW ---------- */
+  //   const drawRow = (row, index, isTotal) => {
+  //     let curX = startX;
+
+  //     if (!isTotal && index % 2 === 0) {
+  //       doc.setFillColor(...COLORS.rowAlt);
+  //       doc.rect(startX, y, tableWidth, rowHeight, "F");
+  //     }
+
+  //     if (isTotal) {
+  //       doc.setFillColor(...COLORS.totalBg);
+  //       doc.rect(startX, y, tableWidth, rowHeight, "F");
+  //     }
+
+  //     row.forEach((cell, i) => {
+  //       const w = colWidths[i];
+  //       doc.setFont("Helvetica", isTotal ? "bold" : "normal");
+  //       doc.setFontSize(8);
+
+  //       doc.text(
+  //         String(cell),
+  //         i === row.length - 1 ? curX + w - 2 : curX + 2,
+  //         y + 4,
+  //         { align: i === row.length - 1 ? "right" : "left" }
+  //       );
+
+  //       curX += w;
+  //     });
+
+  //     y += rowHeight;
+  //   };
+
+  //   /* ---------- PAGE BREAK ---------- */
+  //   const checkPageBreak = () => {
+  //     if (y > maxRowY) {
+  //       doc.addPage();
+  //       drawTitle();
+  //       y = 32;
+  //       drawHeader();
+  //     }
+  //   };
+
+  //   /* ---------- PRINT ---------- */
+  //   drawTitle();
+  //   drawHeader();
+
+  //   const dataRows = sortedTableData.map((r) => keys.map((k) => r[k] ?? ""));
+  //   const totalRow = new Array(keys.length).fill("");
+  //   totalRow[0] = "TOTAL";
+  //   totalRow[keys.length - 1] = totalBalance.toLocaleString();
+
+  //   [...dataRows, totalRow].forEach((row, i) => {
+  //     checkPageBreak();
+  //     drawRow(row, i, i === dataRows.length);
+  //   });
+
+  //   doc.save(`${REPORT_NAME}_Modern.pdf`);
+  // };
 
   async function exportCSV({
     rows,
@@ -816,15 +816,15 @@ export default function AmericanNonActive() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -833,14 +833,28 @@ export default function AmericanNonActive() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."

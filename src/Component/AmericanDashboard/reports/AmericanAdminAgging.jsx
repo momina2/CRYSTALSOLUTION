@@ -40,7 +40,7 @@ const columnsConfig = [
     excelWidth: 10,
   },
   {
-    header: "30-60",
+    header: "31-60",
     key: "Amt002",
     alignment: "right",
     uiWidth: 120,
@@ -49,7 +49,7 @@ const columnsConfig = [
   },
 
   {
-    header: "60-90",
+    header: "61-90",
     key: "Amt003",
     alignment: "right",
     uiWidth: 120,
@@ -57,7 +57,7 @@ const columnsConfig = [
     excelWidth: 10,
   },
   {
-    header: "90-120",
+    header: "91-120",
     key: "Amt004",
     alignment: "right",
     uiWidth: 120,
@@ -66,7 +66,7 @@ const columnsConfig = [
   },
   {
     // header: "120 ≤ 180",
-    header: "120-180",
+    header: "121-150",
     key: "Amt005",
     alignment: "right",
     uiWidth: 120,
@@ -74,7 +74,7 @@ const columnsConfig = [
     excelWidth: 10,
   },
   {
-    header: "180+",
+    header: "150+",
     key: "Amt006",
     alignment: "right",
     uiWidth: 120,
@@ -847,15 +847,15 @@ export default function AmericanAdminAgging() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -864,14 +864,28 @@ export default function AmericanAdminAgging() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."

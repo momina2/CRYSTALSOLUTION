@@ -82,7 +82,6 @@ export default function AmericanSalesManReport() {
   const [apiTotalSalesMan, setApiTotalSalesMan] = useState(0);
   const [apiTotalCustomers, setApiTotalCustomers] = useState(0);
 
-
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -142,7 +141,6 @@ export default function AmericanSalesManReport() {
       if (res.data["Total Customers"]) {
         setApiTotalCustomers(Number(res.data["Total Customers"]) || 0);
       }
-
 
       const mapped = dataRows.map((row) => ({
         ...row,
@@ -274,7 +272,6 @@ export default function AmericanSalesManReport() {
     // Total Balance (last column)
     totalRow[keys.length - 1] = apiTotalBalance.toLocaleString();
     totalRow[keys.length - 2] = apiTotalCustomers.toLocaleString();
-
 
     // totalRow[keys.length - 1] = totalBalance.toLocaleString();
     const rowsPDF = [...dataRows, totalRow];
@@ -566,15 +563,15 @@ export default function AmericanSalesManReport() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -583,14 +580,28 @@ export default function AmericanSalesManReport() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."
@@ -608,7 +619,6 @@ export default function AmericanSalesManReport() {
               </div>
             </div>
           </div>
-
           {/* TABLE HEADER (fixed) */}
           <div
             style={{
@@ -828,7 +838,7 @@ export default function AmericanSalesManReport() {
                     <span>{apiTotalSalesMan.toLocaleString()}</span>
                   ) : index === 3 ? (
                     <span>{apiTotalCustomers.toLocaleString()}</span>
-                  ): index === 1 ? (
+                  ) : index === 1 ? (
                     ""
                   ) : (
                     ""

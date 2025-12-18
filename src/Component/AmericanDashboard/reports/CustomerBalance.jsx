@@ -437,7 +437,7 @@ export default function CustomerBalance() {
       data = data.filter(
         (row) =>
           row.tcstcod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.toLowerCase().includes(q) || 
+          row.tcstdsc?.toLowerCase().includes(q) ||
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q)
       );
@@ -561,15 +561,15 @@ export default function CustomerBalance() {
               marginTop: "8px",
               marginBottom: "8px",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
+              paddingRight: "8px", // table edge se halka gap
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 gap: "10px",
               }}
             >
@@ -578,14 +578,28 @@ export default function CustomerBalance() {
                   minWidth: "260px",
                   maxWidth: "400px",
                   border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "20px",
+                  borderRadius: "2px",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
                 }}
               >
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MagnifyingGlassIcon
+                    className="text-gray-500"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Search..."
