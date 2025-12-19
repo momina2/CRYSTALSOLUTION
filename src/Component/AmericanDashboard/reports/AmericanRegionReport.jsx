@@ -530,6 +530,22 @@ export default function AmericanRegionReport() {
     });
   }, [sortedTableData, searchQuery]);
 
+  const totalBalance = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      const val = Number(row.Bal ?? 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, [filteredData]);
+
+  const totalRegions = filteredData.length;
+
+  const totalCustomers = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      const val = Number(row.Nos ?? 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, [filteredData]);
+
   //   const totalBalance = useMemo(() => {
   //     return sortedTableData.reduce((sum, row) => {
   //       const value = parseFloat(row.Bal ?? 0);
@@ -848,7 +864,8 @@ export default function AmericanRegionReport() {
                   className={alignmentClass}
                   style={{
                     width: column.uiWidth,
-                    background: getcolor,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
                     borderRight:
                       index < columnsConfig.length - 1
                         ? `1px solid ${softTableStyles.softBorderColor}`
@@ -864,13 +881,11 @@ export default function AmericanRegionReport() {
                   }}
                 >
                   {column.key === "Bal" ? (
-                    <span>{apiTotalBalance.toLocaleString()}</span>
+                    <span>{totalBalance.toLocaleString()}</span>
                   ) : index === 1 ? (
-                    <span>{apiTotalRegion.toLocaleString()}</span>
+                    <span>{totalRegions}</span>
                   ) : index === 3 ? (
-                    <span>{apiTotalCustomers.toLocaleString()}</span>
-                  ) : index === 0 ? (
-                    ""
+                    <span>{totalCustomers.toLocaleString()}</span>
                   ) : (
                     ""
                   )}

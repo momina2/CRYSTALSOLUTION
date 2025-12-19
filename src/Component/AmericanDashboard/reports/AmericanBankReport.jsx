@@ -507,6 +507,15 @@ export default function AmericanBankReport() {
     });
   }, [sortedTableData, searchQuery]);
 
+  const totalBalance = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      const val = Number(row.Balance ?? 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, [filteredData]);
+
+  const totalItems = filteredData.length;
+
   //   const totalBalance = useMemo(() => {
   //     return sortedTableData.reduce((sum, row) => {
   //       const value = parseFloat(row.Bal ?? 0);
@@ -822,7 +831,8 @@ export default function AmericanBankReport() {
                   className={alignmentClass}
                   style={{
                     width: column.uiWidth,
-                    background: getcolor,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
                     borderRight:
                       index < columnsConfig.length - 1
                         ? `1px solid ${softTableStyles.softBorderColor}`
@@ -838,11 +848,9 @@ export default function AmericanBankReport() {
                   }}
                 >
                   {column.key === "Balance" ? (
-                    <span>{apiTotalBalance.toLocaleString()}</span>
+                    <span>{totalBalance.toLocaleString()}</span>
                   ) : index === 0 ? (
-                    <span>{apiTotal.toLocaleString()}</span>
-                  ) : index === 0 ? (
-                    ""
+                    <span>{totalItems}</span>
                   ) : (
                     ""
                   )}

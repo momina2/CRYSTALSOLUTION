@@ -44,7 +44,7 @@ const columnsConfig = [
   {
     header: "Nos",
     key: "Nos",
-    alignment: "left",
+    alignment: "right",
     uiWidth: 50,
     pdfWidth: 10,
     excelWidth: 20,
@@ -509,6 +509,20 @@ export default function AmericanSalesManReport() {
   //     }, 0);
   //   }, [sortedTableData]);
 
+  const totalBalance = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      const val = Number(row.Bal ?? 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, [filteredData]);
+  const totalSalesMan = filteredData.length;
+  const totalCustomers = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      const val = Number(row.Nos ?? 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, [filteredData]);
+
   const handleCSV = () => {
     exportCSV({
       rows: sortedTableData,
@@ -817,7 +831,8 @@ export default function AmericanSalesManReport() {
                   className={alignmentClass}
                   style={{
                     width: column.uiWidth,
-                    background: getcolor,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
                     borderRight:
                       index < columnsConfig.length - 1
                         ? `1px solid ${softTableStyles.softBorderColor}`
@@ -833,13 +848,11 @@ export default function AmericanSalesManReport() {
                   }}
                 >
                   {column.key === "Bal" ? (
-                    <span>{apiTotalBalance.toLocaleString()}</span>
+                    <span>{totalBalance.toLocaleString()}</span>
                   ) : index === 0 ? (
-                    <span>{apiTotalSalesMan.toLocaleString()}</span>
+                    <span>{totalSalesMan}</span>
                   ) : index === 3 ? (
-                    <span>{apiTotalCustomers.toLocaleString()}</span>
-                  ) : index === 1 ? (
-                    ""
+                    <span>{totalCustomers.toLocaleString()}</span>
                   ) : (
                     ""
                   )}

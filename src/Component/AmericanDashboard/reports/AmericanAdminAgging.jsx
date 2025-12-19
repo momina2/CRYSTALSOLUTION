@@ -793,6 +793,27 @@ export default function AmericanAdminAgging() {
     }, 0);
   }, [sortedTableData]);
 
+  const runtimeColumnTotals = useMemo(() => {
+    const totals = {
+      Amt001: 0,
+      Amt002: 0,
+      Amt003: 0,
+      Amt004: 0,
+      Amt005: 0,
+      Amt006: 0,
+      Total: 0,
+    };
+
+    sortedTableData.forEach((row) => {
+      Object.keys(totals).forEach((key) => {
+        const val = Number((row[key] || "0").toString().replace(/,/g, ""));
+        totals[key] += isNaN(val) ? 0 : val;
+      });
+    });
+
+    return totals;
+  }, [sortedTableData]);
+
   const handleCSV = () => {
     exportCSV({
       rows: sortedTableData,
@@ -1093,6 +1114,8 @@ export default function AmericanAdminAgging() {
               height: "24px",
               display: "flex",
               width: "100%",
+              backgroundColor: getnavbarbackgroundcolor, // ✅ SAME AS HEADER
+              color: "white",
             }}
           >
             {columnsConfig.map((column, index) => (
@@ -1101,7 +1124,6 @@ export default function AmericanAdminAgging() {
                 className={getAlignmentClass(column.alignment)}
                 style={{
                   width: column.uiWidth,
-                  background: getcolor,
                   borderRight:
                     index < columnsConfig.length - 1
                       ? `1px solid ${softTableStyles.softBorderColor}`
@@ -1116,13 +1138,11 @@ export default function AmericanAdminAgging() {
                   fontFamily: getfontstyle,
                 }}
               >
-                {/* ⭐ column specific total */}
-                {columnTotals[column.key]
-                  ? Number(
-                      columnTotals[column.key].toString().replace(/,/g, "")
-                    ).toLocaleString()
-                  : column.key === "Code"
-                  ? filteredData.length
+                {/* 🔥 RUNTIME TOTALS */}
+                {column.key === "Code"
+                  ? sortedTableData.length // ✅ total items
+                  : runtimeColumnTotals[column.key]
+                  ? runtimeColumnTotals[column.key].toLocaleString()
                   : ""}
               </div>
             ))}

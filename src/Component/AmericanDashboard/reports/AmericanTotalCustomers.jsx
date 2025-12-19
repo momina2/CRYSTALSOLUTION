@@ -50,14 +50,6 @@ const columnsConfig = [
     excelWidth: 40,
   },
   {
-    header: "Salesman",
-    key: "SalesMan",
-    alignment: "left",
-    uiWidth: 200,
-    pdfWidth: 35,
-    excelWidth: 30,
-  },
-  {
     header: "Mobile",
     key: "tmobnum",
     alignment: "left",
@@ -134,7 +126,7 @@ export default function TotalCustomers() {
       form.append("FFnlAmt", "99999999");
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/CustomerBalance.php",
+        "https://crystalsolutions.com.pk/api/AmericanCustomerBalance.php",
         form
       );
 
@@ -827,7 +819,8 @@ export default function TotalCustomers() {
                   className={alignmentClass}
                   style={{
                     width: column.uiWidth,
-                    background: getcolor,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
                     borderRight:
                       index < columnsConfig.length - 1
                         ? `1px solid ${softTableStyles.softBorderColor}`

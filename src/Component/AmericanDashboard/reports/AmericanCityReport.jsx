@@ -510,6 +510,19 @@ export default function AmericanCityReport() {
       );
     });
   }, [sortedTableData, searchQuery]);
+  const totalBalance = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      const val = Number(row.Bal ?? 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, [filteredData]);
+  const totalCities = filteredData.length;
+  const totalCustomers = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      const val = Number(row.Nos ?? 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, [filteredData]);
 
   //   const totalBalance = useMemo(() => {
   //     return sortedTableData.reduce((sum, row) => {
@@ -827,7 +840,8 @@ export default function AmericanCityReport() {
                   className={alignmentClass}
                   style={{
                     width: column.uiWidth,
-                    background: getcolor,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
                     borderRight:
                       index < columnsConfig.length - 1
                         ? `1px solid ${softTableStyles.softBorderColor}`
@@ -843,13 +857,11 @@ export default function AmericanCityReport() {
                   }}
                 >
                   {column.key === "Bal" ? (
-                    <span>{apiTotalBalance.toLocaleString()}</span>
+                    <span>{totalBalance.toLocaleString()}</span>
                   ) : index === 1 ? (
-                    <span>{apiTotalCity.toLocaleString()}</span>
+                    <span>{totalCities}</span>
                   ) : index === 3 ? (
-                    <span>{apiTotalCustomers.toLocaleString()}</span>
-                  ) : index === 0 ? (
-                    ""
+                    <span>{totalCustomers.toLocaleString()}</span>
                   ) : (
                     ""
                   )}

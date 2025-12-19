@@ -83,7 +83,7 @@ export default function CustomerBalance() {
 
   const query = useQueryParams();
 
-  const minParam = query.get("min") || "0";
+  const minParam = query.get("min") || "-99999999";
   const maxParam = query.get("max") || "99999999";
   const labelParam = query.get("label") || "";
 
@@ -121,10 +121,10 @@ export default function CustomerBalance() {
 
       let dataRows = [];
 
-      if (Array.isArray(res.data.Detail)) {
-        dataRows = res.data.Detail;
-      } else if (Array.isArray(res.data)) {
+      if (Array.isArray(res.data)) {
         dataRows = res.data;
+      } else if (Array.isArray(res.data.Detail)) {
+        dataRows = res.data.Detail;
       }
 
       const mapped = dataRows.map((row) => ({
@@ -822,7 +822,8 @@ export default function CustomerBalance() {
                   className={alignmentClass}
                   style={{
                     width: column.uiWidth,
-                    background: getcolor,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
                     borderRight:
                       index < columnsConfig.length - 1
                         ? `1px solid ${softTableStyles.softBorderColor}`

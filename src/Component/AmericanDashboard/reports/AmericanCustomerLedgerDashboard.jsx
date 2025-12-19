@@ -20,14 +20,7 @@ function useQueryParams() {
 }
 
 const columnsConfig = [
-  {
-    header: "Code",
-    key: "code",
-    alignment: "left",
-    uiWidth: 80,
-    pdfWidth: 16,
-    excelWidth: 15,
-  },
+
   {
     header: "Date",
     key: "ttrndat",
@@ -1087,7 +1080,8 @@ export default function AmericanCustomerLedgerDashboard() {
                 {/* TOTAL ROW — INSIDE TABLE */}
                 <tr
                   style={{
-                    backgroundColor: getcolor,
+                    backgroundColor: getnavbarbackgroundcolor,
+                    color: "white",
                     fontWeight: "bold",
                     position: "sticky",
                     bottom: 0,
