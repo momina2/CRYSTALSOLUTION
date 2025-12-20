@@ -1011,7 +1011,7 @@ const columnsConfig = [
   },
   {
     header: "Code",
-    key: "tcstcod",
+    key: "tacccod",
     alignment: "left",
     uiWidth: 80,
     pdfWidth: 20,
@@ -1025,14 +1025,6 @@ const columnsConfig = [
     pdfWidth: 80,
     excelWidth: 40,
   },
-  // {
-  //   header: "Salesman",
-  //   key: "SalesMan",
-  //   alignment: "left",
-  //   uiWidth: 200,
-  //   pdfWidth: 35,
-  //   excelWidth: 30,
-  // },
   {
     header: "Mobile",
     key: "tmobnum",
@@ -1041,10 +1033,17 @@ const columnsConfig = [
     pdfWidth: 25,
     excelWidth: 20,
   },
-
+  {
+    header: "Salesman",
+    key: "tsaldsc",
+    alignment: "left",
+    uiWidth: 180,
+    pdfWidth: 35,
+    excelWidth: 30,
+  },
   {
     header: "Balance",
-    key: "balance",
+    key: "Balance",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
@@ -1317,6 +1316,11 @@ export default function AmericanAdvance() {
     );
   }
 
+  const toNumber = (val) => {
+    if (val === null || val === undefined) return 0;
+    return Number(String(val).replace(/,/g, "")) || 0;
+  };
+
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
@@ -1404,11 +1408,11 @@ export default function AmericanAdvance() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
+          row.tacccod?.toLowerCase().includes(q) ||
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
-          row.balance?.toString().includes(q) // ✅ BALANCE
+          row.tsaldsc?.toLowerCase().includes(q) ||
+          row.Balance?.toString().includes(q) // ✅ BALANCE
       );
     }
 
@@ -1418,9 +1422,9 @@ export default function AmericanAdvance() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "balance") {
-          const aNum = parseFloat(aVal) || 0;
-          const bNum = parseFloat(bVal) || 0;
+        if (sortConfig.key === "Balance") {
+          const aNum = toNumber(aVal);
+          const bNum = toNumber(bVal);
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;
@@ -1442,21 +1446,20 @@ export default function AmericanAdvance() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.tcstcod?.toLowerCase().includes(q) ||
+        row.tacccod?.toLowerCase().includes(q) ||
         row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
-        row.SalesMan?.toLowerCase().includes(q) ||
-        row.balance?.toString().includes(q) // ✅ BALANCE
+        row.tsaldsc?.toLowerCase().includes(q) ||
+        row.Balance?.toString().includes(q) // ✅ BALANCE
       );
     });
   }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
-    return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.balance ?? 0);
-      return sum + (isNaN(value) ? 0 : value);
+    return filteredData.reduce((sum, row) => {
+      return sum + toNumber(row.Balance);
     }, 0);
-  }, [sortedTableData]);
+  }, [filteredData]);
 
   const handleCSV = () => {
     exportCSV({
@@ -1683,8 +1686,8 @@ export default function AmericanAdvance() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "balance" ? (
-                          Number(item[column.key] || 0).toLocaleString()
+                        ) : column.key === "Balance" ? (
+                          toNumber(item.Balance).toLocaleString()
                         ) : column.key === "progressBtn" ? (
                           <div
                             style={{
@@ -1701,7 +1704,7 @@ export default function AmericanAdvance() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanProgressReportDashboard?code=${
-                                    item.tcstcod
+                                    item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
                                 );
@@ -1724,7 +1727,7 @@ export default function AmericanAdvance() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                    item.tcstcod
+                                    item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
                                 );
@@ -1805,8 +1808,8 @@ export default function AmericanAdvance() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "balance" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
+                  {column.key === "Balance" ? (
+                    <span>{toNumber(totalBalance).toLocaleString()}</span>
                   ) : index === 0 ? (
                     <span>{filteredData.length}</span>
                   ) : column.key === "scrollSpacer" ? (
