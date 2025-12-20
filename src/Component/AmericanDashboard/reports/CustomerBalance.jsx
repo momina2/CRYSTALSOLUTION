@@ -10,11 +10,28 @@ import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
+import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Customer Balance by Range";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
 const columnsConfig = [
+  {
+    header: "Lgr",
+    key: "ledgerBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
+    header: "P.R",
+    key: "progressBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
   {
     header: "Code",
     key: "tcstcod",
@@ -163,7 +180,10 @@ export default function CustomerBalance() {
     }
 
     // --------- TABLE HEADER ---------
-    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    const pdfColumns = columnsConfig.filter(
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+    );
+
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
@@ -262,7 +282,9 @@ export default function CustomerBalance() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Report");
 
-    const excelColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    const excelColumns = columnsConfig.filter(
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+    );
 
     const headers = excelColumns.map((c) => c.header);
     const keys = excelColumns.map((c) => c.key);
@@ -802,54 +824,35 @@ export default function CustomerBalance() {
           {/* TOTAL ROW (bottom of table) */}
           <div
             style={{
-              borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
               borderTop: `2px solid ${softTableStyles.softBorderColor}`,
               height: "24px",
               display: "flex",
               width: "100%",
             }}
           >
-            {columnsConfig.map((column, index) => {
-              const isTotalColumn = index === columnsConfig.length - 2; // ⭐ BALANCE is now 2nd last
-
-              const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
-              );
-
-              return (
-                <div
-                  key={`total-col-${index}`}
-                  className={alignmentClass}
-                  style={{
-                    width: column.uiWidth,
-                    background: getnavbarbackgroundcolor,
-                    color: "white",
-                    borderRight:
-                      index < columnsConfig.length - 1
-                        ? `1px solid ${softTableStyles.softBorderColor}`
-                        : "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: isTotalColumn ? "flex-end" : "flex-start",
-                    paddingRight: isTotalColumn ? "5px" : "0px",
-                    paddingLeft: isTotalColumn ? "0px" : "5px",
-                    fontWeight: "bold",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                >
-                  {column.key === "balance" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
-                  ) : index === 0 ? (
-                    <span>{filteredData.length}</span>
-                  ) : column.key === "scrollSpacer" ? (
-                    ""
-                  ) : (
-                    ""
-                  )}
-                </div>
-              );
-            })}
+            {columnsConfig.map((column, index) => (
+              <div
+                key={index}
+                className={getAlignmentClass(column.alignment)}
+                style={{
+                  width: column.uiWidth,
+                  background: getnavbarbackgroundcolor,
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent:
+                    column.key === "balance" ? "flex-end" : "flex-start",
+                  padding: "0 6px",
+                  fontWeight: "bold",
+                }}
+              >
+                {column.key === "balance"
+                  ? totalBalance.toLocaleString()
+                  : column.key === "tcstcod"
+                  ? sortedTableData.length
+                  : ""}
+              </div>
+            ))}
           </div>
 
           {/* ACTION BUTTONS – Only PDF & Excel */}

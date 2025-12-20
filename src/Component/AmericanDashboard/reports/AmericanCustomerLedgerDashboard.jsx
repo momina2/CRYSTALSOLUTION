@@ -20,7 +20,6 @@ function useQueryParams() {
 }
 
 const columnsConfig = [
-
   {
     header: "Date",
     key: "ttrndat",
@@ -319,6 +318,8 @@ export default function AmericanCustomerLedgerDashboard() {
     return Number(String(val).replace(/,/g, "")) || 0;
   };
 
+  const apiTotalBalance = useMemo(() => toNumber(apiData?.Balance), [apiData]);
+
   const getSortIcon = (key) => {
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
@@ -474,7 +475,7 @@ export default function AmericanCustomerLedgerDashboard() {
       "",
       toNumber(totalDebit).toLocaleString(),
       toNumber(totalCredit).toLocaleString(),
-      toNumber(totalBalance).toLocaleString(),
+      toNumber(apiData?.Balance).toLocaleString(),
     ]);
 
     // Dummy row for aging
@@ -708,7 +709,7 @@ export default function AmericanCustomerLedgerDashboard() {
     exportCSV({
       rows: filteredData,
       columnsConfig,
-      totalCollection: totalBalance,
+      totalCollection: apiTotalBalance,
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -1120,7 +1121,7 @@ export default function AmericanCustomerLedgerDashboard() {
                             borderTop: `2px solid ${softTableStyles.softBorderColor}`,
                           }}
                         >
-                          {totalBalance.toLocaleString()}
+                          {apiTotalBalance.toLocaleString()}
                         </td>
                       );
                     }

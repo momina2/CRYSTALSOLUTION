@@ -566,8 +566,536 @@ export default function AmericanProgressReportDashboard() {
   //   doc.save(`${REPORT_NAME}.pdf`);
   // };
 
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF({
+  //     orientation: "portrait",
+  //     unit: "mm",
+  //     format: "a4",
+  //   });
+
+  //   // ================= DATA =================
+  //   const rows = filteredData.map((r) => [
+  //     r.sr,
+  //     r.month,
+  //     toNumber(r.debit).toLocaleString(),
+  //     toNumber(r.credit).toLocaleString(),
+  //     toNumber(r.balance).toLocaleString(),
+  //   ]);
+
+  //   // TOTAL ROW
+  //   rows.push([
+  //     "",
+  //     "Total",
+  //     toNumber(apiData?.totalRow?.Debit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Credit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Balance).toLocaleString(),
+  //   ]);
+
+  //   // Dummy row for aging
+  //   rows.push(["", "", "", "", ""]);
+
+  //   const headers = ["Sr#", "Month", "Debit", "Credit", "Balance"];
+  //   const columnWidths = [15, 30, 30, 30, 30];
+  //   const totalWidth = columnWidths.reduce((a, b) => a + b, 0);
+
+  //   // ================= BASE FONT =================
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.setFontSize(10);
+
+  //   // ================= TABLE HEADER =================
+  //   const addTableHeaders = (startX, startY) => {
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(11);
+
+  //     headers.forEach((h, i) => {
+  //       doc.rect(startX, startY, columnWidths[i], 6.5);
+  //       doc.text(h, startX + columnWidths[i] / 2, startY + 4.4, {
+  //         align: "center",
+  //       });
+  //       startX += columnWidths[i];
+  //     });
+
+  //     doc.setFont("Helvetica", "normal");
+  //     doc.setFontSize(10);
+  //   };
+
+  //   // ================= AGING ROW =================
+  //   const drawBalanceAgingRow = (startX, startY) => {
+  //     const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+  //     const colW = tableWidth / 6;
+
+  //     const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
+  //     const values = [
+  //       apiData?.amt001,
+  //       apiData?.amt002,
+  //       apiData?.amt003,
+  //       apiData?.amt004,
+  //       apiData?.amt005,
+  //       apiData?.amt006,
+  //     ].map((v) => toNumber(v).toLocaleString());
+
+  //     let x = startX;
+  //     doc.rect(startX, startY, tableWidth, 13);
+
+  //     for (let i = 0; i < 6; i++) {
+  //       doc.rect(x, startY, colW, 13);
+  //       doc.line(x, startY + 6.5, x + colW, startY + 6.5);
+
+  //       doc.setFont("Helvetica", "bold");
+  //       doc.setFontSize(9.5);
+  //       doc.text(labels[i], x + colW / 2, startY + 4.6, {
+  //         align: "center",
+  //       });
+
+  //       doc.setFont("Helvetica", "normal");
+  //       doc.setFontSize(10.5);
+  //       doc.text(values[i], x + colW / 2, startY + 11.2, {
+  //         align: "center",
+  //       });
+
+  //       x += colW;
+  //     }
+  //   };
+
+  //   // ================= TABLE ROWS =================
+  //   const addRows = (startX, startY) => {
+  //     const rowH = 5.2;
+
+  //     rows.forEach((row, i) => {
+  //       const y = startY + (i + 2) * rowH;
+
+  //       if (i === rows.length - 1) {
+  //         drawBalanceAgingRow(startX, y + 2);
+  //         return;
+  //       }
+
+  //       let x = startX;
+
+  //       if (row[1] === "Total") {
+  //         doc.setFont("Helvetica", "bold");
+  //       }
+
+  //       row.forEach((cell, c) => {
+  //         doc.rect(x, y, columnWidths[c], rowH);
+  //         doc.text(
+  //           String(cell),
+  //           c >= 2 ? x + columnWidths[c] - 2 : x + 2,
+  //           y + 3.7,
+  //           { align: c >= 2 ? "right" : "left" }
+  //         );
+  //         x += columnWidths[c];
+  //       });
+
+  //       doc.setFont("Helvetica", "normal");
+  //     });
+  //   };
+
+  //   // ================= HEADINGS =================
+  //   const pageCenter = doc.internal.pageSize.width / 2;
+  //   const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+
+  //   // COMPANY NAME
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(17);
+  //   doc.text("AMERICAN ELECTRONICS (SMC-PVT) LTD", pageCenter, 14, {
+  //     align: "center",
+  //   });
+
+  //   // REPORT LINE
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.setFontSize(12);
+  //   doc.text(`Customer Report (${cusDate})`, pageCenter, 20, {
+  //     align: "center",
+  //   });
+
+  //   // ACCOUNT
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(11);
+  //   doc.text(`Account: ${headerName}`, tableStartX, 28);
+
+  //   // ================= DRAW TABLE =================
+  //   addTableHeaders(tableStartX, 32);
+  //   addRows(tableStartX, 32);
+
+  //   // ================= SAVE =================
+  //   doc.save(`CustomerProgressReport_${cusDate}.pdf`);
+  // };
+
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF({
+  //     orientation: "portrait",
+  //     unit: "mm",
+  //     format: "a4",
+  //   });
+
+  //   // ================= COLORS =================
+  //   const COLORS = {
+  //     headerBg: [236, 239, 246], // light iOS gray-blue
+  //     altRow: [248, 249, 252], // zebra row
+  //     totalRow: [230, 235, 255], // total highlight
+  //     border: [180, 180, 180],
+  //     text: [40, 40, 40],
+  //   };
+
+  //   // ================= DATA =================
+  //   const rows = filteredData.map((r) => [
+  //     r.sr,
+  //     r.month,
+  //     toNumber(r.debit).toLocaleString(),
+  //     toNumber(r.credit).toLocaleString(),
+  //     toNumber(r.balance).toLocaleString(),
+  //   ]);
+
+  //   rows.push([
+  //     "",
+  //     "Total",
+  //     toNumber(apiData?.totalRow?.Debit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Credit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Balance).toLocaleString(),
+  //   ]);
+
+  //   rows.push(["", "", "", "", ""]); // aging placeholder
+
+  //   const headers = ["Sr#", "Month", "Debit", "Credit", "Balance"];
+  //   const columnWidths = [15, 30, 30, 30, 30];
+  //   const totalWidth = columnWidths.reduce((a, b) => a + b, 0);
+
+  //   // ================= BASE FONT =================
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.setFontSize(10);
+  //   doc.setTextColor(...COLORS.text);
+
+  //   // ================= TABLE HEADER =================
+  //   const addTableHeaders = (startX, startY) => {
+  //     let x = startX;
+
+  //     doc.setFillColor(...COLORS.headerBg);
+  //     doc.setDrawColor(...COLORS.border);
+  //     doc.rect(startX, startY, totalWidth, 7, "FD");
+
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(11);
+
+  //     headers.forEach((h, i) => {
+  //       doc.text(h, x + columnWidths[i] / 2, startY + 4.8, {
+  //         align: "center",
+  //       });
+  //       x += columnWidths[i];
+  //     });
+
+  //     doc.setFont("Helvetica", "normal");
+  //     doc.setFontSize(10);
+  //   };
+
+  //   // ================= AGING ROW =================
+  //   const drawBalanceAgingRow = (startX, startY) => {
+  //     const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+  //     const colW = tableWidth / 6;
+  //     const rowH = 13;
+
+  //     const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
+  //     const values = [
+  //       apiData?.amt001,
+  //       apiData?.amt002,
+  //       apiData?.amt003,
+  //       apiData?.amt004,
+  //       apiData?.amt005,
+  //       apiData?.amt006,
+  //     ].map((v) => toNumber(v).toLocaleString());
+
+  //     // Outer border
+  //     doc.setDrawColor(180, 180, 180);
+  //     doc.rect(startX, startY, tableWidth, rowH);
+
+  //     let x = startX;
+
+  //     for (let i = 0; i < 6; i++) {
+  //       // Vertical grid line (except first)
+  //       if (i !== 0) {
+  //         doc.line(x, startY, x, startY + rowH);
+  //       }
+
+  //       // Horizontal divider (label / value)
+  //       doc.line(x, startY + rowH / 2, x + colW, startY + rowH / 2);
+
+  //       // Label
+  //       doc.setFont("Helvetica", "bold");
+  //       doc.setFontSize(9.5);
+  //       doc.text(labels[i], x + colW / 2, startY + 4.5, {
+  //         align: "center",
+  //       });
+
+  //       // Value
+  //       doc.setFont("Helvetica", "normal");
+  //       doc.setFontSize(10.5);
+  //       doc.text(values[i], x + colW / 2, startY + 11, {
+  //         align: "center",
+  //       });
+
+  //       x += colW;
+  //     }
+  //   };
+
+  //   // ================= TABLE ROWS =================
+  //   const addRows = (startX, startY) => {
+  //     const rowH = 5.2;
+
+  //     rows.forEach((row, i) => {
+  //       const y = startY + (i + 2) * rowH;
+
+  //       if (i === rows.length - 1) {
+  //         drawBalanceAgingRow(startX, y + 2);
+  //         return;
+  //       }
+
+  //       // Row background
+  //       if (row[1] === "Total") {
+  //         doc.setFillColor(...COLORS.totalRow);
+  //         doc.setFont("Helvetica", "bold");
+  //         doc.rect(startX, y, totalWidth, rowH, "F");
+  //       } else if (i % 2 === 0) {
+  //         doc.setFillColor(...COLORS.altRow);
+  //         doc.rect(startX, y, totalWidth, rowH, "F");
+  //       }
+
+  //       let x = startX;
+  //       row.forEach((cell, c) => {
+  //         doc.text(
+  //           String(cell),
+  //           c >= 2 ? x + columnWidths[c] - 2 : x + 2,
+  //           y + 3.7,
+  //           { align: c >= 2 ? "right" : "left" }
+  //         );
+  //         x += columnWidths[c];
+  //       });
+
+  //       doc.setFont("Helvetica", "normal");
+  //     });
+
+  //     // Outer border only
+  //     const tableHeight = (rows.length + 1) * rowH;
+  //     doc.setDrawColor(...COLORS.border);
+  //     doc.rect(startX, startY, totalWidth, tableHeight);
+  //   };
+
+  //   // ================= HEADINGS =================
+  //   const pageCenter = doc.internal.pageSize.width / 2;
+  //   const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(17);
+  //   doc.text("AMERICAN ELECTRONICS (SMC-PVT) LTD", pageCenter, 14, {
+  //     align: "center",
+  //   });
+
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.setFontSize(12);
+  //   doc.text(`Customer Report (${cusDate})`, pageCenter, 20, {
+  //     align: "center",
+  //   });
+
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(11);
+  //   doc.text(`Account: ${headerName}`, tableStartX, 28);
+
+  //   // ================= DRAW TABLE =================
+  //   addTableHeaders(tableStartX, 32);
+  //   addRows(tableStartX, 32);
+
+  //   // ================= SAVE =================
+  //   doc.save(`CustomerProgressReport_${cusDate}.pdf`);
+  // };
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF({
+  //     orientation: "portrait",
+  //     unit: "mm",
+  //     format: "a4",
+  //   });
+
+  //   // ================= COLORS =================
+  //   const COLORS = {
+  //     headerBg: [225, 228, 235], // premium slate
+  //     lineSoft: [205, 205, 205], // soft separators
+  //     lineStrong: [140, 140, 140], // emphasis
+  //     text: [45, 45, 45],
+  //   };
+
+  //   // ================= DATA =================
+  //   const rows = filteredData.map((r) => [
+  //     r.sr,
+  //     r.month,
+  //     toNumber(r.debit).toLocaleString(),
+  //     toNumber(r.credit).toLocaleString(),
+  //     toNumber(r.balance).toLocaleString(),
+  //   ]);
+
+  //   rows.push([
+  //     "",
+  //     "Total",
+  //     toNumber(apiData?.totalRow?.Debit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Credit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Balance).toLocaleString(),
+  //   ]);
+
+  //   rows.push(["", "", "", "", ""]);
+
+  //   const headers = ["Sr#", "Month", "Debit", "Credit", "Balance"];
+  //   const columnWidths = [15, 30, 30, 30, 30];
+  //   const totalWidth = columnWidths.reduce((a, b) => a + b, 0);
+
+  //   // ================= BASE =================
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.setFontSize(10);
+  //   doc.setTextColor(...COLORS.text);
+
+  //   // ================= HEADER =================
+  //   const addTableHeaders = (x, y) => {
+  //     doc.setFillColor(...COLORS.headerBg);
+  //     doc.rect(x, y, totalWidth, 8, "F");
+
+  //     doc.setDrawColor(...COLORS.lineStrong);
+  //     doc.line(x, y + 8, x + totalWidth, y + 8);
+
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(11);
+
+  //     let cx = x;
+  //     headers.forEach((h, i) => {
+  //       doc.text(h, cx + columnWidths[i] / 2, y + 5.4, { align: "center" });
+  //       cx += columnWidths[i];
+  //     });
+
+  //     doc.setFont("Helvetica", "normal");
+  //     doc.setFontSize(10);
+  //   };
+
+  //   // ================= AGING =================
+  //   const drawBalanceAgingRow = (x, y) => {
+  //     const colW = totalWidth / 6;
+  //     const rowH = 13;
+
+  //     const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
+  //     const values = [
+  //       apiData?.amt001,
+  //       apiData?.amt002,
+  //       apiData?.amt003,
+  //       apiData?.amt004,
+  //       apiData?.amt005,
+  //       apiData?.amt006,
+  //     ].map((v) => toNumber(v).toLocaleString());
+
+  //     doc.setDrawColor(...COLORS.lineStrong);
+  //     doc.rect(x, y, totalWidth, rowH);
+
+  //     let cx = x;
+  //     for (let i = 0; i < 6; i++) {
+  //       if (i !== 0) doc.line(cx, y, cx, y + rowH);
+
+  //       doc.setDrawColor(...COLORS.lineSoft);
+  //       doc.line(cx, y + rowH / 2, cx + colW, y + rowH / 2);
+
+  //       doc.setFont("Helvetica", "bold");
+  //       doc.setFontSize(9.5);
+  //       doc.text(labels[i], cx + colW / 2, y + 4.5, { align: "center" });
+
+  //       doc.setFont("Helvetica", "normal");
+  //       doc.setFontSize(10.5);
+  //       doc.text(values[i], cx + colW / 2, y + 11, { align: "center" });
+
+  //       cx += colW;
+  //     }
+  //   };
+
+  //   // ================= ROWS =================
+  //   const addRows = (x, y) => {
+  //     const rowH = 5.8;
+  //     const gap = 3;
+
+  //     rows.forEach((row, i) => {
+  //       const cy = y + (i + 2) * rowH;
+
+  //       if (i === rows.length - 1) {
+  //         drawBalanceAgingRow(x, cy + 3);
+  //         return;
+  //       }
+
+  //       if (row[1] === "Total") {
+  //         doc.setFont("Helvetica", "bold");
+  //       } else {
+  //         doc.setFont("Helvetica", "normal");
+  //       }
+
+  //       let cx = x;
+  //       row.forEach((cell, c) => {
+  //         doc.text(
+  //           String(cell),
+  //           c >= 2 ? cx + columnWidths[c] - 2 : cx + 2,
+  //           cy + 4,
+  //           { align: c >= 2 ? "right" : "left" }
+  //         );
+  //         cx += columnWidths[c];
+  //       });
+
+  //       // Line logic
+  //       if (row[1] === "Total") {
+  //         doc.setDrawColor(...COLORS.lineStrong);
+  //         doc.setLineWidth(0.5);
+  //       } else if (row[1] === "Opening") {
+  //         doc.setDrawColor(...COLORS.lineStrong);
+  //         doc.setLineWidth(0.35);
+  //       } else {
+  //         doc.setDrawColor(...COLORS.lineSoft);
+  //         doc.setLineWidth(0.25);
+  //       }
+
+  //       doc.line(x + gap, cy + rowH, x + totalWidth - gap, cy + rowH);
+  //       doc.setLineWidth(0.2);
+  //     });
+
+  //     doc.setDrawColor(...COLORS.lineStrong);
+  //     doc.rect(x, y, totalWidth, (rows.length + 1) * rowH);
+  //   };
+
+  //   // ================= TITLES =================
+  //   const center = doc.internal.pageSize.width / 2;
+  //   const tableX = (doc.internal.pageSize.width - totalWidth) / 2;
+
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(17);
+  //   doc.text("AMERICAN ELECTRONICS (SMC-PVT) LTD", center, 14, {
+  //     align: "center",
+  //   });
+
+  //   doc.setFontSize(12);
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.text(`Customer Report (${cusDate})`, center, 20, { align: "center" });
+
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(11);
+  //   doc.text(`Account: ${headerName}`, tableX, 28);
+
+  //   // ================= DRAW =================
+  //   addTableHeaders(tableX, 32);
+  //   addRows(tableX, 32);
+
+  //   doc.save(`CustomerProgressReport_${cusDate}.pdf`);
+  // };
+
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // ================= COLORS =================
+    const COLORS = {
+      headerBg: [225, 228, 235],
+      balanceBg: [232, 238, 255], // 🔹 balance column background
+      lineSoft: [205, 205, 205],
+      lineStrong: [140, 140, 140],
+      text: [45, 45, 45],
+    };
 
     // ================= DATA =================
     const rows = filteredData.map((r) => [
@@ -578,7 +1106,6 @@ export default function AmericanProgressReportDashboard() {
       toNumber(r.balance).toLocaleString(),
     ]);
 
-    // TOTAL ROW
     rows.push([
       "",
       "Total",
@@ -587,36 +1114,42 @@ export default function AmericanProgressReportDashboard() {
       toNumber(apiData?.totalRow?.Balance).toLocaleString(),
     ]);
 
-    // Dummy row for aging
     rows.push(["", "", "", "", ""]);
 
     const headers = ["Sr#", "Month", "Debit", "Credit", "Balance"];
     const columnWidths = [15, 30, 30, 30, 30];
     const totalWidth = columnWidths.reduce((a, b) => a + b, 0);
 
-    doc.setFont(getfontstyle);
+    // ================= BASE =================
+    doc.setFont("Helvetica", "normal");
     doc.setFontSize(10);
+    doc.setTextColor(...COLORS.text);
 
-    // ================= TABLE HEADER =================
-    const addTableHeaders = (startX, startY) => {
-      doc.setFont(getfontstyle, "bold");
-      doc.setFontSize(12);
+    // ================= HEADER =================
+    const addTableHeaders = (x, y) => {
+      doc.setFillColor(...COLORS.headerBg);
+      doc.rect(x, y, totalWidth, 8, "F");
 
+      doc.setDrawColor(...COLORS.lineStrong);
+      doc.line(x, y + 8, x + totalWidth, y + 8);
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(11);
+
+      let cx = x;
       headers.forEach((h, i) => {
-        doc.rect(startX, startY, columnWidths[i], 6);
-        doc.text(h, startX + columnWidths[i] / 2, startY + 4, {
-          align: "center",
-        });
-        startX += columnWidths[i];
+        doc.text(h, cx + columnWidths[i] / 2, y + 5.4, { align: "center" });
+        cx += columnWidths[i];
       });
 
-      doc.setFont(getfontstyle, "normal");
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(10);
     };
 
-    // ================= AGING ROW =================
-    const drawBalanceAgingRow = (startX, startY) => {
-      const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
-      const colW = tableWidth / 6;
+    // ================= AGING =================
+    const drawBalanceAgingRow = (x, y) => {
+      const colW = totalWidth / 6;
+      const rowH = 13;
 
       const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
       const values = [
@@ -628,87 +1161,294 @@ export default function AmericanProgressReportDashboard() {
         apiData?.amt006,
       ].map((v) => toNumber(v).toLocaleString());
 
-      let x = startX;
-      doc.rect(startX, startY, tableWidth, 12);
+      doc.setDrawColor(...COLORS.lineStrong);
+      doc.rect(x, y, totalWidth, rowH);
 
+      let cx = x;
       for (let i = 0; i < 6; i++) {
-        doc.rect(x, startY, colW, 12);
-        doc.line(x, startY + 6, x + colW, startY + 6);
+        if (i !== 0) doc.line(cx, y, cx, y + rowH);
 
-        doc.setFont(getfontstyle, "bold");
-        doc.setFontSize(10);
-        doc.text(labels[i], x + colW / 2, startY + 4, { align: "center" });
+        doc.setDrawColor(...COLORS.lineSoft);
+        doc.line(cx, y + rowH / 2, cx + colW, y + rowH / 2);
 
-        doc.setFont(getfontstyle, "normal");
-        doc.setFontSize(11);
-        doc.text(values[i], x + colW / 2, startY + 10, { align: "center" });
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.text(labels[i], cx + colW / 2, y + 4.5, { align: "center" });
 
-        x += colW;
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(10.5);
+        doc.text(values[i], cx + colW / 2, y + 11, { align: "center" });
+
+        cx += colW;
       }
     };
 
-    // ================= TABLE ROWS =================
-    const addRows = (startX, startY) => {
-      const rowH = 5;
+    // ================= ROWS =================
+    const addRows = (x, y) => {
+      const rowH = 5.8;
+      const gap = 3;
+
+      const balanceX =
+        x +
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3];
 
       rows.forEach((row, i) => {
-        const y = startY + (i + 2) * rowH;
+        const cy = y + (i + 2) * rowH;
 
         if (i === rows.length - 1) {
-          drawBalanceAgingRow(startX, y + 2);
+          drawBalanceAgingRow(x, cy + 3);
           return;
         }
 
-        let x = startX;
+        // 🔹 inset background so borders remain visible
+        const inset = 0.6;
 
-        if (row[1] === "Total") {
-          doc.setFont(getfontstyle, "bold");
-        }
+        doc.setFillColor(...COLORS.balanceBg);
+        doc.rect(
+          balanceX + inset,
+          cy - 0.5 + inset,
+          columnWidths[4] - inset * 2,
+          rowH - inset * 2,
+          "F"
+        );
 
+        doc.setFont(
+          row[1] === "Total" ? "Helvetica" : "Helvetica",
+          row[1] === "Total" ? "bold" : "normal"
+        );
+
+        let cx = x;
         row.forEach((cell, c) => {
-          doc.rect(x, y, columnWidths[c], rowH);
           doc.text(
             String(cell),
-            c >= 2 ? x + columnWidths[c] - 2 : x + 2,
-            y + 3.5,
+            c >= 2 ? cx + columnWidths[c] - 2 : cx + 2,
+            cy + 4,
             { align: c >= 2 ? "right" : "left" }
           );
-          x += columnWidths[c];
+          cx += columnWidths[c];
         });
 
-        doc.setFont(getfontstyle, "normal");
+        // Lines
+        if (row[1] === "Total") {
+          doc.setDrawColor(...COLORS.lineStrong);
+          doc.setLineWidth(0.5);
+        } else if (row[1] === "Opening") {
+          doc.setDrawColor(...COLORS.lineStrong);
+          doc.setLineWidth(0.35);
+        } else {
+          doc.setDrawColor(...COLORS.lineSoft);
+          doc.setLineWidth(0.25);
+        }
+
+        doc.line(x + gap, cy + rowH, x + totalWidth - gap, cy + rowH);
+        doc.setLineWidth(0.2);
       });
+
+      doc.setDrawColor(...COLORS.lineStrong);
+      doc.rect(x, y, totalWidth, (rows.length + 1) * rowH);
     };
 
-    // ================= HEADINGS =================
-    const pageCenter = doc.internal.pageSize.width / 2;
-    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+    // ================= TITLES =================
+    const center = doc.internal.pageSize.width / 2;
+    const tableX = (doc.internal.pageSize.width - totalWidth) / 2;
 
-    // 1️⃣ COMPANY NAME (CENTER)
-    doc.setFont(getfontstyle, "bold");
-    doc.setFontSize(18);
-    doc.text("AMERICAN ELECTRONICS (SMC-PVT) LTD", pageCenter, 12, {
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(17);
+    doc.text("AMERICAN ELECTRONICS (SMC-PVT) LTD", center, 14, {
       align: "center",
     });
 
-    // 2️⃣ REPORT LINE (CENTER)
+    doc.setFont("Helvetica", "normal");
     doc.setFontSize(12);
-    doc.text(`Customer Report (${cusDate})`, pageCenter, 18, {
-      align: "center",
-    });
+    doc.text(`Customer Report (${cusDate})`, center, 20, { align: "center" });
 
-    // 3️⃣ ACCOUNT (LEFT – aligned with table)
-    doc.setFont(getfontstyle, "bold");
+    doc.setFont("Helvetica", "bold");
     doc.setFontSize(11);
-    doc.text(`Account: ${headerName}`, tableStartX, 26);
+    doc.text(`Account: ${headerName}`, tableX, 28);
 
-    // ================= DRAW TABLE =================
-    addTableHeaders(tableStartX, 30);
-    addRows(tableStartX, 30);
+    // ================= DRAW =================
+    addTableHeaders(tableX, 32);
+    addRows(tableX, 32);
 
-    // ================= SAVE =================
     doc.save(`CustomerProgressReport_${cusDate}.pdf`);
   };
+
+  // const exportPDFHandler = () => {
+  //   const doc = new jsPDF("p", "mm", "a4");
+
+  //   // ================= COLORS =================
+  //   const COLORS = {
+  //     headerBg: [255, 239, 230], // light orange
+  //     outerBorder: [235, 120, 60],
+  //     zebra: [248, 248, 248],
+  //     text: [40, 40, 40],
+  //   };
+
+  //   // ================= DATA =================
+  //   const rows = filteredData.map((r) => [
+  //     r.sr,
+  //     r.month,
+  //     toNumber(r.debit).toLocaleString(),
+  //     toNumber(r.credit).toLocaleString(),
+  //     toNumber(r.balance).toLocaleString(),
+  //   ]);
+
+  //   rows.push([
+  //     "",
+  //     "Total",
+  //     toNumber(apiData?.totalRow?.Debit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Credit).toLocaleString(),
+  //     toNumber(apiData?.totalRow?.Balance).toLocaleString(),
+  //   ]);
+
+  //   const headers = ["Sr#", "Month", "Debit", "Credit", "Balance"];
+  //   const columnWidths = [15, 35, 35, 35, 35];
+  //   const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+  //   const rowH = 7;
+
+  //   const pageCenter = doc.internal.pageSize.width / 2;
+  //   const startX = (doc.internal.pageSize.width - tableWidth) / 2;
+  //   let startY = 34;
+
+  //   // ================= HEADING (EXACT AS IMAGE) =================
+
+  //   // Company name (center)
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(16);
+  //   doc.text("AMERICAN ELECTRONICS (SMC-PVT) LTD", pageCenter, 14, {
+  //     align: "center",
+  //   });
+
+  //   // Report line (center, just below)
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.setFontSize(11);
+  //   doc.text(`Customer Report (${cusDate})`, pageCenter, 20, {
+  //     align: "center",
+  //   });
+
+  //   // Account line (LEFT aligned with table)
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(11);
+  //   doc.text(`Account: ${headerName}`, startX, 25);
+
+  //   // ================= OUTER ROUNDED BORDER =================
+  //   const tableHeight = (rows.length + 1) * rowH + 10;
+  //   doc.setDrawColor(...COLORS.outerBorder);
+  //   doc.setLineWidth(1);
+  //   doc.roundedRect(startX - 4, startY - 6, tableWidth + 8, tableHeight, 6, 6);
+
+  //   // ================= HEADER =================
+  //   doc.setFillColor(...COLORS.headerBg);
+  //   doc.roundedRect(startX, startY, tableWidth, rowH, 5, 5, "F");
+
+  //   doc.setFont("Helvetica", "bold");
+  //   doc.setFontSize(11);
+
+  //   let x = startX;
+  //   headers.forEach((h, i) => {
+  //     doc.text(h, x + columnWidths[i] / 2, startY + 4.8, {
+  //       align: "center",
+  //     });
+  //     x += columnWidths[i];
+  //   });
+
+  //   // ================= ROWS (NO GRID) =================
+  //   doc.setFont("Helvetica", "normal");
+  //   doc.setFontSize(10);
+  //   doc.setTextColor(...COLORS.text);
+
+  //   rows.forEach((row, rIndex) => {
+  //     const y = startY + rowH * (rIndex + 1);
+
+  //     // zebra rows
+  //     if (rIndex % 2 === 0 && row[1] !== "Total") {
+  //       doc.setFillColor(...COLORS.zebra);
+  //       doc.rect(startX, y, tableWidth, rowH, "F");
+  //     }
+
+  //     // total row emphasis
+  //     if (row[1] === "Total") {
+  //       doc.setFont("Helvetica", "bold");
+  //     }
+
+  //     let cx = startX;
+  //     row.forEach((cell, cIndex) => {
+  //       doc.text(
+  //         String(cell),
+  //         cIndex >= 2 ? cx + columnWidths[cIndex] - 4 : cx + 4,
+  //         y + 4.6,
+  //         { align: cIndex >= 2 ? "right" : "left" }
+  //       );
+  //       cx += columnWidths[cIndex];
+  //     });
+
+  //     doc.setFont("Helvetica", "normal");
+  //   });
+
+  //   // ================= AGING TABLE (SOFT GRID) =================
+  //   const agingY = startY + tableHeight + 8;
+  //   const agingHeight = 16;
+  //   const colW = tableWidth / 6;
+
+  //   const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
+  //   const values = [
+  //     apiData?.amt001,
+  //     apiData?.amt002,
+  //     apiData?.amt003,
+  //     apiData?.amt004,
+  //     apiData?.amt005,
+  //     apiData?.amt006,
+  //   ].map((v) => toNumber(v).toLocaleString());
+
+  //   // Outer rounded border (same as before)
+  //   doc.setDrawColor(...COLORS.outerBorder);
+  //   doc.roundedRect(
+  //     startX - 4,
+  //     agingY - 4,
+  //     tableWidth + 8,
+  //     agingHeight + 6,
+  //     6,
+  //     6
+  //   );
+
+  //   // ---- SOFT GRID COLOR ----
+  //   doc.setDrawColor(220, 220, 220); // very light gray
+  //   doc.setLineWidth(0.3);
+
+  //   let ax = startX;
+
+  //   labels.forEach((lbl, i) => {
+  //     // soft vertical divider (skip first)
+  //     if (i !== 0) {
+  //       doc.line(ax, agingY - 1, ax, agingY + agingHeight - 1);
+  //     }
+
+  //     // soft horizontal divider (label / value)
+  //     doc.line(ax + 2, agingY + 7.5, ax + colW - 2, agingY + 7.5);
+
+  //     // label
+  //     doc.setFont("Helvetica", "bold");
+  //     doc.setFontSize(9.5);
+  //     doc.text(lbl, ax + colW / 2, agingY + 4.5, {
+  //       align: "center",
+  //     });
+
+  //     // value
+  //     doc.setFont("Helvetica", "normal");
+  //     doc.setFontSize(10.5);
+  //     doc.text(values[i], ax + colW / 2, agingY + 12, {
+  //       align: "center",
+  //     });
+
+  //     ax += colW;
+  //   });
+
+  //   // ================= SAVE =================
+  //   doc.save(`CustomerProgressReport_${cusDate}.pdf`);
+  // };
 
   // EXCEL EXPORT
   async function exportCSV({

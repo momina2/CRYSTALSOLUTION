@@ -18,7 +18,7 @@
 // const columnsConfig = [
 //   {
 //     header: "Code",
-//     key: "tcstcod",
+//     key: "tacccod",
 //     alignment: "left",
 //     uiWidth: 80,
 //     pdfWidth: 20,
@@ -41,8 +41,8 @@
 //     excelWidth: 20,
 //   },
 //   {
-//     header: "Salesman",
-//     key: "SalesMan",
+//     header: "tsaldsc",
+//     key: "tsaldsc",
 //     alignment: "left",
 //     uiWidth: 200,
 //     pdfWidth: 35,
@@ -405,10 +405,10 @@
 //       const q = searchQuery.toLowerCase().trim();
 //       data = data.filter(
 //         (row) =>
-//           row.tcstcod?.toLowerCase().includes(q) || // Code
+//           row.tacccod?.toLowerCase().includes(q) || // Code
 //           row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name
 //           row.tmobnum?.toLowerCase().includes(q) || // Mobile
-//           row.SalesMan?.toLowerCase().includes(q) || // Salesman
+//           row.tsaldsc?.toLowerCase().includes(q) || // tsaldsc
 //           row.balance?.toString().includes(q) // ✅ Balance
 //       );
 //     }
@@ -443,10 +443,10 @@
 //       const q = searchQuery.toLowerCase().trim();
 //       data = data.filter((row) => {
 //         return (
-//           row.tcstcod?.toLowerCase().includes(q) || // Code
+//           row.tacccod?.toLowerCase().includes(q) || // Code
 //           row.tcstdsc?.toLowerCase().includes(q) || // ✅ Name
 //           row.tmobnum?.toLowerCase().includes(q) || // Mobile
-//           row.SalesMan?.toLowerCase().includes(q) || // Salesman
+//           row.tsaldsc?.toLowerCase().includes(q) || // tsaldsc
 //           row.balance?.toString().includes(q) // ✅ Balance
 //         );
 //       });
@@ -888,7 +888,7 @@ const columnsConfig = [
   },
   {
     header: "Code",
-    key: "tcstcod",
+    key: "tacccod",
     alignment: "left",
     uiWidth: 80,
     pdfWidth: 20,
@@ -912,15 +912,15 @@ const columnsConfig = [
   },
   {
     header: "Salesman",
-    key: "SalesMan",
+    key: "tsaldsc",
     alignment: "left",
-    uiWidth: 200,
+    uiWidth: 160,
     pdfWidth: 35,
     excelWidth: 30,
   },
   {
     header: "Balance",
-    key: "balance",
+    key: "Balance",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
@@ -1383,11 +1383,11 @@ export default function AmericanOutstanding() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
+          row.tacccod?.toLowerCase().includes(q) ||
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
-          row.balance?.toString().includes(q) // ✅ BALANCE
+          row.tsaldsc?.toLowerCase().includes(q) ||
+          row.Balance?.toString().includes(q) // ✅ Balance
       );
     }
 
@@ -1397,7 +1397,7 @@ export default function AmericanOutstanding() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "balance") {
+        if (sortConfig.key === "Balance") {
           const aNum = parseFloat(aVal) || 0;
           const bNum = parseFloat(bVal) || 0;
           return sortConfig.direction === "ascending"
@@ -1421,18 +1421,18 @@ export default function AmericanOutstanding() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.tcstcod?.toLowerCase().includes(q) ||
+        row.tacccod?.toLowerCase().includes(q) ||
         row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
-        row.SalesMan?.toLowerCase().includes(q) ||
-        row.balance?.toString().includes(q) // ✅ BALANCE
+        row.tsaldsc?.toLowerCase().includes(q) ||
+        row.Balance?.toString().includes(q) // ✅ Balance
       );
     });
   }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.balance ?? 0);
+      const value = parseFloat(row.Balance ?? 0);
       return sum + (isNaN(value) ? 0 : value);
     }, 0);
   }, [sortedTableData]);
@@ -1662,7 +1662,7 @@ export default function AmericanOutstanding() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "balance" ? (
+                        ) : column.key === "Balance" ? (
                           Number(item[column.key] || 0).toLocaleString()
                         ) : column.key === "progressBtn" ? (
                           <div
@@ -1680,7 +1680,7 @@ export default function AmericanOutstanding() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanProgressReportDashboard?code=${
-                                    item.tcstcod
+                                    item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
                                 );
@@ -1703,7 +1703,7 @@ export default function AmericanOutstanding() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                    item.tcstcod
+                                    item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
                                 );
@@ -1784,7 +1784,7 @@ export default function AmericanOutstanding() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "balance" ? (
+                  {column.key === "Balance" ? (
                     <span>{totalBalance.toLocaleString()}</span>
                   ) : index === 0 ? (
                     <span>{filteredData.length}</span>

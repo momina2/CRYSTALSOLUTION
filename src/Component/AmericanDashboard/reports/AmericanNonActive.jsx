@@ -1225,7 +1225,7 @@ const columnsConfig = [
     header: "Name",
     key: "tcstdsc",
     alignment: "left",
-    uiWidth: 360,
+    uiWidth: 270,
     pdfWidth: 80,
     excelWidth: 40,
   },
@@ -1246,35 +1246,18 @@ const columnsConfig = [
     excelWidth: 20,
   },
   {
-    header: "Opening",
-    key: "Opening",
-    alignment: "right",
+    header: "SalesMan",
+    key: "tsaldsc",
+    alignment: "left",
     uiWidth: 120,
     pdfWidth: 25,
-    excelWidth: 18,
+    excelWidth: 20,
   },
-  {
-    header: "Debit",
-    key: "Debit",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 18,
-  },
-  {
-    header: "Credit",
-    key: "Credit",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 18,
-  },
-
   {
     header: "Balance",
     key: "Balance",
     alignment: "right",
-    uiWidth: 120,
+    uiWidth: 100,
     pdfWidth: 25,
     excelWidth: 18,
   },
@@ -1291,6 +1274,10 @@ function useQueryParams() {
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
 }
+const toNumber = (val) => {
+  if (val === null || val === undefined) return 0;
+  return Number(String(val).replace(/,/g, "")) || 0;
+};
 
 export default function AmericanNonActive() {
   const navigate = useNavigate();
@@ -1632,11 +1619,11 @@ export default function AmericanNonActive() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
+          row.tacccod?.toLowerCase().includes(q) ||
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
-          row.balance?.toString().includes(q) // ✅ BALANCE
+          row.tsaldsc?.toLowerCase().includes(q)
+          // row.balance?.toString().includes(q) // ✅ BALANCE
       );
     }
 
@@ -1646,7 +1633,7 @@ export default function AmericanNonActive() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "balance") {
+        if (sortConfig.key === "Balance") {
           const aNum = parseFloat(aVal) || 0;
           const bNum = parseFloat(bVal) || 0;
           return sortConfig.direction === "ascending"
@@ -1670,21 +1657,22 @@ export default function AmericanNonActive() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.tcstcod?.toLowerCase().includes(q) ||
+        row.tacccod?.toLowerCase().includes(q) ||
         row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
-        row.SalesMan?.toLowerCase().includes(q) ||
-        row.balance?.toString().includes(q) // ✅ BALANCE
+        row.tsaldsc?.toLowerCase().includes(q)
+        // row.balance?.toString().includes(q) // ✅ BALANCE
       );
     });
   }, [sortedTableData, searchQuery]);
 
+
   const totalBalance = useMemo(() => {
-    return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.balance ?? 0);
-      return sum + (isNaN(value) ? 0 : value);
+    return filteredData.reduce((sum, row) => {
+      const value = toNumber(row.Balance);
+      return sum + value;
     }, 0);
-  }, [sortedTableData]);
+  }, [filteredData]);
 
   const handleCSV = () => {
     exportCSV({
@@ -1911,8 +1899,8 @@ export default function AmericanNonActive() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "balance" ? (
-                          Number(item[column.key] || 0).toLocaleString()
+                        ) : column.key === "Balance" ? (
+                          toNumber(item.Balance).toLocaleString()
                         ) : column.key === "progressBtn" ? (
                           <div
                             style={{
@@ -2033,8 +2021,8 @@ export default function AmericanNonActive() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "balance" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
+                  {column.key === "Balance" ? (
+                    <span>{toNumber(totalBalance).toLocaleString()}</span>
                   ) : index === 0 ? (
                     <span>{filteredData.length}</span>
                   ) : column.key === "scrollSpacer" ? (
