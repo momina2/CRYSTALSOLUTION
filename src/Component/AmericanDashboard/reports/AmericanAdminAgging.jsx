@@ -10,11 +10,28 @@ import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
+import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Customer Agging";
 const COMPANY_NAME = "American Electronics";
 
 const columnsConfig = [
+  {
+    header: "Lgr",
+    key: "ledgerBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
+    header: "P.R",
+    key: "progressBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
   {
     header: "Code",
     key: "Code",
@@ -1054,7 +1071,7 @@ export default function AmericanAdminAgging() {
                           transition: "background-color 0.2s ease",
                         }}
                       >
-                        {columnsConfig.map((column, index) => (
+                        {/* {columnsConfig.map((column, index) => (
                           <td
                             key={index}
                             className={getAlignmentClass(column.alignment)}
@@ -1069,6 +1086,83 @@ export default function AmericanAdminAgging() {
                               : column.key === "balance"
                               ? Number(item[column.key] || 0).toLocaleString()
                               : item[column.key]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))} */}
+                        {columnsConfig.map((column, index) => (
+                          <td
+                            key={index}
+                            className={getAlignmentClass(column.alignment)}
+                            style={{
+                              width: column.uiWidth,
+                              padding: "8px 6px",
+                              borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                            }}
+                          >
+                            {column.key === "scrollSpacer" ? (
+                              ""
+                            ) : column.key === "balance" ? (
+                              Number(item[column.key] || 0).toLocaleString()
+                            ) : column.key === "progressBtn" ? (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <FaClipboardList
+                                  size={20}
+                                  style={{
+                                    cursor: "pointer",
+                                    color: "#17a2b8",
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(
+                                      `${
+                                        window.location.origin
+                                      }/crystalsol/AmericanProgressReportDashboard?code=${
+                                        item.Code
+                                      }&name=${encodeURIComponent(
+                                        item.Customer
+                                      )}`,
+                                      "_blank"
+                                    );
+                                  }}
+                                />
+                              </div>
+                            ) : column.key === "ledgerBtn" ? (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <FaFileInvoiceDollar
+                                  size={20}
+                                  style={{
+                                    cursor: "pointer",
+                                    color: "#28a745",
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(
+                                      `${
+                                        window.location.origin
+                                      }/crystalsol/AmericanCustomerLedgerDashboard?code=${
+                                        item.Code
+                                      }&name=${encodeURIComponent(
+                                        item.Customer
+                                      )}`,
+                                      "_blank"
+                                    );
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              item[column.key]
+                            )}
                           </td>
                         ))}
                       </tr>

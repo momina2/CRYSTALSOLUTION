@@ -102,11 +102,14 @@ const columnsConfig = [
 //     </div>
 //   </div>
 // );
+// const [appliedDate, setAppliedDate] = useState(defaultDate);
 
 const toNumber = (val) => {
   if (val === null || val === undefined) return 0;
   return Number(String(val).replace(/,/g, "")) || 0;
 };
+
+const currentYear = new Date().getFullYear();
 
 const HorizontalAggingRangeCard = ({ stats }) => (
   <div
@@ -164,6 +167,9 @@ const HorizontalAggingRangeCard = ({ stats }) => (
 );
 
 export default function AmericanProgressReportDashboard() {
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [appliedYear, setAppliedYear] = useState(currentYear);
+
   const query = useQueryParams();
   const custCode = query.get("code");
   const custName = query.get("name");
@@ -189,6 +195,7 @@ export default function AmericanProgressReportDashboard() {
   const dd = String(today.getDate()).padStart(2, "0");
   const defaultDate = `${yyyy}-${mm}-${dd}`;
   const [cusDate, setCusDate] = useState(defaultDate);
+  const [appliedDate, setAppliedDate] = useState(defaultDate);
 
   const {
     isSidebarVisible,
@@ -238,15 +245,65 @@ export default function AmericanProgressReportDashboard() {
     return `${d}-${m}-${y}`;
   };
 
-  const fetchProgress = async () => {
+  // const fetchProgress = async () => {
+  //   try {
+  //     setIsLoading(true);
+
+  //     const form = new FormData();
+  //     form.append("code", "AMRELEC");
+  //     form.append("cusId", custCode);
+  //     form.append("cusYear", selectedYear);
+
+  //     form.append("cusDate", toApiDate(cusDate));
+
+  //     const res = await axios.post(
+  //       "https://crystalsolutions.com.pk/api/AmericanCustomerProgress.php",
+  //       form
+  //     );
+
+  //     const progressList = res.data?.Progress || [];
+
+  //     // 👉 Extract TOTAL row from API
+  //     const totalRow = progressList.find(
+  //       (r) => String(r["Month"]).toLowerCase() === "total"
+  //     );
+
+  //     // 👉 Remove TOTAL row from table
+  //     const filteredProgress = progressList.filter(
+  //       (r) => String(r["Month"]).toLowerCase() !== "total"
+  //     );
+
+  //     // 👉 Map table rows WITHOUT total row
+  //     const finalRows = filteredProgress.map((r) => ({
+  //       sr: r["Sr#"],
+  //       month: r["Month"],
+  //       debit: r["Debit"],
+  //       credit: r["Credit"],
+  //       balance: r["Balance"],
+  //     }));
+
+  //     setRows(finalRows);
+
+  //     // 👉 Save total row separately
+  //     setApiData({ ...res.data, totalRow });
+  //   } catch (err) {
+  //     console.error("Progress API error:", err);
+  //     setRows([]);
+  //     setApiData(null);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const fetchProgress = async (year = appliedYear, date = appliedDate) => {
     try {
       setIsLoading(true);
 
       const form = new FormData();
       form.append("code", "AMRELEC");
       form.append("cusId", custCode);
-      form.append("cusYear", "2025");
-      form.append("cusDate", toApiDate(cusDate));
+      form.append("cusYear", year);
+      form.append("cusDate", toApiDate(date));
 
       const res = await axios.post(
         "https://crystalsolutions.com.pk/api/AmericanCustomerProgress.php",
@@ -255,31 +312,27 @@ export default function AmericanProgressReportDashboard() {
 
       const progressList = res.data?.Progress || [];
 
-      // 👉 Extract TOTAL row from API
       const totalRow = progressList.find(
         (r) => String(r["Month"]).toLowerCase() === "total"
       );
 
-      // 👉 Remove TOTAL row from table
       const filteredProgress = progressList.filter(
         (r) => String(r["Month"]).toLowerCase() !== "total"
       );
 
-      // 👉 Map table rows WITHOUT total row
-      const finalRows = filteredProgress.map((r) => ({
-        sr: r["Sr#"],
-        month: r["Month"],
-        debit: r["Debit"],
-        credit: r["Credit"],
-        balance: r["Balance"],
-      }));
+      setRows(
+        filteredProgress.map((r) => ({
+          sr: r["Sr#"],
+          month: r["Month"],
+          debit: r["Debit"],
+          credit: r["Credit"],
+          balance: r["Balance"],
+        }))
+      );
 
-      setRows(finalRows);
-
-      // 👉 Save total row separately
       setApiData({ ...res.data, totalRow });
     } catch (err) {
-      console.error("Progress API error:", err);
+      console.error(err);
       setRows([]);
       setApiData(null);
     } finally {
@@ -288,13 +341,40 @@ export default function AmericanProgressReportDashboard() {
   };
 
   useEffect(() => {
-    fetchProgress();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setAppliedYear(currentYear);
+    setAppliedDate(defaultDate);
+
+    fetchProgress(currentYear, defaultDate);
+    // eslint-disable-next-line
   }, []);
 
+  // useEffect(() => {
+  //   fetchProgress();
+  // }, [cusDate]);
+
   useEffect(() => {
-    fetchProgress();
-  }, [cusDate]);
+    // jab year change ho:
+    // cusDate ko usi year ki same date pe le jao
+    const current = new Date(cusDate);
+    const newDate = new Date(
+      selectedYear,
+      current.getMonth(),
+      current.getDate()
+    );
+
+    
+
+    const yyyy = newDate.getFullYear();
+    const mm = String(newDate.getMonth() + 1).padStart(2, "0");
+    const dd = String(newDate.getDate()).padStart(2, "0");
+
+    setCusDate(`${yyyy}-${mm}-${dd}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedYear]);
+
+  // useEffect(() => {
+  //   fetchProgress();
+  // }, [cusDate, selectedYear]);
 
   const getAlignmentClass = (alignment) => {
     switch (alignment) {
@@ -308,6 +388,8 @@ export default function AmericanProgressReportDashboard() {
         return "text-start";
     }
   };
+
+  const yearOptions = [currentYear, currentYear - 1, currentYear - 2];
 
   const getSortIcon = (key) => {
     if (sortConfig.key === key) {
@@ -426,6 +508,16 @@ export default function AmericanProgressReportDashboard() {
       ? apiData["credit amount"]
       : null;
 
+
+
+
+  const handleSelect = () => {
+      setAppliedYear(selectedYear);
+      setAppliedDate(cusDate);
+
+      // 🔴 IMPORTANT: direct API call
+      fetchProgress(selectedYear, cusDate);
+    };
   // PDF EXPORT
   // const exportPDFHandler = () => {
   //   const doc = new jsPDF({
@@ -1602,32 +1694,29 @@ export default function AmericanProgressReportDashboard() {
           {/* HEADER: code | name */}
           <NavComponent textdata={`${headerCode} | ${headerName}`} />
 
-          {/* SEARCH + SINGLE DATE FILTER ROW */}
+          {/* DATE + YEAR FILTER ROW */}
           <div
             style={{
-              width: "100%",
-              marginTop: "10px",
-              marginBottom: "10px",
               display: "flex",
-              justifyContent: "space-between", // ⭐ LEFT + RIGHT PERFECT
-              paddingInline: "12px",
-              flexWrap: "wrap",
-              gap: "10px",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "6px 10px",
+              backgroundColor: "white",
+              // borderRadius: "3px",
+              // border: "1px solid #000", // 🔹 outer thin black border
+              margin: "6px",
             }}
           >
-            {/* LEFT — Date Picker */}
+            {/* LEFT — DATE PICKER */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "6px",
-                border: "1px solid #dadada",
-                backgroundColor: "white",
+                border: "1px solid #000", // 🔹 thin black
+                padding: "2px 6px",
                 borderRadius: "2px",
-                padding: "4px 10px",
               }}
             >
-              <span style={{ fontSize: "12px", color: "#555" }}>Date</span>
               <input
                 type="date"
                 value={cusDate}
@@ -1637,39 +1726,40 @@ export default function AmericanProgressReportDashboard() {
                   outline: "none",
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
+                  backgroundColor: "transparent",
                 }}
               />
             </div>
 
-            {/* RIGHT — Search Bar */}
-            {/* <div
+            {/* RIGHT — YEAR DROPDOWN */}
+            <div
               style={{
-                minWidth: "220px",
-                maxWidth: "260px",
-                border: "1px solid #dadada",
-                borderRadius: "2px",
-                backgroundColor: "white",
                 display: "flex",
                 alignItems: "center",
-                padding: "4px 10px",
+                border: "1px solid #000", // 🔹 thin black
+                padding: "2px 6px",
+                borderRadius: "2px",
               }}
             >
-              <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
                 style={{
-                  flex: 1,
                   border: "none",
                   outline: "none",
-                  paddingLeft: "6px",
                   fontSize: getdatafontsize,
                   fontFamily: getfontstyle,
+                  backgroundColor: "transparent",
+                  cursor: "pointer",
                 }}
-              />
-            </div> */}
+              >
+                {yearOptions.map((yr) => (
+                  <option key={yr} value={yr}>
+                    {yr}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* TABLE HEADER (fixed) */}
@@ -2016,6 +2106,8 @@ export default function AmericanProgressReportDashboard() {
                 <HorizontalAggingRangeCard stats={stats} />
               </div>
             )}
+            <SingleButton title="Select" onClick={handleSelect} />
+
             <SingleButton text="PDF" onClick={exportPDFHandler} />
             <SingleButton text="Excel" onClick={handleCSV} />
           </div>

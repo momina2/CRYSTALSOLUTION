@@ -72,7 +72,7 @@ const columnsConfig = [
     header: "Debit",
     key: "debit",
     alignment: "right",
-    uiWidth: 80,
+    uiWidth: 85,
     pdfWidth: 16,
     excelWidth: 18,
   },
@@ -1087,70 +1087,60 @@ export default function AmericanCustomerLedgerDashboard() {
                     position: "sticky",
                     bottom: 0,
                     zIndex: 1,
-                    borderTop: "2px solid #555", // 🔹 outer top border (dark grey)
+                    borderTop: "2px solid #555",
                     borderBottom: "2px solid #555",
                   }}
                 >
                   {columnsConfig.map((column, index) => {
+                    const baseStyle = {
+                      width: column.uiWidth,
+                      padding: "8px 6px",
+                      borderTop: `2px solid ${softTableStyles.softBorderColor}`,
+                    };
+
+                    // spacer
                     if (column.key === "scrollSpacer") {
-                      return (
-                        <td
-                          key={index}
-                          style={{
-                            width: column.uiWidth,
-                            padding: "8px 6px",
-                            borderTop: `2px solid ${softTableStyles.softBorderColor}`,
-                            borderLeft: index === 0 ? "2px solid #555" : "none",
-                            borderRight:
-                              index === columnsConfig.length - 1
-                                ? "2px solid #555"
-                                : "none",
-                          }}
-                        />
-                      );
+                      return <td key={index} style={baseStyle} />;
                     }
 
-                    if (column.key === "balance") {
-                      return (
-                        <td
-                          key={index}
-                          className="text-end"
-                          style={{
-                            width: column.uiWidth,
-                            padding: "8px 6px",
-                            borderTop: `2px solid ${softTableStyles.softBorderColor}`,
-                          }}
-                        >
-                          {apiTotalBalance.toLocaleString()}
-                        </td>
-                      );
-                    }
-
+                    // ROW COUNT
                     if (index === 0) {
                       return (
-                        <td
-                          key={index}
-                          style={{
-                            width: column.uiWidth,
-                            padding: "8px 6px",
-                            borderTop: `2px solid ${softTableStyles.softBorderColor}`,
-                          }}
-                        >
+                        <td key={index} style={baseStyle}>
                           {filteredData.length}
                         </td>
                       );
                     }
 
-                    return (
-                      <td
-                        key={index}
-                        style={{
-                          width: column.uiWidth,
-                          padding: "8px 6px",
-                          borderTop: `2px solid ${softTableStyles.softBorderColor}`,
-                        }}
-                      />
-                    );
+                    // ✅ DEBIT TOTAL
+                    if (column.key === "debit") {
+                      return (
+                        <td key={index} className="text-end" style={baseStyle}>
+                          {toNumber(totalDebit).toLocaleString()}
+                        </td>
+                      );
+                    }
+
+                    // ✅ CREDIT TOTAL
+                    if (column.key === "credit") {
+                      return (
+                        <td key={index} className="text-end" style={baseStyle}>
+                          {toNumber(totalCredit).toLocaleString()}
+                        </td>
+                      );
+                    }
+
+                    // BALANCE (API)
+                    if (column.key === "balance") {
+                      return (
+                        <td key={index} className="text-end" style={baseStyle}>
+                          {apiTotalBalance.toLocaleString()}
+                        </td>
+                      );
+                    }
+
+                    // EMPTY CELLS
+                    return <td key={index} style={baseStyle} />;
                   })}
                 </tr>
               </tbody>

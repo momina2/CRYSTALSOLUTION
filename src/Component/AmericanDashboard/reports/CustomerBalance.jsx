@@ -92,6 +92,7 @@ export default function CustomerBalance() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -407,39 +408,20 @@ export default function CustomerBalance() {
   };
 
   const getSortIcon = (key) => {
-    // Selected column
+    if (nonSortableKeys.includes(key)) return null; // ❌ no sort icon
+
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
-        <FaSortUp
-          style={{
-            marginLeft: "5px",
-            color: "#e74c3c",
-            transition: "0.3s",
-          }}
-        />
+        <FaSortUp style={{ marginLeft: "5px", color: "#e74c3c" }} />
       ) : (
-        <FaSortDown
-          style={{
-            marginLeft: "5px",
-            color: "#e74c3c",
-            transition: "0.3s",
-          }}
-        />
+        <FaSortDown style={{ marginLeft: "5px", color: "#e74c3c" }} />
       );
     }
 
-    // Default (unselected)
     return (
-      <FaSortDown
-        style={{
-          marginLeft: "5px",
-          color: "white",
-          opacity: 0.4,
-        }}
-      />
+      <FaSortDown style={{ marginLeft: "5px", color: "white", opacity: 0.4 }} />
     );
   };
-
   const requestSort = (key) => {
     let direction = "ascending";
 
@@ -679,8 +661,15 @@ export default function CustomerBalance() {
                   {columnsConfig.map((column, index) => (
                     <td
                       key={index}
-                      onClick={() => requestSort(column.key)}
+                      onClick={() =>
+                        nonSortableKeys.includes(column.key)
+                          ? null
+                          : requestSort(column.key)
+                      }
                       style={{
+                        cursor: nonSortableKeys.includes(column.key)
+                          ? "default"
+                          : "pointer",
                         width: column.uiWidth,
                         padding: "8px 6px",
                         borderBottom: `2px solid ${softTableStyles.softBorderColor}`,
@@ -779,11 +768,69 @@ export default function CustomerBalance() {
                               borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                             }}
                           >
-                            {column.key === "scrollSpacer"
-                              ? "" // ➤ empty column
-                              : column.key === "balance"
-                              ? Number(item[column.key] || 0).toLocaleString()
-                              : item[column.key]}
+                            {column.key === "scrollSpacer" ? (
+                              ""
+                            ) : column.key === "balance" ? (
+                              Number(item[column.key] || 0).toLocaleString()
+                            ) : column.key === "progressBtn" ? (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <FaClipboardList
+                                  size={20}
+                                  style={{
+                                    cursor: "pointer",
+                                    color: "#17a2b8",
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(
+                                      `${
+                                        window.location.origin
+                                      }/crystalsol/AmericanProgressReportDashboard?code=${
+                                        item.tcstcod
+                                      }&name=${encodeURIComponent(
+                                        item.tcstdsc
+                                      )}`,
+                                      "_blank"
+                                    );
+                                  }}
+                                />
+                              </div>
+                            ) : column.key === "ledgerBtn" ? (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <FaFileInvoiceDollar
+                                  size={20}
+                                  style={{
+                                    cursor: "pointer",
+                                    color: "#28a745",
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(
+                                      `${
+                                        window.location.origin
+                                      }/crystalsol/AmericanCustomerLedgerDashboard?code=${
+                                        item.tcstcod
+                                      }&name=${encodeURIComponent(
+                                        item.tcstdsc
+                                      )}`,
+                                      "_blank"
+                                    );
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              item[column.key]
+                            )}
                           </td>
                         ))}
                       </tr>

@@ -459,7 +459,7 @@ export default function AmericanSalesManReport() {
         (row) =>
           row.tsalcod?.toLowerCase().includes(q) ||
           row.SalesMan?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-          row.Nos?.toLowerCase().includes(q) ||
+          row.Nos?.includes(q) ||
           String(row.Bal ?? "").includes(q)
       );
     }
