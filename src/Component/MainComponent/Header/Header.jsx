@@ -600,10 +600,10 @@ export default function Header() {
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar
-          position="static"
+          position="fixed"
           style={{
             background: getnavbarbackgroundcolor,
-            height: "55px",
+            height: "64px",
             borderBottom: "1px solid gray",
           }}
         >
@@ -687,7 +687,7 @@ export default function Header() {
                   // background: "linear-gradient(90deg, #FFCB06, #FF6B6B)",
                   color: "#fff",
                   cursor: "pointer",
-                  marginBottom: "10px",
+                  // marginBottom: "10px",
                 }}
               >
                 📍 {weather.name || "Unknown Location"} | 🌤{" "}

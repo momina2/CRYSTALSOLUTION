@@ -14,13 +14,29 @@
 
 
 :root {
-  --app-header-height: 64px;
+  --app-header-height: -20px;
 }
+
+/* .american-dashboard {
+  height: auto !important;
+  min-height: auto !important;
+  overflow: hidden !important;
+} */
+
 
 .american-dashboard {
   height: auto !important;
   min-height: auto !important;
-  overflow: hidden !important;
+  overflow: visible !important; /* 🔑 FIX */
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  background: #f8f9fb;
+
+}
+
+.american-dashboard section:first-of-type {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 
@@ -229,11 +245,12 @@
 } */
 
 .dashboard-zoom {
-  max-width: 1650px;
-  width: 100%;
   transform: scale(0.93);
   transform-origin: top center;
-  margin-top: -1px; 
+  margin-left: auto;   /* 🔑 */
+  margin-right: auto; 
+  margin-top: calc(-1 * var(--app-header-height)); /* 🔥 MAIN FIX */
+
 }
 
 
@@ -247,12 +264,9 @@
 
 .dashboard-scroll-fix {
   width: 100%;
-  min-height: calc(100vh / 0.93);
   display: flex;
-  justify-content: flex-start; /* ✅ */
+  justify-content: center; /* 🔑 FIX */
 }
-
-
 
 
 
@@ -268,7 +282,11 @@
   height: calc(100vh - var(--app-header-height));
   overflow-y: auto;
   overflow-x: hidden;
+
+  padding-top: 0 !important;   /* 🔑 */
+  margin-top: 0 !important;    /* 🔑 */
 }
+
 
 
 
@@ -378,13 +396,10 @@
 }
 
 
-html,
-body {
+html, body {
   height: 100%;
   margin: 0;
-  overflow: hidden;   /* ✅ ONLY ONE SCROLL ALLOWED */
 }
-
 
 /* ✅ Ledger table body scroll control – NO UI CHANGE */
 .ledger-table-scroll {
