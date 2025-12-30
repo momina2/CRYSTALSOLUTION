@@ -412,7 +412,17 @@ const FinanceSummaryCard = ({ webData }) => {
       <div className="grid grid-cols-2 grid-rows-2 text-center leading-tight flex-1">
         <div className="flex flex-col justify-center border-r border-b border-gray-200 p-1">
           <p className="text-[12px] text-gray-800">Receivable</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
+
+          <h4
+            className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
+            title={webData?.Receivable}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/AmericanReceivableReport",
+                "_blank"
+              )
+            }
+          >
             {webData?.Receivable || "-"}
           </h4>
         </div>
@@ -1356,183 +1366,190 @@ const ElectronicsDashboard = () => {
   return (
     <div className="dashboard-wrapper">
       <div className="american-dashboard">
-        <div
-          className="dashboard-zoom"
-          style={{
-            fontFamily:
-              '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-          }}
-        >
-          <div className="max-w-7xl mx-auto gap-2 mt-1">
-            {/* TOP METRIC CARDS */}
-            <section className="mb-2 grid gap-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
-              <HorizontalBalanceCard mainData={mainData} cardTitle="Customer" />
-              <NewSalesCard salesData={webData} cardTitle="Sale" />
-              <NewPurchaseCard purchaseData={webData} cardTitle="Purchase" />
-              <NewCollectionPaymentCard salesData={webData} />
-              <CustomerDistributionChart mainData={mainData} />
-              <FinancialPieChart webData={webData} balanceData={webData} />
-              <FinanceSummaryCard webData={webData} />
-              <StaffCashSummaryCard balanceData={webData} webData={webData} />
-            </section>
+        <div className="dashboard-scroll-fix">
+          <div
+            className="dashboard-zoom"
+            style={{
+              fontFamily:
+                '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+            }}
+          >
+            <div className="max-w-7xl mx-auto gap-2">
+              {/* TOP METRIC CARDS */}
+              <section className="mb-2 grid gap-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
+                <HorizontalBalanceCard
+                  mainData={mainData}
+                  cardTitle="Customer"
+                />
+                <NewSalesCard salesData={webData} cardTitle="Sale" />
+                <NewPurchaseCard purchaseData={webData} cardTitle="Purchase" />
+                <NewCollectionPaymentCard salesData={webData} />
+                <CustomerDistributionChart mainData={mainData} />
+                <FinancialPieChart webData={webData} balanceData={webData} />
+                <FinanceSummaryCard webData={webData} />
+                <StaffCashSummaryCard balanceData={webData} webData={webData} />
+              </section>
 
-            {/* --- BIG LOWER SECTION --- */}
-            <section className="grid gap-2 mt-0">
-              {/* ⭐ ROW 1: SPC + Range + Agging (3 Cards) */}
-              <div className="grid gap-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
-                <YearlySPCGraph apiData={webData} />
-                <HorizontalRangeCard stats={newRangeStats} />
-                <HorizontalAggingRangeCard stats={newRangeAggingStats} />
-              </div>
-
-              {/* ⭐ ROW 2: Monthly Graph (FULL WIDTH) */}
-              {/* <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]"> */}
-              <div className="relative bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]">
-                {/* 🔽 YEAR DROPDOWN (TOP RIGHT) */}
-                <div className="absolute top-2 right-3 z-10">
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                    className="border border-gray-300 text-xs rounded-md px-1 py-1 focus:outline-none focus:ring-0"
-                  >
-                    <option value="2021">2021</option>
-                    <option value="2022">2022</option>
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                  </select>
+              {/* --- BIG LOWER SECTION --- */}
+              <section className="grid gap-2 mt-0">
+                {/* ⭐ ROW 1: SPC + Range + Agging (3 Cards) */}
+                <div className="grid gap-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
+                  <YearlySPCGraph apiData={webData} />
+                  <HorizontalRangeCard stats={newRangeStats} />
+                  <HorizontalAggingRangeCard stats={newRangeAggingStats} />
                 </div>
 
-                <div className="h-[calc(100%-10px)]">
-                  {isMonthlyDataAvailable ? (
-                    (() => {
-                      // ==== CALCULATING AVERAGES ====
-                      const avgSales =
-                        salesData.reduce((a, b) => a + b, 0) / salesData.length;
-                      const avgPurchase =
-                        purchaseData.reduce((a, b) => a + b, 0) /
-                        purchaseData.length;
-                      const avgExpense =
-                        expenseData.reduce((a, b) => a + b, 0) /
-                        expenseData.length;
-                      const avgCollection =
-                        collectionData.reduce((a, b) => a + b, 0) /
-                        collectionData.length;
+                {/* ⭐ ROW 2: Monthly Graph (FULL WIDTH) */}
+                {/* <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]"> */}
+                <div className="relative bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]">
+                  {/* 🔽 YEAR DROPDOWN (TOP RIGHT) */}
+                  <div className="absolute top-2 right-3 z-10">
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(e.target.value)}
+                      className="border border-gray-300 text-xs rounded-md px-1 py-1 focus:outline-none focus:ring-0"
+                    >
+                      <option value="2021">2021</option>
+                      <option value="2022">2022</option>
+                      <option value="2023">2023</option>
+                      <option value="2024">2024</option>
+                      <option value="2025">2025</option>
+                      <option value="2026">2026</option>
+                    </select>
+                  </div>
 
-                      return (
-                        <Bar
-                          data={{
-                            labels: months,
-                            datasets: [
-                              {
-                                label: "Sales",
-                                data: salesData,
-                                backgroundColor: ChartColors.Sales,
-                                borderRadius: 8,
-                              },
-                              {
-                                label: "Purchase",
-                                data: purchaseData,
-                                backgroundColor: ChartColors.Purchase,
-                                borderRadius: 8,
-                              },
-                              {
-                                label: "Expense",
-                                data: expenseData,
-                                backgroundColor: ChartColors.Expense,
-                                borderRadius: 8,
-                              },
-                              {
-                                label: "Collection",
-                                data: collectionData,
-                                backgroundColor: ChartColors.Collection,
-                                borderRadius: 8,
-                              },
+                  <div className="h-[calc(100%-10px)]">
+                    {isMonthlyDataAvailable ? (
+                      (() => {
+                        // ==== CALCULATING AVERAGES ====
+                        const avgSales =
+                          salesData.reduce((a, b) => a + b, 0) /
+                          salesData.length;
+                        const avgPurchase =
+                          purchaseData.reduce((a, b) => a + b, 0) /
+                          purchaseData.length;
+                        const avgExpense =
+                          expenseData.reduce((a, b) => a + b, 0) /
+                          expenseData.length;
+                        const avgCollection =
+                          collectionData.reduce((a, b) => a + b, 0) /
+                          collectionData.length;
 
-                              // ---------- AVERAGE LINES ----------
-                              {
-                                label: "Sales (Avg)",
-                                data: months.map(() => avgSales),
-                                type: "line",
-                                borderColor: ChartColors.Sales,
-                                borderWidth: 1.4,
-                                pointRadius: 0,
-                                fill: false,
-                                borderDash: [5, 5], // dotted line to distinguish
-                                hidden: !salesData.some((v) => v !== 0),
-                              },
-                              {
-                                label: "Purchase (Avg)",
-                                data: months.map(() => avgPurchase),
-                                type: "line",
-                                borderColor: ChartColors.Purchase,
-                                borderWidth: 1.4,
-                                pointRadius: 0,
-                                fill: false,
-                                borderDash: [5, 5],
-                                hidden: !purchaseData.some((v) => v !== 0),
-                              },
-                              {
-                                label: "Expense (Avg)",
-                                data: months.map(() => avgExpense),
-                                type: "line",
-                                borderColor: ChartColors.Expense,
-                                borderWidth: 1.4,
-                                pointRadius: 0,
-                                fill: false,
-                                borderDash: [5, 5],
-                                hidden: !expenseData.some((v) => v !== 0),
-                              },
-                              {
-                                label: "Collection (Avg)",
-                                data: months.map(() => avgCollection),
-                                type: "line",
-                                borderColor: ChartColors.Collection,
-                                borderWidth: 1.4,
-                                pointRadius: 0,
-                                fill: false,
-                                borderDash: [5, 5],
-                                hidden: !collectionData.some((v) => v !== 0),
-                              },
-                            ],
-                          }}
-                          options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
+                        return (
+                          <Bar
+                            data={{
+                              labels: months,
+                              datasets: [
+                                {
+                                  label: "Sales",
+                                  data: salesData,
+                                  backgroundColor: ChartColors.Sales,
+                                  borderRadius: 8,
+                                },
+                                {
+                                  label: "Purchase",
+                                  data: purchaseData,
+                                  backgroundColor: ChartColors.Purchase,
+                                  borderRadius: 8,
+                                },
+                                {
+                                  label: "Expense",
+                                  data: expenseData,
+                                  backgroundColor: ChartColors.Expense,
+                                  borderRadius: 8,
+                                },
+                                {
+                                  label: "Collection",
+                                  data: collectionData,
+                                  backgroundColor: ChartColors.Collection,
+                                  borderRadius: 8,
+                                },
 
-                            plugins: {
-                              legend: {
-                                position: "top",
-                                labels: { usePointStyle: true, padding: 16 },
-                                filter: (legendItem, chartData) => {
-                                  return !legendItem.text.includes("(Avg)");
+                                // ---------- AVERAGE LINES ----------
+                                {
+                                  label: "Sales (Avg)",
+                                  data: months.map(() => avgSales),
+                                  type: "line",
+                                  borderColor: ChartColors.Sales,
+                                  borderWidth: 1.4,
+                                  pointRadius: 0,
+                                  fill: false,
+                                  borderDash: [5, 5], // dotted line to distinguish
+                                  hidden: !salesData.some((v) => v !== 0),
+                                },
+                                {
+                                  label: "Purchase (Avg)",
+                                  data: months.map(() => avgPurchase),
+                                  type: "line",
+                                  borderColor: ChartColors.Purchase,
+                                  borderWidth: 1.4,
+                                  pointRadius: 0,
+                                  fill: false,
+                                  borderDash: [5, 5],
+                                  hidden: !purchaseData.some((v) => v !== 0),
+                                },
+                                {
+                                  label: "Expense (Avg)",
+                                  data: months.map(() => avgExpense),
+                                  type: "line",
+                                  borderColor: ChartColors.Expense,
+                                  borderWidth: 1.4,
+                                  pointRadius: 0,
+                                  fill: false,
+                                  borderDash: [5, 5],
+                                  hidden: !expenseData.some((v) => v !== 0),
+                                },
+                                {
+                                  label: "Collection (Avg)",
+                                  data: months.map(() => avgCollection),
+                                  type: "line",
+                                  borderColor: ChartColors.Collection,
+                                  borderWidth: 1.4,
+                                  pointRadius: 0,
+                                  fill: false,
+                                  borderDash: [5, 5],
+                                  hidden: !collectionData.some((v) => v !== 0),
+                                },
+                              ],
+                            }}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+
+                              plugins: {
+                                legend: {
+                                  position: "top",
+                                  labels: { usePointStyle: true, padding: 16 },
+                                  filter: (legendItem, chartData) => {
+                                    return !legendItem.text.includes("(Avg)");
+                                  },
                                 },
                               },
-                            },
 
-                            scales: {
-                              x: { grid: { display: false } },
-                              y: {
-                                ticks: {
-                                  callback: (value) => `${value / 1_000_000}M`,
-                                  color: "#6b7280",
+                              scales: {
+                                x: { grid: { display: false } },
+                                y: {
+                                  ticks: {
+                                    callback: (value) =>
+                                      `${value / 1_000_000}M`,
+                                    color: "#6b7280",
+                                  },
+                                  grid: { color: "rgba(0,0,0,0.04)" },
                                 },
-                                grid: { color: "rgba(0,0,0,0.04)" },
                               },
-                            },
-                          }}
-                        />
-                      );
-                    })()
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-                      Monthly comparison data not available.
-                    </div>
-                  )}
+                            }}
+                          />
+                        );
+                      })()
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                        Monthly comparison data not available.
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            </div>
           </div>
         </div>
       </div>
