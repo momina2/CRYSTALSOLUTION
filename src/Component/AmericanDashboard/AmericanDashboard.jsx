@@ -291,7 +291,15 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
         <div className="flex flex-col justify-center p-1">
           <p className="text-[14px] text-gray-800">
             Managers:
-            <span className="text-[16px] font-semibold text-sky-700 pl-1">
+            <span
+              className="text-[16px] font-semibold text-sky-700 pl-1 cursor-pointer hover:underline"
+              onClick={() =>
+                window.open(
+                  window.location.origin + "/crystalsol/AmericanManagersReport",
+                  "_blank"
+                )
+              }
+            >
               {webData?.Managers || "-"}
             </span>
           </p>

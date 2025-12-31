@@ -119,6 +119,11 @@ function useQueryParams() {
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
 }
+const showIfNonZero = (val) => {
+  const num = Number((val ?? "0").toString().replace(/,/g, ""));
+  if (!num) return "";
+  return num.toLocaleString();
+};
 
 export default function AmericanAdminAgging() {
   const [rows, setRows] = useState([]);
@@ -1102,8 +1107,6 @@ export default function AmericanAdminAgging() {
                           >
                             {column.key === "scrollSpacer" ? (
                               ""
-                            ) : column.key === "balance" ? (
-                              Number(item[column.key] || 0).toLocaleString()
                             ) : column.key === "progressBtn" ? (
                               <div
                                 style={{
@@ -1160,6 +1163,16 @@ export default function AmericanAdminAgging() {
                                   }}
                                 />
                               </div>
+                            ) : [
+                                "Amt001",
+                                "Amt002",
+                                "Amt003",
+                                "Amt004",
+                                "Amt005",
+                                "Amt006",
+                                "Total",
+                              ].includes(column.key) ? (
+                              showIfNonZero(item[column.key])
                             ) : (
                               item[column.key]
                             )}

@@ -18,6 +18,11 @@ function useQueryParams() {
   const { search } = useLocation();
   return new URLSearchParams(search);
 }
+ const showIfNonZero = (val) => {
+    const num = toNumber(val);
+    return num === 0 ? "" : num.toLocaleString();
+  };
+
 
 // 👉 Progress table columns as per API
 const columnsConfig = [
@@ -158,7 +163,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
               color: "#000",
             }}
           >
-            {toNumber(s.amount).toLocaleString()}
+            {showIfNonZero(s.amount).toLocaleString()}
           </p>
         </div>
       ))}
@@ -353,8 +358,6 @@ export default function AmericanProgressReportDashboard() {
   // }, [cusDate]);
 
   useEffect(() => {
-    // jab year change ho:
-    // cusDate ko usi year ki same date pe le jao
     const current = new Date(cusDate);
     const newDate = new Date(
       selectedYear,
@@ -362,20 +365,18 @@ export default function AmericanProgressReportDashboard() {
       current.getDate()
     );
 
-    
-
     const yyyy = newDate.getFullYear();
     const mm = String(newDate.getMonth() + 1).padStart(2, "0");
     const dd = String(newDate.getDate()).padStart(2, "0");
 
     setCusDate(`${yyyy}-${mm}-${dd}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear]);
 
-  // useEffect(() => {
-  //   fetchProgress();
-  // }, [cusDate, selectedYear]);
+  useEffect(() => {
+    fetchProgress(selectedYear, cusDate);
+  }, [selectedYear, cusDate]);
 
+ 
   const getAlignmentClass = (alignment) => {
     switch (alignment) {
       case "left":
@@ -477,17 +478,17 @@ export default function AmericanProgressReportDashboard() {
   }, [sortedTableData, searchQuery]);
 
   const totalDebit = useMemo(
-    () => filteredData.reduce((sum, r) => sum + toNumber(r.debit), 0),
+    () => filteredData.reduce((sum, r) => sum + showIfNonZero(r.debit), 0),
     [filteredData]
   );
 
   const totalCredit = useMemo(
-    () => filteredData.reduce((sum, r) => sum + toNumber(r.credit), 0),
+    () => filteredData.reduce((sum, r) => sum + showIfNonZero(r.credit), 0),
     [filteredData]
   );
 
   const totalBalance = useMemo(
-    () => filteredData.reduce((sum, r) => sum + toNumber(r.balance), 0),
+    () => filteredData.reduce((sum, r) => sum + showIfNonZero(r.balance), 0),
     [filteredData]
   );
 
@@ -508,16 +509,13 @@ export default function AmericanProgressReportDashboard() {
       ? apiData["credit amount"]
       : null;
 
-
-
-
   const handleSelect = () => {
-      setAppliedYear(selectedYear);
-      setAppliedDate(cusDate);
+    setAppliedYear(selectedYear);
+    setAppliedDate(cusDate);
 
-      // 🔴 IMPORTANT: direct API call
-      fetchProgress(selectedYear, cusDate);
-    };
+    // 🔴 IMPORTANT: direct API call
+    fetchProgress(selectedYear, cusDate);
+  };
   // PDF EXPORT
   // const exportPDFHandler = () => {
   //   const doc = new jsPDF({
@@ -1193,17 +1191,17 @@ export default function AmericanProgressReportDashboard() {
     const rows = filteredData.map((r) => [
       r.sr,
       r.month,
-      toNumber(r.debit).toLocaleString(),
-      toNumber(r.credit).toLocaleString(),
-      toNumber(r.balance).toLocaleString(),
+      showIfNonZero(r.debit).toLocaleString(),
+      showIfNonZero(r.credit).toLocaleString(),
+      showIfNonZero(r.balance).toLocaleString(),
     ]);
 
     rows.push([
       "",
       "Total",
-      toNumber(apiData?.totalRow?.Debit).toLocaleString(),
-      toNumber(apiData?.totalRow?.Credit).toLocaleString(),
-      toNumber(apiData?.totalRow?.Balance).toLocaleString(),
+      showIfNonZero(apiData?.totalRow?.Debit).toLocaleString(),
+      showIfNonZero(apiData?.totalRow?.Credit).toLocaleString(),
+      showIfNonZero(apiData?.totalRow?.Balance).toLocaleString(),
     ]);
 
     rows.push(["", "", "", "", ""]);
@@ -1251,7 +1249,7 @@ export default function AmericanProgressReportDashboard() {
         apiData?.amt004,
         apiData?.amt005,
         apiData?.amt006,
-      ].map((v) => toNumber(v).toLocaleString());
+      ].map((v) => showIfNonZero(v).toLocaleString());
 
       doc.setDrawColor(...COLORS.lineStrong);
       doc.rect(x, y, totalWidth, rowH);
@@ -1905,7 +1903,7 @@ export default function AmericanProgressReportDashboard() {
                           } else if (
                             ["debit", "credit", "balance"].includes(key)
                           ) {
-                            value = toNumber(item[key]).toLocaleString();
+                            value = showIfNonZero(item[key]).toLocaleString();
                           } else {
                             value = item[key] ?? "";
                           }
@@ -1992,17 +1990,17 @@ export default function AmericanProgressReportDashboard() {
                 if (column.key === "month") content = "";
 
                 if (column.key === "debit")
-                  content = toNumber(
+                  content = showIfNonZero(
                     apiData?.totalRow?.Debit ?? totalDebit
                   ).toLocaleString();
 
                 if (column.key === "credit")
-                  content = toNumber(
+                  content = showIfNonZero(
                     apiData?.totalRow?.Credit ?? totalCredit
                   ).toLocaleString();
 
                 if (column.key === "balance")
-                  content = toNumber(
+                  content = showIfNonZero(
                     apiData?.totalRow?.Balance ?? totalBalance
                   ).toLocaleString();
 
@@ -2106,7 +2104,7 @@ export default function AmericanProgressReportDashboard() {
                 <HorizontalAggingRangeCard stats={stats} />
               </div>
             )}
-            <SingleButton title="Select" onClick={handleSelect} />
+            {/* <SingleButton title="Select" onClick={handleSelect} /> */}
 
             <SingleButton text="PDF" onClick={exportPDFHandler} />
             <SingleButton text="Excel" onClick={handleCSV} />

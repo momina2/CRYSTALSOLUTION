@@ -470,9 +470,9 @@ export default function AmericanSalesManReport() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "Bal") {
-          const aNum = parseFloat(aVal) || 0;
-          const bNum = parseFloat(bVal) || 0;
+        if (sortConfig.key === "Bal" || sortConfig.key === "Nos") {
+          const aNum = Number(aVal) || 0;
+          const bNum = Number(bVal) || 0;
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;

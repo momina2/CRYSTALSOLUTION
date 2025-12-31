@@ -14,6 +14,14 @@ import { useLocation } from "react-router-dom";
 const REPORT_NAME = "Customer Ledger";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
+const toNumber = (val) => {
+  if (val === null || val === undefined || val === "") return 0;
+  return Number(String(val).replace(/,/g, "")) || 0;
+};
+const showIfNonZero = (val) => {
+  const num = toNumber(val);
+  return num === 0 ? "" : num.toLocaleString();
+};
 function useQueryParams() {
   const { search } = useLocation();
   return new URLSearchParams(search);
@@ -72,7 +80,7 @@ const columnsConfig = [
     header: "Debit",
     key: "debit",
     alignment: "right",
-    uiWidth: 85,
+    uiWidth: 120,
     pdfWidth: 16,
     excelWidth: 18,
   },
@@ -80,7 +88,7 @@ const columnsConfig = [
     header: "Credit",
     key: "credit",
     alignment: "right",
-    uiWidth: 80,
+    uiWidth: 120,
     pdfWidth: 16,
     excelWidth: 18,
   },
@@ -147,7 +155,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
               color: "#000",
             }}
           >
-            {Number(s.amount || 0).toLocaleString()}
+            {showIfNonZero(s.amount || 0).toLocaleString()}
           </p>
         </div>
       ))}
@@ -313,12 +321,11 @@ export default function AmericanCustomerLedgerDashboard() {
     }
   };
   // 🔹 helper to safely convert string numbers like "1,234,567" to number
-  const toNumber = (val) => {
-    if (val === null || val === undefined || val === "") return 0;
-    return Number(String(val).replace(/,/g, "")) || 0;
-  };
 
-  const apiTotalBalance = useMemo(() => toNumber(apiData?.Balance), [apiData]);
+  const apiTotalBalance = useMemo(
+    () => showIfNonZero(apiData?.Balance),
+    [apiData]
+  );
 
   const getSortIcon = (key) => {
     if (sortConfig.key === key) {
@@ -458,11 +465,11 @@ export default function AmericanCustomerLedgerDashboard() {
       r.ttrntyp || "",
       r.ttrnnum || "",
       r.ttrndsc || "",
-      toNumber(r.titmqnt).toLocaleString(),
-      toNumber(r.tsalrat).toLocaleString(),
-      toNumber(r.debit).toLocaleString(),
-      toNumber(r.credit).toLocaleString(),
-      toNumber(r.balance).toLocaleString(),
+      showIfNonZero(r.titmqnt).toLocaleString(),
+      showIfNonZero(r.tsalrat).toLocaleString(),
+      showIfNonZero(r.debit).toLocaleString(),
+      showIfNonZero(r.credit).toLocaleString(),
+      showIfNonZero(r.balance).toLocaleString(),
     ]);
 
     // TOTAL ROW
@@ -473,9 +480,9 @@ export default function AmericanCustomerLedgerDashboard() {
       "Total",
       "",
       "",
-      toNumber(totalDebit).toLocaleString(),
-      toNumber(totalCredit).toLocaleString(),
-      toNumber(apiData?.Balance).toLocaleString(),
+      showIfNonZero(totalDebit).toLocaleString(),
+      showIfNonZero(totalCredit).toLocaleString(),
+      showIfNonZero(apiData?.Balance).toLocaleString(),
     ]);
 
     // Dummy row for aging
@@ -528,7 +535,7 @@ export default function AmericanCustomerLedgerDashboard() {
         apiData?.amt004,
         apiData?.amt005,
         apiData?.amt006,
-      ].map((v) => toNumber(v).toLocaleString());
+      ].map((v) => showIfNonZero(v).toLocaleString());
 
       let x = startX;
       doc.rect(startX, startY, tableWidth, 12);
@@ -659,7 +666,7 @@ export default function AmericanCustomerLedgerDashboard() {
           if (
             ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
           ) {
-            return Number(item[key] || 0).toLocaleString();
+            return showIfNonZero(item[key] || 0).toLocaleString();
           }
           return item[key] ?? "";
         })
@@ -1024,7 +1031,9 @@ export default function AmericanCustomerLedgerDashboard() {
                               "tsalrat",
                             ].includes(key)
                           ) {
-                            value = Number(item[key] || 0).toLocaleString();
+                            value = showIfNonZero(
+                              item[key] || 0
+                            ).toLocaleString();
                           } else {
                             value = item[key] ?? "";
                           }
@@ -1116,7 +1125,7 @@ export default function AmericanCustomerLedgerDashboard() {
                     if (column.key === "debit") {
                       return (
                         <td key={index} className="text-end" style={baseStyle}>
-                          {toNumber(totalDebit).toLocaleString()}
+                          {showIfNonZero(totalDebit).toLocaleString()}
                         </td>
                       );
                     }
@@ -1125,7 +1134,7 @@ export default function AmericanCustomerLedgerDashboard() {
                     if (column.key === "credit") {
                       return (
                         <td key={index} className="text-end" style={baseStyle}>
-                          {toNumber(totalCredit).toLocaleString()}
+                          {showIfNonZero(totalCredit).toLocaleString()}
                         </td>
                       );
                     }

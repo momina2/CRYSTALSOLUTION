@@ -13,8 +13,8 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "City Details Report";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const REPORT_NAME = "American Receivable Report";
+const COMPANY_NAME = "American Trading";
 
 const columnsConfig = [
   {
@@ -33,38 +33,46 @@ const columnsConfig = [
     pdfWidth: 0,
     excelWidth: 0,
   },
-
   {
     header: "Code",
     key: "tacccod",
     alignment: "left",
-    uiWidth: 90,
+    uiWidth: 80,
     pdfWidth: 20,
-    excelWidth: 8,
+    excelWidth: 15,
   },
   {
-    header: "Description",
+    header: "Name",
     key: "tcstdsc",
     alignment: "left",
     uiWidth: 360,
     pdfWidth: 80,
-    excelWidth: 20,
+    excelWidth: 40,
   },
   {
-    header: "Phone",
-    key: "tmobnum",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 15,
+    header: "Salesman",
+    key: "tsaldsc",
+    alignment: "left",
+    uiWidth: 200,
+    pdfWidth: 35,
+    excelWidth: 30,
   },
+  {
+    header: "Mobile",
+    key: "tmobnum",
+    alignment: "left",
+    uiWidth: 110,
+    pdfWidth: 25,
+    excelWidth: 20,
+  },
+
   {
     header: "Balance",
     key: "Balance",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
-    excelWidth: 15,
+    excelWidth: 18,
   },
   {
     header: "",
@@ -80,25 +88,25 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function AmericanCityDetailsReport() {
+export default function AmericanReceivableReport() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
-  const [apiData, setApiData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
-
   const [isLoading, setIsLoading] = useState(true);
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
   const query = useQueryParams();
-  const CtyCod = query.get("PCtyCod");
-  const CtyName = query.get("name");
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
-  const [headerCode] = useState(CtyCod);
-  const [headerName] = useState(CtyName);
+  const minParam = query.get("min") || "0";
+  const maxParam = query.get("max") || "99999999";
+  const labelParam = query.get("label") || "";
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     isSidebarVisible,
@@ -110,55 +118,43 @@ export default function AmericanCityDetailsReport() {
   } = useTheme();
 
   // === API CALL =====
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-
-      const form = new FormData();
-      form.append("code", "AMRELEC");
-      form.append("PCtyCod", CtyCod);
-
-      const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanCityCustomers.php",
-        form
-      );
-
-      const DetailsList = Array.isArray(res.data)
-        ? res.data.map((row) => ({
-            ...row,
-            balance: Number(String(row.Balance ?? 0).replace(/,/g, "")),
-          }))
-        : [];
-
-      setRows(DetailsList);
-    } catch (err) {
-      console.error("Progress API error:", err);
-      setRows([]);
-      setApiData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const formatNumber = (val) => {
-    const num = Number(val);
-    if (isNaN(num)) return "0";
-    return Math.trunc(num).toLocaleString();
-  };
+  // useEffect(() => {
+  //   fetchData();
+  // }, [minParam, maxParam]);
 
   useEffect(() => {
-    if (CtyCod) {
-      fetchData();
-    }
-  }, [CtyCod]);
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        const form = new FormData();
+        form.append("code", "AMRELEC");
+
+        const res = await axios.post(
+          "https://crystalsolutions.com.pk/api/AmericanNilCustomers.php",
+          form,
+          { timeout: 20000 }
+        );
+
+        const arr = res?.data ?? [];
+        setRows(arr);
+      } catch (err) {
+        console.error("FetchError:", err);
+        setRows([]);
+      }
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
+
   const exportPDFHandler = () => {
     const doc = new jsPDF({ orientation: "portrait" });
 
     // -------- PDF CONFIG ----------
-    const topMargin = 16;
-    const rowHeight = 5;
-    const headerHeight = 8;
-    const maxRowY = 280;
+    const topMargin = 16; // top space for header
+    const rowHeight = 5; // normal row height
+    const headerHeight = 8; // table header height
+    const maxRowY = 280; // printable area before adding new page
 
     // ------- TITLE --------
     function drawTitle() {
@@ -168,7 +164,7 @@ export default function AmericanCityDetailsReport() {
 
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(13);
-      doc.text(headerCode, 105, 24, { align: "center" });
+      doc.text(REPORT_NAME, 105, 24, { align: "center" });
     }
 
     // --------- TABLE HEADER ---------
@@ -180,7 +176,7 @@ export default function AmericanCityDetailsReport() {
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2;
+    const startX = (210 - tableWidth) / 2; // page width 210mm
     let y = 32;
 
     function drawHeader() {
@@ -248,8 +244,7 @@ export default function AmericanCityDetailsReport() {
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = sortedTableData.length.toString();
 
-    totalRow[keys.length - 1] = formatNumber(totalBalance);
-
+    totalRow[keys.length - 1] = totalBalance.toLocaleString();
     const rowsPDF = [...dataRows, totalRow];
 
     rowsPDF.forEach((row, index) => {
@@ -259,7 +254,7 @@ export default function AmericanCityDetailsReport() {
     });
 
     // ---------- SAVE ----------
-    doc.save(`${headerCode}|${headerName}.pdf`);
+    doc.save(`${REPORT_NAME}.pdf`);
   };
 
   // ======================= EXCEL EXPORT =======================
@@ -320,8 +315,7 @@ export default function AmericanCityDetailsReport() {
 
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
-    totalRowData[headers.length - 1] = formatNumber(totalCollection);
-
+    totalRowData[headers.length - 1] = totalCollection.toLocaleString();
     const totalRow = worksheet.addRow(totalRowData);
 
     totalRow.eachCell((cell) => {
@@ -437,8 +431,8 @@ export default function AmericanCityDetailsReport() {
           row.tacccod?.toLowerCase().includes(q) ||
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q) // ✅ BALANCE
+          row.tsaldsc?.toLowerCase().includes(q) ||
+          row.Balance?.toString().includes(q) // ✅ Balance
       );
     }
 
@@ -475,15 +469,16 @@ export default function AmericanCityDetailsReport() {
         row.tacccod?.toLowerCase().includes(q) ||
         row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
-        row.SalesMan?.toLowerCase().includes(q) ||
-        row.Balance?.toString().includes(q) // ✅ BALANCE
+        row.tsaldsc?.toLowerCase().includes(q) ||
+        row.Balance?.toString().includes(q) // ✅ Balance
       );
     });
   }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
-      return sum + (row.balance || 0);
+      const value = parseFloat(row.Balance ?? 0);
+      return sum + (isNaN(value) ? 0 : value);
     }, 0);
   }, [sortedTableData]);
 
@@ -531,7 +526,7 @@ export default function AmericanCityDetailsReport() {
           }}
         >
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
-          <NavComponent textdata={`${headerCode} | ${headerName}`} />
+          <NavComponent textdata={REPORT_NAME} />
 
           {/* SEARCH ROW */}
           <div
@@ -835,7 +830,7 @@ export default function AmericanCityDetailsReport() {
                   }}
                 >
                   {column.key === "Balance" ? (
-                    <span>{formatNumber(totalBalance)}</span>
+                    <span>{totalBalance.toLocaleString()}</span>
                   ) : index === 2 ? (
                     <span>{filteredData.length}</span>
                   ) : column.key === "scrollSpacer" ? (

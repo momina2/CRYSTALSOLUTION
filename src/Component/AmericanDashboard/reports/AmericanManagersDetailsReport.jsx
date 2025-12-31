@@ -37,7 +37,7 @@ const columnsConfig = [
   {
     header: "Code",
     key: "tacccod",
-    alignment: "left",
+    alignment: "center",
     uiWidth: 90,
     pdfWidth: 20,
     excelWidth: 8,
@@ -53,8 +53,16 @@ const columnsConfig = [
   {
     header: "Phone",
     key: "tmobnum",
-    alignment: "right",
+    alignment: "center",
     uiWidth: 120,
+    pdfWidth: 25,
+    excelWidth: 15,
+  },
+   {
+    header: "Salesman",
+    key: "tsaldsc",
+    alignment: "left",
+    uiWidth: 160,
     pdfWidth: 25,
     excelWidth: 15,
   },
@@ -80,7 +88,7 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function AmericanCityDetailsReport() {
+export default function AmericanManagersDetailsReport() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [apiData, setApiData] = useState(null);
@@ -94,7 +102,7 @@ export default function AmericanCityDetailsReport() {
   });
 
   const query = useQueryParams();
-  const CtyCod = query.get("PCtyCod");
+  const CtyCod = query.get("PMgrCod");
   const CtyName = query.get("name");
 
   const [headerCode] = useState(CtyCod);
@@ -116,10 +124,10 @@ export default function AmericanCityDetailsReport() {
 
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("PCtyCod", CtyCod);
+      form.append("PMgrCod", CtyCod);
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanCityCustomers.php",
+        "https://crystalsolutions.com.pk/api/AmericanManagersCustomers.php",
         form
       );
 
@@ -437,7 +445,7 @@ export default function AmericanCityDetailsReport() {
           row.tacccod?.toLowerCase().includes(q) ||
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
+          row.tsaldsc?.toLowerCase().includes(q) ||
           row.Balance?.toString().includes(q) // ✅ BALANCE
       );
     }
@@ -475,7 +483,7 @@ export default function AmericanCityDetailsReport() {
         row.tacccod?.toLowerCase().includes(q) ||
         row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
-        row.SalesMan?.toLowerCase().includes(q) ||
+        row.tsaldsc?.toLowerCase().includes(q) ||
         row.Balance?.toString().includes(q) // ✅ BALANCE
       );
     });

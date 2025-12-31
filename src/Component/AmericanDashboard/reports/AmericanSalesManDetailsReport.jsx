@@ -36,7 +36,7 @@ const columnsConfig = [
 
   {
     header: "Code",
-    key: "tcstcod",
+    key: "tacccod",
     alignment: "left",
     uiWidth: 90,
     pdfWidth: 20,
@@ -60,7 +60,7 @@ const columnsConfig = [
   },
   {
     header: "Balance",
-    key: "balance",
+    key: "Balance",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
@@ -92,6 +92,12 @@ export default function AmericanSalesManDetailsReport() {
     key: null,
     direction: "ascending",
   });
+
+  const formatNumber = (val) => {
+    const num = Number(val);
+    if (isNaN(num)) return "0";
+    return Math.trunc(num).toLocaleString();
+  };
 
   const query = useQueryParams();
   const SalManCode = query.get("tsalcod");
@@ -237,7 +243,8 @@ export default function AmericanSalesManDetailsReport() {
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = sortedTableData.length.toString();
 
-    totalRow[keys.length - 1] = totalBalance.toLocaleString();
+    totalRow[keys.length - 1] = formatNumber(totalBalance);
+
     const rowsPDF = [...dataRows, totalRow];
 
     rowsPDF.forEach((row, index) => {
@@ -308,7 +315,8 @@ export default function AmericanSalesManDetailsReport() {
 
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
-    totalRowData[headers.length - 1] = totalCollection.toLocaleString();
+    totalRowData[headers.length - 1] = formatNumber(totalCollection);
+
     const totalRow = worksheet.addRow(totalRowData);
 
     totalRow.eachCell((cell) => {
@@ -425,7 +433,7 @@ export default function AmericanSalesManDetailsReport() {
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
-          row.balance?.toString().includes(q) // ✅ BALANCE
+          row.Balance?.toString().includes(q) // ✅ BALANCE
       );
     }
 
@@ -435,9 +443,9 @@ export default function AmericanSalesManDetailsReport() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "balance") {
-          const aNum = parseFloat(aVal) || 0;
-          const bNum = parseFloat(bVal) || 0;
+        if (sortConfig.key === "Bal" ) {
+          const aNum = Number(aVal) || 0;
+          const bNum = Number(bVal) || 0;
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;
@@ -463,14 +471,14 @@ export default function AmericanSalesManDetailsReport() {
         row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
         row.SalesMan?.toLowerCase().includes(q) ||
-        row.balance?.toString().includes(q) // ✅ BALANCE
+        row.Balance?.toString().includes(q) // ✅ BALANCE
       );
     });
   }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.balance ?? 0);
+      const value = parseFloat(row.Balance ?? 0);
       return sum + (isNaN(value) ? 0 : value);
     }, 0);
   }, [sortedTableData]);
@@ -700,8 +708,8 @@ export default function AmericanSalesManDetailsReport() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "balance" ? (
-                          Number(item[column.key] || 0).toLocaleString()
+                        ) : column.key === "Balance" ? (
+                          formatNumber(item[column.key])
                         ) : column.key === "progressBtn" ? (
                           <div
                             style={{
@@ -822,8 +830,8 @@ export default function AmericanSalesManDetailsReport() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "balance" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
+                  {column.key === "Balance" ? (
+                    <span>{formatNumber(totalBalance)}</span>
                   ) : index === 2 ? (
                     <span>{filteredData.length}</span>
                   ) : column.key === "scrollSpacer" ? (

@@ -182,6 +182,9 @@ import AmericanCityDetailsReport from "./Component/AmericanDashboard/reports/Ame
 import AmericanRegionReport from "./Component/AmericanDashboard/reports/AmericanRegionReport.jsx";
 import AmericanBankReport from "./Component/AmericanDashboard/reports/AmericanBankReport.jsx";
 import AmericanCashReport from "./Component/AmericanDashboard/reports/AmericanCashReport.jsx";
+import AmericanReceivableReport from "./Component/AmericanDashboard/reports/AmericanReceivableReport.jsx";
+import AmericanManagersReport from "./Component/AmericanDashboard/reports/AmericanManagersReport.jsx";
+import AmericanManagersDetailsReport from "./Component/AmericanDashboard/reports/AmericanManagersDetailsReport.jsx";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -449,6 +452,21 @@ function App() {
                   exact
                   path="/AmericanCashReport"
                   element={<AmericanCashReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanReceivableReport"
+                  element={<AmericanReceivableReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanManagersReport"
+                  element={<AmericanManagersReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanManagersDetailsReport"
+                  element={<AmericanManagersDetailsReport />}
                 ></Route>
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////

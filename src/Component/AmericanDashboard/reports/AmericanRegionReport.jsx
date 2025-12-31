@@ -44,7 +44,7 @@ const columnsConfig = [
   {
     header: "Nos",
     key: "Nos",
-    alignment: "right",
+    alignment: "center",
     uiWidth: 50,
     pdfWidth: 10,
     excelWidth: 20,
@@ -54,7 +54,7 @@ const columnsConfig = [
     header: "Balance",
     key: "Bal",
     alignment: "right",
-    uiWidth: 100,
+    uiWidth: 120,
     pdfWidth: 25,
     excelWidth: 18,
   },
@@ -793,7 +793,7 @@ export default function AmericanRegionReport() {
                               onClick={(e) => {
                                 e.stopPropagation();
 
-                                if (!item.tregcod) return; // ⛔ prevent null navigation
+                                if (!item.tregcod) return;
 
                                 window.open(
                                   `${
