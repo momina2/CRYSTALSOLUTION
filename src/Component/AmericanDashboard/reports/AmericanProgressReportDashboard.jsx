@@ -18,12 +18,13 @@ function useQueryParams() {
   const { search } = useLocation();
   return new URLSearchParams(search);
 }
- const showIfNonZero = (val) => {
-    const num = toNumber(val);
-    return num === 0 ? "" : num.toLocaleString();
-  };
+const showIfNonZero = (val) => {
+  const num = toNumber(val);
+  return num === 0 ? "" : num.toLocaleString();
+};
 
-
+const hasAnyAgingValue = (stats = []) =>
+  stats.some((s) => Number(s.amount) !== 0);
 // 👉 Progress table columns as per API
 const columnsConfig = [
   {
@@ -376,7 +377,6 @@ export default function AmericanProgressReportDashboard() {
     fetchProgress(selectedYear, cusDate);
   }, [selectedYear, cusDate]);
 
- 
   const getAlignmentClass = (alignment) => {
     switch (alignment) {
       case "left":
@@ -1986,7 +1986,7 @@ export default function AmericanProgressReportDashboard() {
                 );
 
                 let content = "";
-                if (column.key === "sr") content = filteredData.length;
+                // if (column.key === "sr") content = filteredData.length;
                 if (column.key === "month") content = "";
 
                 if (column.key === "debit")
@@ -2101,7 +2101,9 @@ export default function AmericanProgressReportDashboard() {
                   margin: "0 auto", // ⭐ THIS centers the whole card irrespective of width
                 }}
               >
-                <HorizontalAggingRangeCard stats={stats} />
+                {hasAnyAgingValue(stats) && (
+                  <HorizontalAggingRangeCard stats={stats} />
+                )}
               </div>
             )}
             {/* <SingleButton title="Select" onClick={handleSelect} /> */}

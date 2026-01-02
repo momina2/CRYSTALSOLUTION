@@ -27,6 +27,9 @@ function useQueryParams() {
   return new URLSearchParams(search);
 }
 
+const hasAnyAgingValue = (stats = []) =>
+  stats.some((s) => Number(s.amount) !== 0);
+
 const columnsConfig = [
   {
     header: "Date",
@@ -1227,7 +1230,9 @@ export default function AmericanCustomerLedgerDashboard() {
                   gap: "8px", // horizontally center
                 }}
               >
-                <HorizontalAggingRangeCard stats={stats} />
+                {hasAnyAgingValue(stats) && (
+                  <HorizontalAggingRangeCard stats={stats} />
+                )}
               </div>
             )}
             <SingleButton
