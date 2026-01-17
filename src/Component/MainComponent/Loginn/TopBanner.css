@@ -1,0 +1,67 @@
+/* ===== STICKY TOP BANNER ===== */
+.topStickyBannerWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;            /* 🔥 controlled height */
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* Banner container */
+.customTopBanner {
+  height: 200px;
+}
+
+/* Each slide */
+.customTopBanner .banner-elem {
+  height: 200px;
+}
+
+/* Background image layer */
+.customTopBanner .bg {
+  height: 100%;
+  width: 100%;
+}
+
+/* Text overlay */
+.bannerTextWrap {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  z-index: 2;
+  .bannerTextWrap {
+  left: 160px;
+}
+
+}
+
+.bannerTitle {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.bannerSubtitle {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+/* Remove default dots */
+.customTopBanner .banner-anim-ctrl {
+  display: none;
+}
+
+.customTopBanner .bg {
+  display: flex;
+  align-items: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-color: #020617;
+  padding-left: 120px; /* image space */
+}
