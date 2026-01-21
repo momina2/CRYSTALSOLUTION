@@ -117,10 +117,10 @@ export default function AmericanRegionDetailsReport() {
 
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("PRegCod", RegCod);
+      form.append("FRegCod", RegCod);
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanRegionCustomers.php",
+        "https://crystalsolutions.pk/api/AmericanRegionCustomers.php",
         form
       );
 

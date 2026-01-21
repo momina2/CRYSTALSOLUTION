@@ -116,10 +116,10 @@ export default function AmericanCityDetailsReport() {
 
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("PCtyCod", CtyCod);
+      form.append("FCtyCod", CtyCod);
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanCityCustomers.php",
+        "https://crystalsolutions.pk/api/AmericanCityCustomers.php",
         form
       );
 

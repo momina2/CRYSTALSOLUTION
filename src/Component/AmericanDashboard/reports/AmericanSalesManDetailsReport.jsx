@@ -122,10 +122,10 @@ export default function AmericanSalesManDetailsReport() {
 
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("PEmpCod", SalManCode);
+      form.append("FEmpCod", SalManCode);
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanSalesManCustomers.php",
+        "https://crystalsolutions.pk/api/AmericanSalesManCustomers.php",
         form
       );
 
