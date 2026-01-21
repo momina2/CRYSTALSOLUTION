@@ -29,19 +29,18 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  LineController
+  LineController,
 );
 
 // API URLs
-const ADMIN_INFO_API_URL = "https://crystalsolutions.com.pk/api/AdminInfo.php";
+const ADMIN_INFO_API_URL = "https://crystalsolutions.pk/api/AdminInfo.php";
 const MONTHLY_COMPARISON_API_URL =
-  "https://crystalsolutions.com.pk/api/MonthlyComparison.php";
-const DASHBOARD_DAILY =
-  "https://crystalsolutions.com.pk/api/DashboardDaily.php";
+  "https://crystalsolutions.pk/api/MonthlyComparison.php";
+const DASHBOARD_DAILY = "https://crystalsolutions.pk/api/DashboardDaily.php";
 const DASHBOARD_DAILY_WEB =
-  "https://crystalsolutions.com.pk/api/DashboardDailyWeb.php";
+  "https://crystalsolutions.pk/api/DashboardDailyWeb.php";
 const AMERICAN_AGGING_API_URL =
-  "https://crystalsolutions.com.pk/api/AmericanAdminAgging.php";
+  "https://crystalsolutions.pk/api/AmericanAdminAgging.php";
 
 const months = [
   "Jan",
@@ -196,7 +195,7 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/AmericanCashReport",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -212,7 +211,7 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/AmericanBankReport",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -232,7 +231,7 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
               onClick={() =>
                 window.open(
                   window.location.origin + "/crystalsol/AmericanSalesManReport",
-                  "_blank"
+                  "_blank",
                 )
               }
             >
@@ -260,7 +259,7 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
               onClick={() =>
                 window.open(
                   window.location.origin + "/crystalsol/AmericanCityReport",
-                  "_blank"
+                  "_blank",
                 )
               }
             >
@@ -278,7 +277,7 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
               onClick={() =>
                 window.open(
                   window.location.origin + "/crystalsol/AmericanRegionReport",
-                  "_blank"
+                  "_blank",
                 )
               }
             >
@@ -296,7 +295,7 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
               onClick={() =>
                 window.open(
                   window.location.origin + "/crystalsol/AmericanManagersReport",
-                  "_blank"
+                  "_blank",
                 )
               }
             >
@@ -427,7 +426,7 @@ const FinanceSummaryCard = ({ webData }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/AmericanReceivableReport",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -484,7 +483,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/TotalCustomers",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -505,7 +504,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/AmericanNonActive",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -524,7 +523,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/AmericanAdvance",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -543,7 +542,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/AmericanNil",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -564,7 +563,7 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             onClick={() =>
               window.open(
                 window.location.origin + "/crystalsol/AmericanOutstanding",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -582,10 +581,10 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
 const NewSalesCard = ({ salesData }) => {
   if (!salesData) return null;
 
-  const amount2024 = salesData.LastYearSaleAmount || "N/A";
-  const quantity2024 = salesData.LastYearSaleQnty || "N/A";
-  const amount2025 = salesData.YearSaleAmount || "N/A";
-  const quantity2025 = salesData.YearSaleQnty || "N/A";
+  const amount2025 = salesData.LastYearSaleAmount || "N/A";
+  const quantity2025 = salesData.LastYearSaleQnty || "N/A";
+  const amount2026 = salesData.YearSaleAmount || "N/A";
+  const quantity2026 = salesData.YearSaleQnty || "N/A";
 
   const currentMonthAmount = salesData.MonthSaleAmount || "N/A";
   const currentMonthQuantity = salesData.MonthSaleQnty || "N/A";
@@ -618,17 +617,28 @@ const NewSalesCard = ({ salesData }) => {
         <div className="text-center">
           <p className="text-[10px] font-bold text-gray-700">{lastYear}</p>
           <h4 className="text-[16px] font-semibold text-indigo-800">
-            {quantity2024}
+            {quantity2025}
           </h4>
-          <p className="text-[10px] text-gray-500">{amount2024}</p>
+          <p className="text-[10px] text-gray-500">{amount2025}</p>
         </div>
 
         <div className="text-center">
           <p className="text-[10px] font-bold text-gray-700">{currentYear}</p>
           <h4 className="text-[16px] font-semibold text-indigo-800">
-            {quantity2025}
+            {quantity2026}
           </h4>
-          <p className="text-[10px] text-gray-500">{amount2025}</p>
+          <p
+            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
+            title={amount2026}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/AmericanSalesReport",
+                "_blank",
+              )
+            }
+          >
+            {amount2026}
+          </p>
         </div>
       </div>
 
@@ -843,136 +853,6 @@ const NewCollectionPaymentCard = ({ salesData }) => {
   );
 };
 
-const NewCollectionCard = ({ salesData }) => {
-  if (!salesData) return null;
-
-  const amount2024 = salesData.LastYearCollection || "N/A";
-  const amount2025 = salesData.CurrentYearCollection || "N/A";
-
-  const currentMonthAmount = salesData.MonthCollection || "N/A";
-  const previousMonthAmount = salesData.PreviousMonthCollection || "N/A";
-
-  const dateParts = currentDate.split("-");
-  const currentMonthIndex = parseInt(dateParts[1], 10) - 1;
-  const currentYear = parseInt(dateParts[2], 10);
-  const lastYear = currentYear - 1;
-
-  const currentMonthName = months[currentMonthIndex];
-  let previousMonthIndex = currentMonthIndex - 1;
-  if (previousMonthIndex < 0) previousMonthIndex = 11;
-  const previousMonthName = months[previousMonthIndex];
-
-  const labelCurrentMonth = `${currentMonthName} ${currentYear}`;
-  const labelPreviousMonth = `${previousMonthName} ${currentYear}`;
-
-  return (
-    <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
-      {/* HEADER */}
-      <p className="text-[16px] font-medium text-black">Collection</p>
-
-      {/* TOP 2024 & 2025 VALUES */}
-      <div className="flex justify-between leading-tight">
-        <div className="text-left">
-          <p className="text-[10px] text-gray-500">{lastYear}</p>
-          <h4 className="text-[16px] font-semibold text-indigo-800">
-            {amount2024}
-          </h4>
-        </div>
-
-        <div className="text-right">
-          <p className="text-[10px] text-gray-500">{currentYear}</p>
-          <h4 className="text-[16px] font-semibold text-indigo-800">
-            {amount2025}
-          </h4>
-        </div>
-      </div>
-
-      {/* BOTTOM STATS */}
-      <div className="grid grid-cols-2 gap-1 text-center leading-tight">
-        <div>
-          <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
-            {currentMonthAmount}
-          </h4>
-        </div>
-
-        <div>
-          <p className="text-[10px] text-gray-500">{labelPreviousMonth}</p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
-            {previousMonthAmount}
-          </h4>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ----------------------
-// New Payment Card (Compact)
-// ----------------------
-const NewPaymentCard = ({ salesData }) => {
-  if (!salesData) return null;
-
-  const amount2024 = salesData.LastYearPayment || "N/A";
-  const amount2025 = salesData.CurrentYearPayment || "N/A";
-  const currentMonthAmount = salesData.MonthPayment || "N/A";
-  const previousMonthAmount = salesData.PreviousMonthPayment || "N/A";
-
-  const dateParts = currentDate.split("-");
-  const currentMonthIndex = parseInt(dateParts[1], 10) - 1;
-  const currentYear = parseInt(dateParts[2], 10);
-  const lastYear = currentYear - 1;
-
-  const currentMonthName = months[currentMonthIndex];
-  let previousMonthIndex = currentMonthIndex - 1;
-  if (previousMonthIndex < 0) previousMonthIndex = 11;
-  const previousMonthName = months[previousMonthIndex];
-
-  const labelCurrentMonth = `${currentMonthName} ${currentYear}`;
-  const labelPreviousMonth = `${previousMonthName} ${currentYear}`;
-
-  return (
-    <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
-      {/* HEADER */}
-      <p className="text-[16px] font-medium text-black">Payment</p>
-
-      {/* TOP YEAR VALUES */}
-      <div className="flex justify-between leading-tight">
-        <div className="text-left">
-          <p className="text-[10px] text-gray-500">{lastYear}</p>
-          <h4 className="text-[16px] font-semibold text-indigo-800">
-            {amount2024}
-          </h4>
-        </div>
-
-        <div className="text-right">
-          <p className="text-[10px] text-gray-500">{currentYear}</p>
-          <h4 className="text-[16px] font-semibold text-indigo-800">
-            {amount2025}
-          </h4>
-        </div>
-      </div>
-
-      {/* BOTTOM STATS */}
-      <div className="grid grid-cols-2 gap-1 text-center leading-tight">
-        <div>
-          <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
-            {currentMonthAmount}
-          </h4>
-        </div>
-
-        <div>
-          <p className="text-[10px] text-gray-500">{labelPreviousMonth}</p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
-            {previousMonthAmount}
-          </h4>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const rangeApiMapping = {
   "≤ 0 (Nil)": { FIntAmt: -9999999999, FFnlAmt: 0 },
   "< 1M": { FIntAmt: 1, FFnlAmt: 1000000 },
@@ -992,7 +872,7 @@ const HorizontalRangeCard = ({ stats }) => {
     const url =
       window.location.origin +
       `/crystalsol/CustomerBalance?min=${FIntAmt}&max=${FFnlAmt}&label=${encodeURIComponent(
-        rangeLabel
+        rangeLabel,
       )}`;
 
     window.open(url, "_blank");
@@ -1053,7 +933,7 @@ const handleAggingClick = (rangeLabel) => {
   const url =
     window.location.origin +
     `/crystalsol/AmericanAdminAgging?min=${dayNum}&label=${encodeURIComponent(
-      rangeLabel
+      rangeLabel,
     )}`;
 
   window.open(url, "_blank");
@@ -1119,7 +999,7 @@ const CustomerDistributionChart = ({ mainData }) => {
 
   const outstanding =
     Number(
-      (mainData?.["OutStanding Customer"] || "0").toString().replace(/,/g, "")
+      (mainData?.["OutStanding Customer"] || "0").toString().replace(/,/g, ""),
     ) || 0;
 
   const nil =
@@ -1128,7 +1008,7 @@ const CustomerDistributionChart = ({ mainData }) => {
 
   const advance =
     Number(
-      (mainData?.["Advance Customer"] || "0").toString().replace(/,/g, "")
+      (mainData?.["Advance Customer"] || "0").toString().replace(/,/g, ""),
     ) || 0;
 
   const nonActive =
