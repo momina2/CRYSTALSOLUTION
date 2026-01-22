@@ -619,7 +619,18 @@ const NewSalesCard = ({ salesData }) => {
           <h4 className="text-[16px] font-semibold text-indigo-800">
             {quantity2025}
           </h4>
-          <p className="text-[10px] text-gray-500">{amount2025}</p>
+          <p
+            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
+            title={amount2025}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/AmericanSalesReportLastYear",
+                "_blank",
+              )
+            }
+          >
+            {amount2025}
+          </p>
         </div>
 
         <div className="text-center">
@@ -632,7 +643,7 @@ const NewSalesCard = ({ salesData }) => {
             title={amount2026}
             onClick={() =>
               window.open(
-                window.location.origin + "/crystalsol/AmericanSalesReport",
+                window.location.origin + "/crystalsol/AmericanSalesReportCurrentYear",
                 "_blank",
               )
             }
