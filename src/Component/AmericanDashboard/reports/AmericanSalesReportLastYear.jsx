@@ -13,7 +13,7 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "American Sales Report";
+const REPORT_NAME = "American Sales Report 2025";
 const COMPANY_NAME = "American Trading";
 
 const columnsConfig = [
