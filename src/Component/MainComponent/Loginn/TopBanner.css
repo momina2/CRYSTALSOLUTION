@@ -1,31 +1,31 @@
-/* ===== STICKY TOP BANNER ===== */
+/* 
 .topStickyBannerWrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 200px;            /* 🔥 controlled height */
+  height: 200px;           
   z-index: 9999;
   overflow: hidden;
 }
 
-/* Banner container */
+
 .customTopBanner {
   height: 200px;
 }
 
-/* Each slide */
+
 .customTopBanner .banner-elem {
   height: 200px;
 }
 
-/* Background image layer */
+
 .customTopBanner .bg {
   height: 100%;
   width: 100%;
 }
 
-/* Text overlay */
+
 .bannerTextWrap {
   position: absolute;
   left: 40px;
@@ -51,7 +51,7 @@
   margin-top: 2px;
 }
 
-/* Remove default dots */
+
 .customTopBanner .banner-anim-ctrl {
   display: none;
 }
@@ -63,5 +63,111 @@
   background-repeat: no-repeat;
   background-position: left center;
   background-color: #020617;
-  padding-left: 120px; /* image space */
+  padding-left: 120px; 
+} */
+
+/* 
+
+.topStickyBannerWrapper {
+  width: 100%;
+  padding: 10px 0;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+}
+
+
+.topStickyBanner p {
+  margin: 0;
+  font-size: 16px;
+}
+
+
+.banner-morning {
+  background: linear-gradient(90deg, #ffb347, #ffcc33);
+}
+
+
+.banner-afternoon {
+  background: linear-gradient(90deg, #36d1dc, #5b86e5);
+}
+
+.banner-evening {
+  background: linear-gradient(90deg, #ff512f, #dd2476);
+}
+
+
+.banner-night {
+  background: linear-gradient(90deg, #141e30, #243b55);
+}
+
+
+.banner-newyear {
+  background: linear-gradient(90deg, #8360c3, #2ebf91);
+}
+
+.banner-pakistan {
+  background: linear-gradient(90deg, #0f9b0f, #1a8f3a);
+}
+
+
+.banner-green {
+  background: linear-gradient(90deg, #11998e, #38ef7d);
+} */
+
+
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+.topStickyBannerWrapper {
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+}
+
+.topStickyBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.bannerIcon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+/* Time-based */
+.banner-morning {
+  background: linear-gradient(90deg, #f6d365, #fda085);
+}
+
+.banner-afternoon {
+  background: linear-gradient(90deg, #36d1dc, #5b86e5);
+}
+
+.banner-evening {
+  background: linear-gradient(90deg, #ff512f, #dd2476);
+}
+
+.banner-night {
+  background: linear-gradient(90deg, #141e30, #243b55);
+}
+
+/* Events */
+.banner-newyear {
+  background: linear-gradient(90deg, #8360c3, #2ebf91);
+}
+
+.banner-pakistan {
+  background: linear-gradient(90deg, #0f9b0f, #1a8f3a);
+}
+
+.banner-green {
+  background: linear-gradient(90deg, #11998e, #38ef7d);
 }

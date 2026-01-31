@@ -28,25 +28,25 @@ const slides = [
   {
     title: "Installment Software",
     tagline:
-      "Our Installment and Trading Software is designed to simplify and automate installment-based sales and asset trading operations.Our Installment and Trading Software is designed to simplify and automate installment-based sales and asset trading operations.Our Installment and Trading Software is designed to simplify and automate installment-based sales and asset trading operations.Our Installment and Trading Software is designed to simplify and automate installment-based sales and asset trading operations.",
+      "Our Installment and Trading Software is designed to simplify and automate installment-based sales and asset trading operations.Our Installment and Trading Software is designed to simplify and automate installment-based sales and asset trading operations.Our Installment and Trading Software is designed to simplify and automate installment-based sales and asset trading operations.",
     link: "https://crystalsolutions.pk/services/installment-software",
   },
   {
     title: "Streamlined Complaint Management",
     tagline:
-      "The Complaint Management System centralizes all customer complaints and service requests.The Complaint Management System centralizes all customer complaints and service requests.The Complaint Management System centralizes all customer complaints and service requests.The Complaint Management System centralizes all customer complaints and service requests.The Complaint Management System centralizes all customer complaints and service requests.",
+      "The Complaint Management System centralizes all customer complaints and service requests.The Complaint Management System centralizes all customer complaints and service requests.The Complaint Management System centralizes all customer complaints and service requests.",
     link: "https://crystalsolutions.pk/services/complaint-management",
   },
   {
     title: "All-in-One Fitness Platform",
     tagline:
-      "Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.",
+      "Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.Our Fitness Management Platform provides a complete digital solution for gyms and fitness centers.",
     link: "https://crystalsolutions.pk/services/gym-management",
   },
   {
     title: "Digital Restaurant Ecosystem",
     tagline:
-      "The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.",
+      "The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.The Digital Restaurant Ecosystem is a comprehensive solution that streamlines restaurant operations.",
     link: "https://crystalsolutions.pk/services/restaurant-management",
   },
 ];
@@ -110,9 +110,6 @@ function Loginn() {
         console.error("Error fetching IP address:", error);
       });
   }, []);
-
-
-  
 
   const {
     data: locationdata,
@@ -225,14 +222,13 @@ function Loginn() {
 
       if (error === 200) {
         if (user.tusrsts === "A") {
-
           if (organisation.code !== "CRYSTAL") {
             try {
               await dispatch(
-                fetchGetActiveUserLocation(user?.tusrid, organisation.code)
+                fetchGetActiveUserLocation(user?.tusrid, organisation.code),
               );
               await dispatch(
-                fetchGetActiveUserYear(user?.tusrid, organisation.code)
+                fetchGetActiveUserYear(user?.tusrid, organisation.code),
               );
 
               if (!yeardata[0] || !locationdata[0]) {
@@ -251,47 +247,47 @@ function Loginn() {
               localStorage.setItem("user", JSON.stringify(user));
               localStorage.setItem(
                 "organisation",
-                JSON.stringify(organisation)
+                JSON.stringify(organisation),
               );
               localStorage.setItem(
                 "locationnumber",
-                JSON.stringify(locationdata[0].tloccod)
+                JSON.stringify(locationdata[0].tloccod),
               );
               localStorage.setItem(
                 "yeardescription",
-                JSON.stringify(yeardata[0].tyerdsc)
+                JSON.stringify(yeardata[0].tyerdsc),
               );
               localStorage.setItem(
                 "globalposid",
-                JSON.stringify(locationdata[0].tposid)
+                JSON.stringify(locationdata[0].tposid),
               );
               localStorage.setItem(
                 "globallivedata",
-                JSON.stringify(locationdata[0].tposliv)
+                JSON.stringify(locationdata[0].tposliv),
               );
               localStorage.setItem(
                 "globalStockCheck",
-                JSON.stringify(locationdata[0].tstkchk)
+                JSON.stringify(locationdata[0].tstkchk),
               );
               localStorage.setItem(
                 "globalMRPCheck",
-                JSON.stringify(locationdata[0].tmrpchk)
+                JSON.stringify(locationdata[0].tmrpchk),
               );
               localStorage.setItem(
                 "globalpostoken",
-                JSON.stringify(yeardata[0].tpostkn)
+                JSON.stringify(yeardata[0].tpostkn),
               );
               localStorage.setItem(
                 "globalntn",
-                JSON.stringify(locationdata[0].tntnnum || "")
+                JSON.stringify(locationdata[0].tntnnum || ""),
               );
               localStorage.setItem(
                 "globalstn",
-                JSON.stringify(yeardata[0].tstnnum || "")
+                JSON.stringify(yeardata[0].tstnnum || ""),
               );
               localStorage.setItem(
                 "globalfbrtoken",
-                JSON.stringify(locationdata[0].tpostkn || "")
+                JSON.stringify(locationdata[0].tpostkn || ""),
               );
 
               toast.success(`${message}`, { autoClose: 3000 });
@@ -310,17 +306,17 @@ function Loginn() {
             try {
               // Fetch location and year data
               await dispatch(
-                fetchGetActiveUserLocation(user?.tusrid, organisation.code)
+                fetchGetActiveUserLocation(user?.tusrid, organisation.code),
               );
               await dispatch(
-                fetchGetActiveUserYear(user?.tusrid, organisation.code)
+                fetchGetActiveUserYear(user?.tusrid, organisation.code),
               );
 
               localStorage.setItem("isLoggedIn", "true");
               localStorage.setItem("user", JSON.stringify(user));
               localStorage.setItem(
                 "organisation",
-                JSON.stringify(organisation)
+                JSON.stringify(organisation),
               );
 
               toast.success(`${message}`, { autoClose: 3000 });
@@ -337,23 +333,23 @@ function Loginn() {
           } else {
             toast.error(
               `You have no access to login to the ERP software. Please contact the ${codeValue} support team.`,
-              { autoClose: 3000 }
+              { autoClose: 3000 },
             );
           }
         } else if (user.tusrsts === "C") {
           toast.error(
             `Your account has been cancelled. Please contact the ${codeValue} support team.`,
-            { autoClose: 3000 }
+            { autoClose: 3000 },
           );
         } else if (user.tusrsts === "S") {
           toast.error(
             `Your account has been suspended. Please contact the ${codeValue} support team.`,
-            { autoClose: 3000 }
+            { autoClose: 3000 },
           );
         } else {
           toast.error(
             `Unknown account status. Please contact the ${codeValue} support team.`,
-            { autoClose: 3000 }
+            { autoClose: 3000 },
           );
         }
       } else {
