@@ -228,7 +228,6 @@ const TopBanner = () => {
     bgClass: "",
   });
 
-  // 🎯 Special Events (DATE based)
   const specialEvents = [
     {
       date: "01-01",
@@ -257,18 +256,16 @@ const TopBanner = () => {
       now.getMonth() + 1
     ).padStart(2, "0")}`;
 
-    // 🔎 Check for special event
     const event = specialEvents.find((e) => e.date === today);
 
     if (event) {
-      // ✅ Event banner (poora din)
       setBanner({
         text: event.text,
         icon: event.icon,
         bgClass: event.bgClass,
       });
     } else {
-      // ⏰ Time-based greetings
+
       if (hours >= 5 && hours < 12) {
         setBanner({
           text: "Good Morning",

@@ -120,7 +120,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
 .topStickyBannerWrapper {
-  height: 45px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
