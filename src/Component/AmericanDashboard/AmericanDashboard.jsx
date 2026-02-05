@@ -810,7 +810,17 @@ const NewPurchaseCard = ({ purchaseData }) => {
           <p className="text-[10px] font-bold text-gray-800">
             {labelLastYearSameMonth}
           </p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
+          <h4
+            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            title={lastYearMonthQuantity}
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanLastYearSameMonthPurchaseReport",
+                "_blank",
+              )
+            }
+          >
             {lastYearMonthQuantity}
           </h4>
           <p className="text-[10px] text-gray-500 mt-[-2px]">
@@ -822,7 +832,17 @@ const NewPurchaseCard = ({ purchaseData }) => {
           <p className="text-[10px] font-bold text-gray-800">
             {labelCurrentMonth}
           </p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
+          <h4
+            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            title={currentMonthQuantity}
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanCurrentMonthPurchaseReport",
+                "_blank",
+              )
+            }
+          >
             {currentMonthQuantity}
           </h4>
           <p className="text-[10px] text-gray-500 mt-[-2px]">
@@ -834,7 +854,17 @@ const NewPurchaseCard = ({ purchaseData }) => {
           <p className="text-[10px] font-bold text-gray-800">
             {labelPreviousMonth}
           </p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
+          <h4
+            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            title={previousMonthQuantity}
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanPreviousMonthPurchaseReport",
+                "_blank",
+              )
+            }
+          >
             {previousMonthQuantity}
           </h4>
           <p className="text-[10px] text-gray-500 mt-[-2px]">

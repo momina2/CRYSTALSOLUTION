@@ -185,13 +185,18 @@ import AmericanCashReport from "./Component/AmericanDashboard/reports/AmericanCa
 import AmericanReceivableReport from "./Component/AmericanDashboard/reports/AmericanReceivableReport.jsx";
 import AmericanManagersReport from "./Component/AmericanDashboard/reports/AmericanManagersReport.jsx";
 import AmericanManagersDetailsReport from "./Component/AmericanDashboard/reports/AmericanManagersDetailsReport.jsx";
-import AmericanSalesReportCurrentYear from "./Component/AmericanDashboard/reports/AmericanSalesReportCurrentYear.jsx";
-import AmericanSalesReportLastYear from "./Component/AmericanDashboard/reports/AmericanSalesReportLastYear.jsx";
-import AmericanPurchaseReportLastYear from "./Component/AmericanDashboard/reports/AmericanPurchaseReportLastYear.jsx";
-import AmericanPurchaseReportCurrentYear from "./Component/AmericanDashboard/reports/AmericanPurchaseReportCurrentYear.jsx";
-import AmericanLastYearSameMonthSalesReport from "./Component/AmericanDashboard/reports/AmericanLastYearSameMonthSalesReport.jsx";
-import AmericanCurrentMonthSalesReport from "./Component/AmericanDashboard/reports/AmericanCurrentMonthSalesReport.jsx";
-import AmericanPreviousMonthSalesReport from "./Component/AmericanDashboard/reports/AmericanPreviousMonthSalesReport.jsx";
+//PURCHASE
+import AmericanPurchaseReportLastYear from "./Component/AmericanDashboard/reports/Purchase/AmericanPurchaseReportLastYear.jsx";
+import AmericanPurchaseReportCurrentYear from "./Component/AmericanDashboard/reports/Purchase/AmericanPurchaseReportCurrentYear.jsx";
+import AmericanLastYearSameMonthPurchaseReport from "./Component/AmericanDashboard/reports/Purchase/AmericanLastYearSameMonthPurchaseReport.jsx";
+import AmericanCurrentMonthPurchaseReport from "./Component/AmericanDashboard/reports/Purchase/AmericanCurrentMonthPurchaseReport.jsx";
+import AmericanPreviousMonthPurchaseReport from "./Component/AmericanDashboard/reports/Purchase/AmericanPreviousMonthPurchaseReport.jsx";
+//SALES
+import AmericanLastYearSameMonthSalesReport from "./Component/AmericanDashboard/reports/Sales/AmericanLastYearSameMonthSalesReport.jsx";
+import AmericanCurrentMonthSalesReport from "./Component/AmericanDashboard/reports/Sales/AmericanCurrentMonthSalesReport.jsx";
+import AmericanPreviousMonthSalesReport from "./Component/AmericanDashboard/reports/Sales/AmericanPreviousMonthSalesReport.jsx";
+import AmericanSalesReportCurrentYear from "./Component/AmericanDashboard/reports/Sales/AmericanSalesReportCurrentYear.jsx";
+import AmericanSalesReportLastYear from "./Component/AmericanDashboard/reports/Sales/AmericanSalesReportLastYear.jsx";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -475,42 +480,58 @@ function App() {
                   path="/AmericanManagersDetailsReport"
                   element={<AmericanManagersDetailsReport />}
                 ></Route>
-                 <Route
+                <Route
                   exact
                   path="/AmericanSalesReportCurrentYear"
-                  element={<AmericanSalesReportCurrentYear/>}
+                  element={<AmericanSalesReportCurrentYear />}
                 ></Route>
                 <Route
                   exact
                   path="/AmericanSalesReportLastYear"
-                  element={<AmericanSalesReportLastYear/>}
+                  element={<AmericanSalesReportLastYear />}
                 ></Route>
-                <Route
-                  exact
-                  path="/AmericanPurchaseReportLastYear"
-                  element={<AmericanPurchaseReportLastYear/>}
-                ></Route>
-                <Route
-                  exact
-                  path="/AmericanPurchaseReportCurrentYear"
-                  element={<AmericanPurchaseReportCurrentYear/>}
-                ></Route>
+
                 <Route
                   exact
                   path="/AmericanLastYearSameMonthSalesReport"
-                  element={<AmericanLastYearSameMonthSalesReport/>}
+                  element={<AmericanLastYearSameMonthSalesReport />}
                 ></Route>
                 <Route
                   exact
                   path="/AmericanCurrentMonthSalesReport"
-                  element={<AmericanCurrentMonthSalesReport/>}
+                  element={<AmericanCurrentMonthSalesReport />}
                 ></Route>
                 <Route
                   exact
                   path="/AmericanPreviousMonthSalesReport"
-                  element={<AmericanPreviousMonthSalesReport/>}
+                  element={<AmericanPreviousMonthSalesReport />}
                 ></Route>
-                
+                {/*Purchase Reportz */}
+                <Route
+                  exact
+                  path="/AmericanPurchaseReportLastYear"
+                  element={<AmericanPurchaseReportLastYear />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanPurchaseReportCurrentYear"
+                  element={<AmericanPurchaseReportCurrentYear />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanCurrentMonthPurchaseReport"
+                  element={<AmericanCurrentMonthPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanPreviousMonthPurchaseReport"
+                  element={<AmericanPreviousMonthPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanLastYearSameMonthPurchaseReport"
+                  element={<AmericanLastYearSameMonthPurchaseReport />}
+                ></Route>
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////   FILE //////////////////////////
