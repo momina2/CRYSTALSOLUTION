@@ -12,6 +12,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
+import Select from "react-select";
 
 const REPORT_NAME = "American Sales Report 2025";
 const COMPANY_NAME = "American Trading";
@@ -79,6 +80,21 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
+const sortAZ = (arr, labelKey) =>
+  [...arr].sort((a, b) =>
+    a[labelKey]?.toLowerCase().localeCompare(b[labelKey]?.toLowerCase()),
+  );
+
+const toOptions = (arr, valueKey, labelKey) =>
+  [...arr]
+    .sort((a, b) =>
+      a[labelKey]?.toLowerCase().localeCompare(b[labelKey]?.toLowerCase()),
+    )
+    .map((item) => ({
+      value: item[valueKey],
+      label: item[labelKey]?.trim(),
+    }));
+
 export default function AmericanSalesReportLastYear() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -102,12 +118,12 @@ export default function AmericanSalesReportLastYear() {
 
   const query = useQueryParams();
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
-  const [city, setCity] = useState("");
-  const [region, setRegion] = useState("");
-  const [salesman, setSalesman] = useState("");
-  const [company, setCompany] = useState("");
-  const [customer, setCustomer] = useState("");
-  const [category, setCategory] = useState("");
+  const [city, setCity] = useState(null);
+  const [region, setRegion] = useState(null);
+  const [salesman, setSalesman] = useState(null);
+  const [company, setCompany] = useState(null);
+  const [customer, setCustomer] = useState(null);
+  const [category, setCategory] = useState(null);
 
   const [cities, setCities] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -124,6 +140,13 @@ export default function AmericanSalesReportLastYear() {
 
   // const [errorMessage, setErrorMessage] = useState("");
 
+  const cityOptions = toOptions(cities, "tctycod", "tctydsc");
+  const regionOptions = toOptions(regions, "tregcod", "tregdsc");
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
+  const companyOptions = toOptions(companies, "tcmpcod", "tcmpdsc");
+  const customerOptions = toOptions(customers, "tcstcod", "tcstdsc");
+  const categoryOptions = toOptions(categoryList, "tctgcod", "tctgdsc");
+
   const {
     isSidebarVisible,
     getcolor,
@@ -133,11 +156,6 @@ export default function AmericanSalesReportLastYear() {
     getdatafontsize,
   } = useTheme();
 
-  // === API CALL =====
-  // useEffect(() => {
-  //   fetchData();
-  // }, [minParam, maxParam]);
-
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -146,12 +164,12 @@ export default function AmericanSalesReportLastYear() {
       form.append("code", "AMRELEC");
       form.append("FIntDat", fromDate);
       form.append("FFnlDat", toDate);
-      form.append("FCtyCod", city || "");
-      form.append("FRegCod", region || "");
-      form.append("FSalCod", salesman || "");
-      form.append("FCmpCod", company || "");
-      form.append("FCstCod", customer || "");
-      form.append("FCtgCod", category || "");
+      form.append("FCtyCod", city?.value || "");
+      form.append("FRegCod", region?.value || "");
+      form.append("FSalCod", salesman?.value || "");
+      form.append("FCmpCod", company?.value || "");
+      form.append("FCstCod", customer?.value || "");
+      form.append("FCtgCod", category?.value || "");
 
       // form.append("FSalCod", "");
 
@@ -280,15 +298,6 @@ export default function AmericanSalesReportLastYear() {
     fetchCompany();
   }, []);
 
-  //   const handleSelect = () => {
-  //     if (!fromDate || !toDate) return;
-  //     if (fromDate > toDate) {
-  //       alert("From date cannot be greater than To date");
-  //       return;
-  //     }
-  //     fetchData();
-  //   };
-
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
 
@@ -299,7 +308,11 @@ export default function AmericanSalesReportLastYear() {
 
     // ✅ URL update
     navigate(
-      `?from=${fromDate}&to=${toDate}&city=${city}&region=${region}&salesman=${salesman}&company=${company}`,
+      `?from=${fromDate}&to=${toDate}` +
+        `&city=${city?.value || ""}` +
+        `&region=${region?.value || ""}` +
+        `&salesman=${salesman?.value || ""}` +
+        `&company=${company?.value || ""}`,
       { replace: true },
     );
 
@@ -653,6 +666,100 @@ export default function AmericanSalesReportLastYear() {
     }, 0);
   }, [filteredData]);
 
+  const filterRowStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  };
+
+  const filterLabelStyle = {
+    width: "80px", // 🔥 alignment like Image-1
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    textAlign: "left",
+  };
+
+  const selectStyles = {
+    container: (base) => ({
+      ...base,
+      width: "220px",
+      fontFamily: getfontstyle,
+      fontSize: getdatafontsize,
+    }),
+
+    control: (base) => ({
+      ...base,
+      minHeight: "28px",
+      height: "28px",
+      backgroundColor: "#fff",
+      border: "1px solid #000",
+      borderRadius: "0px",
+      boxShadow: "none",
+      justifyContent: "flex-start", // 🔥 LEFT
+    }),
+
+    valueContainer: (base) => ({
+      ...base,
+      padding: "0 6px",
+      justifyContent: "flex-start", // 🔥 LEFT
+      textAlign: "left", // 🔥 LEFT
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      color: "#000",
+      lineHeight: "26px",
+      textAlign: "left", // 🔥 LEFT
+      marginLeft: "0px",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#000",
+      textAlign: "left", // 🔥 LEFT
+      marginLeft: "0px",
+    }),
+
+    input: (base) => ({
+      ...base,
+      textAlign: "left", // 🔥 LEFT
+    }),
+
+    indicatorsContainer: (base) => ({
+      ...base,
+      height: "28px",
+    }),
+
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: "2px 6px",
+      color: "#000",
+    }),
+
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+
+    menu: (base) => ({
+      ...base,
+      borderRadius: "0px",
+      border: "1px solid #000",
+      boxShadow: "none",
+    }),
+
+    option: (base) => ({
+      ...base,
+      textAlign: "left", // 🔥 LEFT in dropdown also
+      padding: "4px 8px",
+      color: "#000",
+    }),
+
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
+  };
+
   const handleCSV = () => {
     exportCSV({
       rows: sortedTableData,
@@ -710,68 +817,94 @@ export default function AmericanSalesReportLastYear() {
               flexWrap: "wrap", // responsive
             }}
           >
-            {/* LEFT — DATE + SELECT */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              {/* From */}
+            {/* LEFT — DATE + SEARCH */}
+            {/* TOP ROW — FROM / TO LEFT, SEARCH RIGHT */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              {/* LEFT — FROM / TO */}
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  backgroundColor: "white",
-                  border: "1px solid #dadada",
-                  padding: "2px 8px",
-                  flexWrap: "wrap",
-                }}
+                style={{ display: "flex", alignItems: "center", gap: "14px" }}
               >
-                <span style={{ fontSize: "12px" }}>From</span>
-                <input
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    fontSize: getdatafontsize,
-                  }}
-                />
+                {/* FROM */}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                >
+                  <span
+                    style={{
+                      width: "45px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                    }}
+                  >
+                    From :
+                  </span>
+                  <input
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    style={{
+                      height: "28px",
+                      width: "140px",
+                      border: "1px solid #000",
+                      borderRadius: "0px",
+                      padding: "0 6px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      outline: "none",
+                      backgroundColor: "white",
+                    }}
+                  />
+                </div>
+
+                {/* TO */}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                >
+                  <span
+                    style={{
+                      width: "45px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                    }}
+                  >
+                    To :
+                  </span>
+                  <input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    style={{
+                      height: "28px",
+                      width: "140px",
+                      border: "1px solid #000",
+                      borderRadius: "0px",
+                      padding: "0 6px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      outline: "none",
+                      backgroundColor: "white",
+                    }}
+                  />
+                </div>
               </div>
 
-              {/* To */}
+              {/* RIGHT — SEARCH (push to right) */}
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  backgroundColor: "white",
-                  border: "1px solid #dadada",
-                  padding: "2px 8px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <span style={{ fontSize: "12px" }}>To</span>
-                <input
-                  type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    fontSize: getdatafontsize,
-                  }}
-                />
-              </div>
-              {/* RIGHT — SEARCH */}
-              <div
-                style={{
-                  minWidth: "200px",
+                  marginLeft: "auto", // 🔥 MAGIC LINE
+                  minWidth: "220px",
                   maxWidth: "360px",
-                  border: `1px solid ${softTableStyles.softBorderColor}`,
+                  border: "1px solid #000",
                   backgroundColor: "white",
                   display: "flex",
                   alignItems: "center",
                   padding: "2px 8px",
-                  marginLeft: "200px",
+                  height: "28px",
                 }}
               >
                 <MagnifyingGlassIcon
@@ -793,6 +926,7 @@ export default function AmericanSalesReportLastYear() {
                 />
               </div>
             </div>
+
             {/* FILTER ROW — LEFT & RIGHT STACKS */}
             <div
               style={{
@@ -809,75 +943,54 @@ export default function AmericanSalesReportLastYear() {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "flex-start",
-                  gap: "6px",
-                  padding: "0 12px 10px",
+                  gap: "4px",
+                  // padding: "0 2px",
                 }}
               >
                 {/* CUSTOMER */}
-                <select
-                  value={customer}
-                  onChange={(e) => setCustomer(e.target.value)}
-                  style={{
-                    minWidth: "160px",
-                    padding: "4px 6px",
-                    border: "1px solid #dadada",
-                    backgroundColor: "white",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                >
-                  <option value="">Customers</option>
-                  {Array.isArray(customers) &&
-                    customers.map((c) => (
-                      <option key={c.tcstcod} value={c.tcstcod}>
-                        {c.tcstcod} - {c.tcstdsc?.trim()}
-                      </option>
-                    ))}
-                </select>
+
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Customer :</span>
+                  <Select
+                    options={customerOptions}
+                    value={customer}
+                    onChange={setCustomer}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* COMPANY */}
-                <select
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                  style={{
-                    minWidth: "160px",
-                    padding: "4px 6px",
-                    border: "1px solid #dadada",
-                    backgroundColor: "white",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                >
-                  <option value="">Company</option>
-                  {Array.isArray(companies) &&
-                    companies.map((c) => (
-                      <option key={c.id} value={c.tcmpcod}>
-                        {c.tcmpcod} - {c.tcmpdsc.trim()}
-                      </option>
-                    ))}
-                </select>
+
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Company :</span>
+                  <Select
+                    options={companyOptions}
+                    value={company}
+                    onChange={setCompany}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* CATEGORY */}
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  style={{
-                    minWidth: "160px",
-                    padding: "4px 6px",
-                    border: "1px solid #dadada",
-                    backgroundColor: "white",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                >
-                  <option value="">Category</option>
-                  {Array.isArray(categoryList) &&
-                    categoryList.map((c) => (
-                      <option key={c.tctgcod} value={c.tctgcod}>
-                        {c.tctgcod} - {c.tctgdsc?.trim()}
-                      </option>
-                    ))}
-                </select>
+
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Category :</span>
+                  <Select
+                    options={categoryOptions}
+                    value={category}
+                    onChange={setCategory}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
               </div>
 
               {/* RIGHT — 3 DROPDOWNS (VERTICAL, RIGHT ALIGNED) */}
@@ -886,77 +999,53 @@ export default function AmericanSalesReportLastYear() {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "flex-end",
-                  gap: "6px",
+                  gap: "4px",
                   marginLeft: "auto",
                 }}
               >
                 {/* CITY */}
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  style={{
-                    minWidth: "160px",
-                    padding: "4px 6px",
-                    border: "1px solid #dadada",
-                    backgroundColor: "white",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                >
-                  <option value="">City</option>
-                  {cities.map((c) => (
-                    <option key={c.id} value={c.tctycod}>
-                      {c.tctycod} - {c.tctydsc.trim()}
-                    </option>
-                  ))}
-                </select>
+
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>City :</span>
+                  <Select
+                    options={cityOptions}
+                    value={city}
+                    onChange={setCity}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* REGION (future API) */}
-                <select
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                  style={{
-                    minWidth: "160px",
-                    padding: "4px 6px",
-                    border: "1px solid #dadada",
-                    backgroundColor: "white",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {/* ALL */}
-                  <option value="">Regions</option>
 
-                  {regions.map((r) => (
-                    <option key={r.id} value={r.tregcod}>
-                      {r.tregcod} - {r.tregdsc.trim()}
-                    </option>
-                  ))}
-                </select>
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Region :</span>
+                  <Select
+                    options={regionOptions}
+                    value={region}
+                    onChange={setRegion}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* SALESMAN (future API) */}
-                <select
-                  value={salesman}
-                  onChange={(e) => setSalesman(e.target.value)}
-                  style={{
-                    minWidth: "160px",
-                    padding: "4px 6px",
-                    border: "1px solid #dadada",
-                    backgroundColor: "white",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                >
-                  <option value="">SalesMen</option>
-
-                  {Array.isArray(salesmen) &&
-                    salesmen.map((s) => (
-                      <option key={s.id} value={s.tsalcod}>
-                        {s.tsalcod} - {s.tsaldsc.trim()}
-                      </option>
-                    ))}
-                </select>
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Salesman :</span>
+                  <Select
+                    options={salesmanOptions}
+                    value={salesman}
+                    onChange={setSalesman}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1242,8 +1331,6 @@ export default function AmericanSalesReportLastYear() {
               marginBottom: "2px",
             }}
           >
-            <SingleButton text="Select" onClick={handleSelect} />
-
             <SingleButton
               text="PDF"
               onClick={exportPDFHandler}
@@ -1260,6 +1347,7 @@ export default function AmericanSalesReportLastYear() {
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }
             />
+            <SingleButton text="Select" onClick={handleSelect} />
           </div>
         </div>
       </div>

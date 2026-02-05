@@ -733,7 +733,18 @@ const NewPurchaseCard = ({ purchaseData }) => {
           <h4 className="text-[16px] font-semibold text-indigo-800">
             {quantityLastYear}
           </h4>
-          <p className="text-[10px] text-gray-500">{amountLastYear}</p>
+          <p
+            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
+            title={amountLastYear}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/AmericanPurchaseReportLastYear",
+                "_blank",
+              )
+            }
+          >
+            {amountLastYear}
+          </p>
         </div>
 
         <div className="text-center">
@@ -741,7 +752,18 @@ const NewPurchaseCard = ({ purchaseData }) => {
           <h4 className="text-[16px] font-semibold text-indigo-800">
             {quantityCurrentYear}
           </h4>
-          <p className="text-[10px] text-gray-500">{amountCurrentYear}</p>
+          <p
+            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
+            title={amountCurrentYear}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/AmericanPurchaseReportCurrentYear",
+                "_blank",
+              )
+            }
+          >
+            {amountCurrentYear}
+          </p>
         </div>
       </div>
 
