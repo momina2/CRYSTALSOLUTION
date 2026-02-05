@@ -187,7 +187,11 @@ import AmericanManagersReport from "./Component/AmericanDashboard/reports/Americ
 import AmericanManagersDetailsReport from "./Component/AmericanDashboard/reports/AmericanManagersDetailsReport.jsx";
 import AmericanSalesReportCurrentYear from "./Component/AmericanDashboard/reports/AmericanSalesReportCurrentYear.jsx";
 import AmericanSalesReportLastYear from "./Component/AmericanDashboard/reports/AmericanSalesReportLastYear.jsx";
-
+import AmericanPurchaseReportLastYear from "./Component/AmericanDashboard/reports/AmericanPurchaseReportLastYear.jsx";
+import AmericanPurchaseReportCurrentYear from "./Component/AmericanDashboard/reports/AmericanPurchaseReportCurrentYear.jsx";
+import AmericanLastYearSameMonthSalesReport from "./Component/AmericanDashboard/reports/AmericanLastYearSameMonthSalesReport.jsx";
+import AmericanCurrentMonthSalesReport from "./Component/AmericanDashboard/reports/AmericanCurrentMonthSalesReport.jsx";
+import AmericanPreviousMonthSalesReport from "./Component/AmericanDashboard/reports/AmericanPreviousMonthSalesReport.jsx";
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -481,6 +485,32 @@ function App() {
                   path="/AmericanSalesReportLastYear"
                   element={<AmericanSalesReportLastYear/>}
                 ></Route>
+                <Route
+                  exact
+                  path="/AmericanPurchaseReportLastYear"
+                  element={<AmericanPurchaseReportLastYear/>}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanPurchaseReportCurrentYear"
+                  element={<AmericanPurchaseReportCurrentYear/>}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanLastYearSameMonthSalesReport"
+                  element={<AmericanLastYearSameMonthSalesReport/>}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanCurrentMonthSalesReport"
+                  element={<AmericanCurrentMonthSalesReport/>}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanPreviousMonthSalesReport"
+                  element={<AmericanPreviousMonthSalesReport/>}
+                ></Route>
+                
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////   FILE //////////////////////////

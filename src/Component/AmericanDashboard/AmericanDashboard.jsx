@@ -624,7 +624,8 @@ const NewSalesCard = ({ salesData }) => {
             title={amount2025}
             onClick={() =>
               window.open(
-                window.location.origin + "/crystalsol/AmericanSalesReportLastYear",
+                window.location.origin +
+                  "/crystalsol/AmericanSalesReportLastYear",
                 "_blank",
               )
             }
@@ -643,7 +644,8 @@ const NewSalesCard = ({ salesData }) => {
             title={amount2026}
             onClick={() =>
               window.open(
-                window.location.origin + "/crystalsol/AmericanSalesReportCurrentYear",
+                window.location.origin +
+                  "/crystalsol/AmericanSalesReportCurrentYear",
                 "_blank",
               )
             }
@@ -657,9 +659,20 @@ const NewSalesCard = ({ salesData }) => {
       <div className="grid grid-cols-3 gap-1 text-center leading-tight">
         <div>
           <p className="text-[10px] text-gray-500">{labelLastYearSameMonth}</p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
+          <h4
+            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            title={lastYearMonthQuantity}
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanLastYearSameMonthSalesReport",
+                "_blank",
+              )
+            }
+          >
             {lastYearMonthQuantity}
           </h4>
+
           <p className="text-[10px] text-gray-500 mt-[-2px]">
             {lastYearMonthAmount}
           </p>
@@ -667,9 +680,20 @@ const NewSalesCard = ({ salesData }) => {
 
         <div>
           <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
+          <h4
+            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            title={currentMonthQuantity}
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanCurrentMonthSalesReport",
+                "_blank",
+              )
+            }
+          >
             {currentMonthQuantity}
           </h4>
+
           <p className="text-[10px] text-gray-500 mt-[-2px]">
             {currentMonthAmount}
           </p>
@@ -677,9 +701,20 @@ const NewSalesCard = ({ salesData }) => {
 
         <div>
           <p className="text-[10px] text-gray-500">{labelPreviousMonth}</p>
-          <h4 className="text-[14px] font-semibold text-sky-700">
+          <h4
+            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            title={previousMonthQuantity}
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanPreviousMonthSalesReport",
+                "_blank",
+              )
+            }
+          >
             {previousMonthQuantity}
           </h4>
+
           <p className="text-[10px] text-gray-500 mt-[-2px]">
             {previousMonthAmount}
           </p>
@@ -738,7 +773,8 @@ const NewPurchaseCard = ({ purchaseData }) => {
             title={amountLastYear}
             onClick={() =>
               window.open(
-                window.location.origin + "/crystalsol/AmericanPurchaseReportLastYear",
+                window.location.origin +
+                  "/crystalsol/AmericanPurchaseReportLastYear",
                 "_blank",
               )
             }
@@ -757,7 +793,8 @@ const NewPurchaseCard = ({ purchaseData }) => {
             title={amountCurrentYear}
             onClick={() =>
               window.open(
-                window.location.origin + "/crystalsol/AmericanPurchaseReportCurrentYear",
+                window.location.origin +
+                  "/crystalsol/AmericanPurchaseReportCurrentYear",
                 "_blank",
               )
             }
