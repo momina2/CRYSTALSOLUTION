@@ -197,6 +197,25 @@ import AmericanCurrentMonthSalesReport from "./Component/AmericanDashboard/repor
 import AmericanPreviousMonthSalesReport from "./Component/AmericanDashboard/reports/Sales/AmericanPreviousMonthSalesReport.jsx";
 import AmericanSalesReportCurrentYear from "./Component/AmericanDashboard/reports/Sales/AmericanSalesReportCurrentYear.jsx";
 import AmericanSalesReportLastYear from "./Component/AmericanDashboard/reports/Sales/AmericanSalesReportLastYear.jsx";
+//nasir traders - SALES
+import NasirTRD from "./Component/NasirTraders/NasirTradersDashboard.jsx";
+import NASIRTRADERSLastYearSaleReport from "./Component/NasirTraders/Reports/Sales/NASIRTRADERSLastYearSaleReport.jsx";
+import NASIRTRADERSCurrentYearSaleReport from "./Component/NasirTraders/Reports/Sales/NASIRTRADERSCurrentYearsSaleReport.jsx";
+import NASIRTRADERSCurrentMonthSaleReport from "./Component/NasirTraders/Reports/Sales/NASIRTRADERSCurrentMonthSaleReport.jsx";
+import NASIRTRADERSLastYearSameMonthSaleReport from "./Component/NasirTraders/Reports/Sales/NASIRTRADERSLastYearSameMonthSaleReport.jsx";
+import NASIRTRADERSPreviousMonthSalesReport from "./Component/NasirTraders/Reports/Sales/NASIRTRADERSPreviousMonthSalesReport.jsx";
+//NASIR TRADERS - PURCHASE
+import NASIRTRADERSLastYearPurchaseReport from "./Component/NasirTraders/Reports/Purchase/NASIRTRADERSLastYearPurchaseReport.jsx";
+import NASIRTRADERSCurrentYearsPurchaseReport from "./Component/NasirTraders/Reports/Purchase/NASIRTRADERSCurrentYearsPurchaseReport.jsx";
+import NASIRTRADERSLastYearSameMonthPurchaseReport from "./Component/NasirTraders/Reports/Purchase/NASIRTRADERSLastYearSameMonthPurchaseReport.jsx";
+import NASIRTRADERSPreviousMonthPurchaseReport from "./Component/NasirTraders/Reports/Purchase/NASIRTRADERSPreviousMonthPurchaseReport.jsx";
+import NASIRTRADERSCurrentMonthPurchaseReport from "./Component/NasirTraders/Reports/Purchase/NASIRTRADERSCurrentMonthPurchaseReport.jsx";
+//NASIR TRADERS - CASH & BANK
+import NASIRTRADERSCashReport from "./Component/NasirTraders/Reports/NASIRTRADERSCashReport.jsx";
+import NASIRTRADERSBankReport from "./Component/NasirTraders/Reports/NASIRTRADERSBankReport.jsx";
+
+import NASIRTRADERSReceivableReport from "./Component/NasirTraders/Reports/NASIRTRADERSRecievableReport.jsx";
+
 
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
 function App() {
@@ -534,6 +553,78 @@ function App() {
                 ></Route>
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////
+             /////////////////////////////   NASIR TRADERS//////////////////////////
+             /////////////////////////////////////////////////////////////////////////////
+             ///////////////////////////////////////////////////////////////////////////// */}
+                <Route
+                  exact
+                  path="/NASIRTRADERSLastYearSaleReport"
+                  element={<NASIRTRADERSLastYearSaleReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSCurrentYearSaleReport"
+                  element={<NASIRTRADERSCurrentYearSaleReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSCurrentMonthSaleReport"
+                  element={<NASIRTRADERSCurrentMonthSaleReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSLastYearSameMonthSaleReport"
+                  element={<NASIRTRADERSLastYearSameMonthSaleReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSPreviousMonthSaleReport"
+                  element={<NASIRTRADERSPreviousMonthSalesReport />}
+                ></Route>
+
+                <Route
+                  exact
+                  path="/NASIRTRADERSLastYearPurchaseReport"
+                  element={<NASIRTRADERSLastYearPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSCurrentYearsPurchaseReport"
+                  element={<NASIRTRADERSCurrentYearsPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSCurrentMonthPurchaseReport"
+                  element={<NASIRTRADERSCurrentMonthPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSLastYearSameMonthPurchaseReport"
+                  element={<NASIRTRADERSLastYearSameMonthPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSPreviousMonthPurchaseReport"
+                  element={<NASIRTRADERSPreviousMonthPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSCashReport"
+                  element={<NASIRTRADERSCashReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSBankReport"
+                  element={<NASIRTRADERSBankReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/NASIRTRADERSReceivableReport"
+                  element={<NASIRTRADERSReceivableReport />}
+                ></Route>
+
+                {/* /////////////////////////////////////////////////////////////////////////////
+             /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////   FILE //////////////////////////
              /////////////////////////////////////////////////////////////////////////////
              ///////////////////////////////////////////////////////////////////////////// */}
@@ -847,7 +938,7 @@ function App() {
                 <Route
                   exact
                   path="/MemberCollectionReport"
-                  element={<AmericanDashbaord />}
+                  element={<NasirTRD />}
                 />
                 <Route
                   exact
