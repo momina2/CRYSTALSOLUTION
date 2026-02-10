@@ -5,7 +5,6 @@ body {
   overflow: hidden;
 }
 
-
 .loginPageWrapper {
   width: 100%;
   min-height: 100vh;
@@ -17,9 +16,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-
-
 
 .topLogoArea {
   width: 95%;

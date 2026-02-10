@@ -4,6 +4,17 @@ import "./AmericanDashboard.css";
 import { Bar } from "react-chartjs-2";
 import { Chart } from "react-google-charts";
 import {
+  UserGroupIcon,
+  ChartBarIcon,
+  ShoppingCartIcon,
+  BanknotesIcon,
+  CreditCardIcon,
+  ScaleIcon,
+  BuildingLibraryIcon,
+  ArrowsRightLeftIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
+import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
@@ -56,7 +67,6 @@ const months = [
   "Nov",
   "Dec",
 ];
-// --- 1. Date function for dd-mm-yyyy (Used by daily, web, etc.) ---
 const getCurrentDateFormatted = () => {
   const date = new Date();
   const day = String(date.getDate()).padStart(2, "0");
@@ -65,7 +75,6 @@ const getCurrentDateFormatted = () => {
   return `${day}-${month}-${year}`; // e.g., 28-11-2025
 };
 
-// --- 2. New Date function for yyyy-mm-dd (REQUIRED FOR AmericanAdminAgging) ---
 const getAggingDateFormatted = () => {
   const date = new Date();
   const day = String(date.getDate()).padStart(2, "0");
@@ -74,7 +83,7 @@ const getAggingDateFormatted = () => {
   return `${year}-${month}-${day}`; // e.g., 2025-11-28
 };
 
-const currentDate = getCurrentDateFormatted(); // Used for APIs needing dd-mm-yyyy format
+const currentDate = getCurrentDateFormatted();
 
 const ChartColors = {
   Sales: "rgba(79, 109, 255, 0.8)", // Softer, professional blue
@@ -147,12 +156,6 @@ const YearlySPCGraph = ({ apiData }) => {
           font: { size: 11, weight: 600 },
         },
       },
-      // title: {
-      //   display: true,
-      //   text: "Yearly Comparison (in Millions)",
-      //   color: "#111827",
-      //   font: { size: 13, weight: 600 },
-      // },
     },
     scales: {
       x: {
@@ -189,7 +192,12 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
       {/* 🔹 TOP CASH/BANK ROW */}
       <div className="flex justify-between px-1">
         <div className="flex flex-col justify-center p-1">
-          <p className="text-[15px] font-semibold text-black">Cash</p>
+          {/* <p className="text-[15px] font-semibold text-black">Cash</p> */}
+          <div className="flex items-center gap-1">
+            <BanknotesIcon className="w-4 h-4 text-gray-600" />
+            <p className="text-[15px] font-semibold text-black">Cash</p>
+          </div>
+
           <h4
             className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
             onClick={() =>
@@ -204,7 +212,11 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
         </div>
 
         <div className="flex flex-col justify-center p-1">
-          <p className="text-[15px] font-semibold text-black">Bank</p>
+          {/* <p className="text-[15px] font-semibold text-black">Bank</p> */}
+          <div className="flex items-center gap-1">
+            <BuildingLibraryIcon className="w-4 h-4 text-gray-600" />
+            <p className="text-[15px] font-semibold text-black">Bank</p>
+          </div>
 
           <h4
             className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
@@ -413,7 +425,13 @@ const FinanceSummaryCard = ({ webData }) => {
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      <p className="text-[14px] font-medium text-black">Financial Summary</p>
+      {/* <p className="text-[14px] font-medium text-black">Financial Summary</p> */}
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
+          <ScaleIcon className="w-4 h-4 text-gray-700" />
+        </div>
+        <p className="text-[14px] font-medium text-black">Financial Summary</p>
+      </div>
 
       {/* GRID */}
       <div className="grid grid-cols-2 grid-rows-2 text-center leading-tight flex-1">
@@ -469,7 +487,14 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 flex flex-col gap-1 rounded-lg transition-all duration-300 hover:shadow-md">
       <div className="flex justify-between items-end">
         <div>
-          <p className="text-[16px] font-medium text-black">Customers</p>
+          {/* <p className="text-[16px] font-medium text-black">Customers</p> */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100">
+              <UserGroupIcon className="w-4 h-4 text-gray-700" />
+            </div>
+            <p className="text-[16px] font-medium text-black">Customers</p>
+          </div>
+
           <h2 className="text-2xl font-semibold text-indigo-800 mt-1">
             {formatValue("Total Customer")}
           </h2>
@@ -610,7 +635,13 @@ const NewSalesCard = ({ salesData }) => {
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      <p className="text-[16px] font-medium text-black">Sale</p>
+      {/* <p className="text-[16px] font-medium text-black">Sale</p> */}
+      <div className="flex items-center gap-2">
+        <div className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100">
+          <ChartBarIcon className="w-4 h-4 text-gray-700" />
+        </div>
+        <p className="text-[16px] font-medium text-black">Sale</p>
+      </div>
 
       {/* TOP 2024 & 2025 */}
       <div className="grid grid-cols-2 gap-1 leading-tight">
@@ -759,7 +790,13 @@ const NewPurchaseCard = ({ purchaseData }) => {
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      <p className="text-[16px] font-medium text-black">Purchase</p>
+      {/* <p className="text-[16px] font-medium text-black">Purchase</p> */}
+      <div className="flex items-center gap-2">
+        <div className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100">
+          <ShoppingCartIcon className="w-4 h-4 text-gray-700" />
+        </div>
+        <p className="text-[16px] font-medium text-black">Purchase</p>
+      </div>
 
       {/* TOP 2024 & 2025 */}
       <div className="grid grid-cols-2 gap-1 text-center leading-tight">
@@ -906,9 +943,18 @@ const NewCollectionPaymentCard = ({ salesData }) => {
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between leading-tight">
       {/* COLLECTION */}
       <div>
-        <p className="text-[14px] font-medium text-black">
+        {/* <p className="text-[14px] font-medium text-black">
           Collection {totalCollection2025}
-        </p>
+        </p> */}
+
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
+            <BanknotesIcon className="w-4 h-4 text-gray-700" />
+          </div>
+          <p className="text-[14px] font-medium text-black">
+            Collection {totalCollection2025}
+          </p>
+        </div>
 
         <div className="grid grid-cols-2 text-center mt-1">
           <div>
@@ -929,9 +975,18 @@ const NewCollectionPaymentCard = ({ salesData }) => {
 
       {/* PAYMENT */}
       <div>
-        <p className="text-[14px] font-medium text-black">
+        {/* <p className="text-[14px] font-medium text-black">
           Payment {totalPayment2025}
-        </p>
+        </p> */}
+
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
+            <CreditCardIcon className="w-4 h-4 text-gray-700" />
+          </div>
+          <p className="text-[14px] font-medium text-black">
+            Payment {totalPayment2025}
+          </p>
+        </div>
 
         <div className="grid grid-cols-2 text-center mt-1">
           <div>
@@ -981,9 +1036,17 @@ const HorizontalRangeCard = ({ stats }) => {
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      <p className="text-[14px] font-semibold text-black leading-none pl-1">
+      {/* <p className="text-[14px] font-semibold text-black leading-none pl-1">
         Customer Range
-      </p>
+      </p> */}
+      <div className="flex items-center gap-2 pl-1">
+        <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
+          <ArrowsRightLeftIcon className="w-4 h-4 text-gray-700" />
+        </div>
+        <p className="text-[14px] font-semibold text-black leading-none">
+          Customer Range
+        </p>
+      </div>
 
       {/* BODY */}
       <div className="flex justify-between flex-1">
@@ -1042,9 +1105,17 @@ const handleAggingClick = (rangeLabel) => {
 const HorizontalAggingRangeCard = ({ stats }) => (
   <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
     {/* HEADER */}
-    <p className="text-[14px] font-semibold text-black leading-none pl-1">
+    {/* <p className="text-[14px] font-semibold text-black leading-none pl-1">
       Customer Agging
-    </p>
+    </p> */}
+    <div className="flex items-center gap-2 pl-1">
+      <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
+        <ClockIcon className="w-4 h-4 text-gray-700" />
+      </div>
+      <p className="text-[14px] font-semibold text-black leading-none">
+        Customer Agging
+      </p>
+    </div>
 
     {/* BODY */}
     <div className="flex justify-between flex-1">
