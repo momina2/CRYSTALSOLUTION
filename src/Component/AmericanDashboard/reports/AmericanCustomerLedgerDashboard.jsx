@@ -10,6 +10,7 @@ import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
+import { useRef } from "react";
 
 const REPORT_NAME = "Customer Ledger";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
@@ -124,41 +125,29 @@ const HorizontalAggingRangeCard = ({ stats }) => (
       marginBottom: "6px",
     }}
   >
-    <div
-      style={{
-        display: "flex",
-        textAlign: "center",
-        paddingTop: "2px",
-      }}
-    >
+    <div style={{ display: "flex", textAlign: "center", paddingTop: "2px" }}>
       {stats.map((s, i) => (
         <div
           key={i}
           style={{
             flex: 1,
             padding: "4px 2px",
-            borderRight: i !== stats.length - 1 ? "1px solid #000" : "none", // vertical grid
+            borderRight: i !== stats.length - 1 ? "1px solid #000" : "none",
           }}
         >
           <p
             style={{
               marginBottom: "4px",
               fontSize: "12px",
-              borderBottom: "1px solid #000", // horizontal grid
+              borderBottom: "1px solid #000",
               paddingBottom: "2px",
             }}
           >
             {s.range}
           </p>
 
-          <p
-            style={{
-              fontSize: "13px",
-              fontWeight: 600,
-              color: "#000",
-            }}
-          >
-            {showIfNonZero(s.amount || 0).toLocaleString()}
+          <p style={{ fontSize: "13px", fontWeight: 600, color: "#000" }}>
+            {showIfNonZero(s.amount || 0)}
           </p>
         </div>
       ))}
@@ -168,8 +157,9 @@ const HorizontalAggingRangeCard = ({ stats }) => (
 
 export default function AmericanCustomerLedgerDashboard() {
   const query = useQueryParams();
-  const custCode = query.get("code");
-  const custName = query.get("name");
+
+  const [custCode] = useState(() => query.get("code"));
+  const [custName] = useState(() => query.get("name"));
 
   const [headerCode] = useState(custCode);
   const [headerName] = useState(custName);
@@ -185,7 +175,7 @@ export default function AmericanCustomerLedgerDashboard() {
     direction: "ascending",
   });
 
-  // date filters (option 1: default = 1st of month to today)
+  // date defaults
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, "0");
@@ -194,8 +184,22 @@ export default function AmericanCustomerLedgerDashboard() {
   const defaultToDate = `${yyyy}-${mm}-${dd}`;
   const defaultFromDate = `${yyyy}-01-01`;
 
+  const [tempFromDate, setTempFromDate] = useState(defaultFromDate);
+  const [tempToDate, setTempToDate] = useState(defaultToDate);
+
   const [fromDate, setFromDate] = useState(defaultFromDate);
   const [toDate, setToDate] = useState(defaultToDate);
+
+  const [selectedFilters, setSelectedFilters] = useState({});
+
+  const handleChange = (key, value) => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const requestIdRef = useRef(0);
 
   const {
     isSidebarVisible,
@@ -208,7 +212,7 @@ export default function AmericanCustomerLedgerDashboard() {
 
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -219,29 +223,6 @@ export default function AmericanCustomerLedgerDashboard() {
     softRowSeparator: "#f8f9fa",
     softSelectedColor: "#f0f8ff",
   };
-
-  // const contentStyle = {
-  //   backgroundColor: getcolor,
-  //   width: tableWidth,
-  //   position: "fixed",
-  //   top: "50%",
-  //   left: isSidebarVisible ? "50%" : "50%",
-  //   transform: "translate(-50%, -50%)",
-  //   transition: "left 0.3s ease-in-out, width 0.3s ease-in-out",
-  //   display: "flex",
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  //   overflowX: "hidden",
-  //   overflowY: "auto",
-  //   wordBreak: "break-word",
-  //   textAlign: "center",
-  //   maxWidth: "95vw",
-  //   fontSize: "15px",
-  //   fontStyle: "normal",
-  //   fontWeight: "400",
-  //   lineHeight: "23px",
-  //   fontFamily: '"Poppins", sans-serif',
-  // };
 
   // helpers
   const contentStyle = {
@@ -266,40 +247,76 @@ export default function AmericanCustomerLedgerDashboard() {
   const toApiDate = (input) => {
     if (!input) return "";
     const [y, m, d] = input.split("-");
-    return `${d}-${m}-${y}`;
+    return `${d}-${m}-${y}`; // DD-MM-YYYY
   };
 
   const fetchLedger = async () => {
+    if (!custCode) {
+      console.error("Customer code missing — API blocked");
+      return;
+    }
+
+    if (!fromDate || !toDate) {
+      alert("From and To dates are required");
+      return;
+    }
+
+    if (fromDate > toDate) {
+      alert("From date cannot be greater than To date");
+      return;
+    }
+
+    const currentRequestId = ++requestIdRef.current;
+
     try {
       setIsLoading(true);
 
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("FIntDat", toApiDate(fromDate));
-      form.append("FFnlDat", toApiDate(toDate));
       form.append("FAccCod", custCode);
 
-      const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanCustomerLedger.php",
-        form
+      // 🔒 ONLY THESE TWO DATES — NO YEAR LOGIC ANYWHERE
+      form.append("FIntDat", toApiDate(fromDate));
+      form.append("FFnlDat", toApiDate(toDate));
+
+      console.log(
+        "Ledger API Request:",
+        custCode,
+        toApiDate(fromDate),
+        toApiDate(toDate),
       );
 
-      setApiData(res.data || null);
+      const res = await axios.post(
+        "https://crystalsolutions.pk/api/AmericanCustomerLedger.php",
+        form,
+      );
 
-      const finalRows = (res.data?.Header || []).map((r) => ({
+      if (currentRequestId !== requestIdRef.current) return;
+
+      const data = res.data || null;
+      setApiData(data);
+
+      const finalRows = (data?.Header || []).map((r) => ({
         ...r,
         code: custCode,
       }));
 
       setRows(finalRows);
     } catch (err) {
+      if (currentRequestId !== requestIdRef.current) return;
       console.error("Ledger API error:", err);
       setRows([]);
       setApiData(null);
     } finally {
-      setIsLoading(false);
+      if (currentRequestId === requestIdRef.current) {
+        setIsLoading(false);
+      }
     }
   };
+
+  // useEffect(() => {
+  //   fetchLedger();
+  // }, []);
 
   useEffect(() => {
     fetchLedger();
@@ -327,7 +344,7 @@ export default function AmericanCustomerLedgerDashboard() {
 
   const apiTotalBalance = useMemo(
     () => showIfNonZero(apiData?.Balance),
-    [apiData]
+    [apiData],
   );
 
   const getSortIcon = (key) => {
@@ -414,7 +431,7 @@ export default function AmericanCustomerLedgerDashboard() {
     return sortedTableData.filter((row) => {
       const rowString = Object.values(row)
         .map((v) =>
-          v !== null && v !== undefined ? String(v).toLowerCase() : ""
+          v !== null && v !== undefined ? String(v).toLowerCase() : "",
         )
         .join(" ");
       return rowString.includes(search);
@@ -427,7 +444,7 @@ export default function AmericanCustomerLedgerDashboard() {
         const value = parseFloat(row.debit ?? 0);
         return sum + (isNaN(value) ? 0 : value);
       }, 0),
-    [filteredData]
+    [filteredData],
   );
 
   const totalCredit = useMemo(
@@ -436,7 +453,7 @@ export default function AmericanCustomerLedgerDashboard() {
         const value = parseFloat(row.credit ?? 0);
         return sum + (isNaN(value) ? 0 : value);
       }, 0),
-    [filteredData]
+    [filteredData],
   );
 
   const totalBalance = useMemo(
@@ -445,19 +462,21 @@ export default function AmericanCustomerLedgerDashboard() {
         const value = parseFloat(row.balance ?? 0);
         return sum + (isNaN(value) ? 0 : value);
       }, 0),
-    [filteredData]
+    [filteredData],
   );
 
-  const stats = apiData
-    ? [
-        { range: "01-30", amount: apiData.amt001 ?? apiData.Amt001 ?? 0 },
-        { range: "31-60", amount: apiData.amt002 ?? apiData.Amt002 ?? 0 },
-        { range: "61-90", amount: apiData.amt003 ?? apiData.Amt003 ?? 0 },
-        { range: "91-120", amount: apiData.amt004 ?? apiData.Amt004 ?? 0 },
-        { range: "121-150", amount: apiData.amt005 ?? apiData.Amt005 ?? 0 },
-        { range: "150+", amount: apiData.amt006 ?? apiData.Amt006 ?? 0 },
-      ]
-    : [];
+  const stats = useMemo(() => {
+    if (!apiData) return [];
+
+    return [
+      { range: "01-30", amount: apiData.amt001 ?? 0 },
+      { range: "31-60", amount: apiData.amt002 ?? 0 },
+      { range: "61-90", amount: apiData.amt003 ?? 0 },
+      { range: "91-120", amount: apiData.amt004 ?? 0 },
+      { range: "121-150", amount: apiData.amt005 ?? 0 },
+      { range: "150+", amount: apiData.amt006 ?? 0 },
+    ];
+  }, [apiData]);
 
   const exportPDFHandler = () => {
     const doc = new jsPDF({ orientation: "portrait" });
@@ -584,7 +603,7 @@ export default function AmericanCustomerLedgerDashboard() {
             String(cell),
             c >= 4 ? x + columnWidths[c] - 2 : x + 2,
             y + 3.5,
-            { align: c >= 4 ? "right" : "left" }
+            { align: c >= 4 ? "right" : "left" },
           );
 
           x += columnWidths[c];
@@ -672,7 +691,7 @@ export default function AmericanCustomerLedgerDashboard() {
             return showIfNonZero(item[key] || 0).toLocaleString();
           }
           return item[key] ?? "";
-        })
+        }),
       );
       row.eachCell((cell) => {
         cell.border = {
@@ -711,7 +730,7 @@ export default function AmericanCustomerLedgerDashboard() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
 
@@ -760,7 +779,7 @@ export default function AmericanCustomerLedgerDashboard() {
         >
           {/* HEADER */}
           {/* <NavComponent textdata={REPORT_NAME} /> */}
-          <NavComponent textdata={`${headerCode} | ${headerName}`} />
+          <NavComponent textdata={`${custCode} | ${custName}`} />
 
           {/* SEARCH + DATE FILTER ROW */}
           <div
@@ -799,8 +818,8 @@ export default function AmericanCustomerLedgerDashboard() {
                 <span style={{ fontSize: "12px", color: "#555" }}>From</span>
                 <input
                   type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
+                  value={tempFromDate}
+                  onChange={(e) => setTempFromDate(e.target.value)}
                   style={{
                     border: "none",
                     outline: "none",
@@ -825,8 +844,8 @@ export default function AmericanCustomerLedgerDashboard() {
                 <span style={{ fontSize: "12px", color: "#555" }}>To</span>
                 <input
                   type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
+                  value={tempToDate}
+                  onChange={(e) => setTempToDate(e.target.value)}
                   style={{
                     border: "none",
                     outline: "none",
@@ -1001,6 +1020,17 @@ export default function AmericanCustomerLedgerDashboard() {
                   </>
                 ) : (
                   <>
+                    {!isLoading && filteredData.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={columnsConfig.length}
+                          className="text-center"
+                          style={{ padding: "12px", color: "#888" }}
+                        >
+                          No data found for selected date range
+                        </td>
+                      </tr>
+                    )}
                     {filteredData.map((item, i) => (
                       <tr
                         key={i}
@@ -1012,8 +1042,8 @@ export default function AmericanCustomerLedgerDashboard() {
                             selectedRowIndex === i
                               ? getnavbarbackgroundcolor // ✅ theme color
                               : i % 2 === 0
-                              ? getcolor
-                              : "#f8f9ff",
+                                ? getcolor
+                                : "#f8f9ff",
                           transition: "background-color 0.2s ease",
                         }}
                       >
@@ -1035,7 +1065,7 @@ export default function AmericanCustomerLedgerDashboard() {
                             ].includes(key)
                           ) {
                             value = showIfNonZero(
-                              item[key] || 0
+                              item[key] || 0,
                             ).toLocaleString();
                           } else {
                             value = item[key] ?? "";
@@ -1227,14 +1257,20 @@ export default function AmericanCustomerLedgerDashboard() {
                   width: "100%",
                   display: "flex",
                   justifyContent: "center",
-                  gap: "8px", // horizontally center
                 }}
               >
-                {hasAnyAgingValue(stats) && (
-                  <HorizontalAggingRangeCard stats={stats} />
-                )}
+                <HorizontalAggingRangeCard stats={stats} />
               </div>
             )}
+
+            <SingleButton
+              text="Select"
+              onClick={() => {
+                setFromDate(tempFromDate);
+                setToDate(tempToDate);
+              }}
+            />
+
             <SingleButton
               text="PDF"
               onClick={exportPDFHandler}

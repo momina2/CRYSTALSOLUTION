@@ -495,7 +495,15 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
             <p className="text-[16px] font-medium text-black">Customers</p>
           </div>
 
-          <h2 className="text-2xl font-semibold text-indigo-800 mt-1">
+          <h2
+            className="text-xl font-semibold text-gray-900 mt-1 cursor-pointer hover:text-blue-600 transition"
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/TotalCustomers",
+                "_blank",
+              )
+            }
+          >
             {formatValue("Total Customer")}
           </h2>
         </div>
@@ -517,81 +525,87 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
         </div>
       </div>
       <div className="border-t border-gray-200 my-1"></div>
-      <div className="grid grid-cols-4 gap-1 pb-1 text-center p-1">
-        <div className="flex flex-col px-1">
+      <div className="grid grid-cols-4 gap-1 text-center leading-tight flex-1">
+        {/* Non-Active */}
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanNonActive",
+              "_blank",
+            )
+          }
+          className="flex flex-col px-1 py-2 rounded-md cursor-pointer 
+               hover:bg-gray-100 transition-all duration-200"
+        >
           <p className="text-[11px] font-medium text-gray-500 mb-1">Non-Act</p>
           <h4 className="text-lg font-semibold text-sky-700">
             {formatValue("Non Active")}
           </h4>
-          <p
-            className="text-[11px] text-gray-500 mt-1 cursor-pointer hover:underline"
-            title={formatValue("Non Active")}
-            onClick={() =>
-              window.open(
-                window.location.origin + "/crystalsol/AmericanNonActive",
-                "_blank",
-              )
-            }
-          >
-            {formatValue("Non Active Amount")}
+          <p className="text-[11px] text-gray-500 mt-1">
+            {formatValue("NonActiveAmount")}
           </p>
         </div>
 
-        <div className="flex flex-col px-1">
+        {/* Advance */}
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanAdvance",
+              "_blank",
+            )
+          }
+          className="flex flex-col px-1 py-2 rounded-md cursor-pointer 
+               hover:bg-gray-100 transition-all duration-200"
+        >
           <p className="text-[11px] font-medium text-gray-500 mb-1">Advance</p>
           <h4 className="text-lg font-semibold text-sky-700">
             {formatValue("Advance Customer")}
           </h4>
-          <p
-            className="text-[11px] ext-emerald-600 mt-1 cursor-pointer hover:underline"
-            title={formatValue("Advance Amount")}
-            onClick={() =>
-              window.open(
-                window.location.origin + "/crystalsol/AmericanAdvance",
-                "_blank",
-              )
-            }
-          >
+          <p className="text-[11px] text-emerald-600 mt-1">
             {formatValue("Advance Amount")}
           </p>
         </div>
 
-        <div className="flex flex-col px-1">
+        {/* Nil */}
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanNil",
+              "_blank",
+            )
+          }
+          className="flex flex-col px-1 py-2 rounded-md cursor-pointer 
+               hover:bg-gray-100 transition-all duration-200"
+        >
           <p className="text-[11px] font-medium text-gray-500 mb-1">Nil</p>
           <h4 className="text-lg font-semibold text-sky-700">
             {formatValue("Nil Customer")}
           </h4>
-          <p
-            className="text-[11px] text-gray-500 mt-1 cursor-pointer hover:underline"
-            title={formatValue("Nil Amount")}
-            onClick={() =>
-              window.open(
-                window.location.origin + "/crystalsol/AmericanNil",
-                "_blank",
-              )
-            }
-          >
-            {formatValue("Nil Amount")}
+          <p className="text-[11px] text-gray-500 mt-1">
+            {formatValue("Nil Amount") === "N/A"
+              ? "0"
+              : formatValue("Nil Amount")}
           </p>
         </div>
 
-        <div className="flex flex-col px-1">
+        {/* Outstanding */}
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanOutstanding",
+              "_blank",
+            )
+          }
+          className="flex flex-col px-1 py-2 rounded-md cursor-pointer 
+               hover:bg-gray-100 transition-all duration-200"
+        >
           <p className="text-[11px] font-medium text-gray-500 mb-1">
             Outstanding
           </p>
           <h4 className="text-lg font-semibold text-sky-700">
             {formatValue("OutStanding Customer")}
           </h4>
-          <p
-            className="text-[11px] text-red-500 mt-1 cursor-pointer hover:underline"
-            title={formatValue("OutStanding Amount")}
-            onClick={() =>
-              window.open(
-                window.location.origin + "/crystalsol/AmericanOutstanding",
-                "_blank",
-              )
-            }
-          >
+          <p className="text-[11px] text-red-500 mt-1">
             {formatValue("OutStanding Amount")}
           </p>
         </div>
@@ -1054,7 +1068,7 @@ const HorizontalRangeCard = ({ stats }) => {
           <div
             key={stat.range}
             onClick={() => handleRangeClick(stat.range)}
-            className="flex-1 flex flex-col items-center justify-evenly cursor-pointer hover:bg-gray-50 transition"
+            className="flex-1 flex flex-col items-center justify-evenly cursor-pointer hover:bg-gray-100 transition"
           >
             <p className="text-[12px] font-medium text-gray-600 leading-none">
               {stat.range}
