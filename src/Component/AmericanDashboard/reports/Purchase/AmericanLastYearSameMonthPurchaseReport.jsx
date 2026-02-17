@@ -104,7 +104,7 @@ const toOptions = (arr, valueKey, labelKey) =>
       label: item[labelKey]?.trim(),
     }));
 
-export default function AmericanLastYearSameMonthSalesReport() {
+export default function AmericanLastYearSameMonthPurchaseReport() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
