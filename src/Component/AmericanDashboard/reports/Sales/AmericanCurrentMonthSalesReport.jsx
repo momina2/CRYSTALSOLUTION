@@ -22,7 +22,7 @@ const year = currentDate.getFullYear();
 
 // Example:
 // February 2026
-const REPORT_NAME = `American Sales Report - ${monthName} ${year}`;
+const REPORT_NAME = `American Sale Report - ${monthName} ${year}`;
 
 const COMPANY_NAME = "American Trading";
 

@@ -14,7 +14,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "January Sales Report 2026";
+const REPORT_NAME = "January Sale Report 2026";
 const COMPANY_NAME = "American Trading";
 
 const columnsConfig = [
