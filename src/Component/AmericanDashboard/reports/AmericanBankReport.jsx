@@ -14,7 +14,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Bank Report";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const COMPANY_NAME = "American Traders";
 
 const columnsConfig = [
   // {
@@ -109,7 +109,7 @@ export default function AmericanBankReport() {
       form.append("FRepTyp", "B");
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/CashBankBalance.php",
+        "https://crystalsolutions.pk/api/CashBankBalance.php",
         form
       );
 
