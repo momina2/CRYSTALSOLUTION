@@ -15,7 +15,7 @@ import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
 const REPORT_NAME = "February Purchase Report 2026";
-const COMPANY_NAME = "American Trading";
+const COMPANY_NAME = "American Traders";
 
 const columnsConfig = [
   // {
