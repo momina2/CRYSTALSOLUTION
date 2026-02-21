@@ -118,8 +118,8 @@ export default function AmericanCurrentMonthSalesReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("2026-02-01");
-  const [toDate, setToDate] = useState("2026-02-28");
+  const [fromDate, setFromDate] = useState("01-02-2026");
+  const [toDate, setToDate] = useState("28-02-2026");
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",

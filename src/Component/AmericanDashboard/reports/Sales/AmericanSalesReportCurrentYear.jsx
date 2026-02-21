@@ -109,8 +109,8 @@ export default function AmericanSalesReportCurrentYear() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("2026-01-01");
-  const [toDate, setToDate] = useState("2026-12-31");
+  const [fromDate, setFromDate] = useState("01-01-2026");
+  const [toDate, setToDate] = useState("31-12-2026");
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",

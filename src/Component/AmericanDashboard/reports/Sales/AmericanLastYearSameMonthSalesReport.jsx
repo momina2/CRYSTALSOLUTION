@@ -109,8 +109,8 @@ export default function AmericanLastYearSameMonthSalesReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("2025-02-01");
-  const [toDate, setToDate] = useState("2025-02-28");
+  const [fromDate, setFromDate] = useState("01-02-2025");
+  const [toDate, setToDate] = useState("28-02-2025");
   const [apiTotalQty, setApiTotalQty] = useState(0);
   const [apiTotalAmount, setApiTotalAmount] = useState(0);
   const [sortConfig, setSortConfig] = useState({
