@@ -13,6 +13,7 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
+import { api } from "qz-tray";
 
 const REPORT_NAME = "January Sale Report 2026";
 const COMPANY_NAME = "American Trading";
@@ -111,6 +112,8 @@ export default function AmericanPreviousMonthSalesReport() {
   const [isLoading, setIsLoading] = useState(true);
   const [fromDate, setFromDate] = useState("2026-01-01");
   const [toDate, setToDate] = useState("2026-01-31");
+  const [apiTotalQty, setApiTotalQty] = useState(0);
+  const [apiTotalAmount, setApiTotalAmount] = useState(0);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -170,20 +173,13 @@ export default function AmericanPreviousMonthSalesReport() {
       form.append("code", "AMRELEC");
       form.append("FLocCod", "001");
       form.append("FYerDsc", "2019-2025");
-
       form.append("FIntDat", fromDate);
       form.append("FFnlDat", toDate);
-      // form.append("FCtyCod", city?.value || "");
-      // form.append("FRegCod", region?.value || "");
-      // form.append("FSalCod", salesman?.value || "");
       form.append("FCmpCod", company?.value || "");
-      // form.append("FCstCod", customer?.value || "");
       form.append("FCtgCod", category?.value || "");
       form.append("FTrnTyp", "");
       form.append("FStrCod", store?.value || "");
       form.append("FSchTxt", "");
-
-      // form.append("FSalCod", "");
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/ItemSaleSummary.php",
@@ -191,12 +187,23 @@ export default function AmericanPreviousMonthSalesReport() {
         { timeout: 20000 },
       );
 
-      const arr = res?.data?.Detail ?? [];
-      setRows(arr);
+      setRows(res?.data?.Detail ?? []);
+
+      // ✅ TOTALS FROM API (FINAL SOURCE)
+      setApiTotalQty(
+        Number(String(res?.data?.["Total Qnty"] || 0).replace(/,/g, "")),
+      );
+
+      setApiTotalAmount(
+        Number(String(res?.data?.["Total Amount"] || 0).replace(/,/g, "")),
+      );
     } catch (err) {
       console.error("FetchError:", err);
       setRows([]);
+      setApiTotalQty(0);
+      setApiTotalAmount(0);
     }
+
     setIsLoading(false);
   };
 
@@ -427,7 +434,7 @@ export default function AmericanPreviousMonthSalesReport() {
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = sortedTableData.length.toString();
 
-    totalRow[keys.length - 1] = totalSaleAmount.toLocaleString();
+    totalRow[keys.length - 1] = apiTotalAmount.toLocaleString();
     const rowsPDF = [...dataRows, totalRow];
 
     rowsPDF.forEach((row, index) => {
@@ -665,19 +672,19 @@ export default function AmericanPreviousMonthSalesReport() {
     });
   }, [sortedTableData, searchQuery]);
 
-  const totalQuantity = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(String(row.Qnty || "0").replace(/,/g, ""));
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
+  // const totalQuantity = useMemo(() => {
+  //   return filteredData.reduce((sum, row) => {
+  //     const val = Number(String(row.Qnty || "0").replace(/,/g, ""));
+  //     return sum + (isNaN(val) ? 0 : val);
+  //   }, 0);
+  // }, [filteredData]);
 
-  const totalSaleAmount = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(String(row["Sale Amount"] || "0").replace(/,/g, ""));
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
+  // const totalSaleAmount = useMemo(() => {
+  //   return filteredData.reduce((sum, row) => {
+  //     const val = Number(String(row["Sale Amount"] || "0").replace(/,/g, ""));
+  //     return sum + (isNaN(val) ? 0 : val);
+  //   }, 0);
+  // }, [filteredData]);
 
   const filterRowStyle = {
     display: "flex",
@@ -777,8 +784,8 @@ export default function AmericanPreviousMonthSalesReport() {
     exportCSV({
       rows: sortedTableData,
       columnsConfig,
-      totalCollection: totalSaleAmount,
-      totalQnty: totalQuantity,
+      totalCollection: apiTotalAmount,
+      totalQnty: apiTotalQty,
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -1321,24 +1328,12 @@ export default function AmericanPreviousMonthSalesReport() {
                   }}
                 >
                   {column.key === "Qnty" ? (
-                    <span
-                      style={{
-                        display: "block",
-                        textAlign: "right",
-                        width: "100%",
-                      }}
-                    >
-                      {totalQuantity.toLocaleString()}
+                    <span style={{ width: "100%", textAlign: "right" }}>
+                      {apiTotalQty.toLocaleString()}
                     </span>
                   ) : column.key === "Sale Amount" ? (
-                    <span
-                      style={{
-                        display: "block",
-                        textAlign: "right",
-                        width: "100%",
-                      }}
-                    >
-                      {totalSaleAmount.toLocaleString()}
+                    <span style={{ width: "100%", textAlign: "right" }}>
+                      {apiTotalAmount.toLocaleString()}
                     </span>
                   ) : index === 0 ? (
                     <span>{filteredData.length}</span>

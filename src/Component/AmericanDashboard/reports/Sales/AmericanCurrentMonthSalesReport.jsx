@@ -47,7 +47,7 @@ const columnsConfig = [
     header: "Code",
     key: "code",
     alignment: "left",
-    uiWidth: 110,
+    uiWidth: 140,
     pdfWidth: 20,
     excelWidth: 15,
   },
@@ -150,6 +150,10 @@ export default function AmericanCurrentMonthSalesReport() {
   const [companies, setCompanies] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
 
+  //Totals from API (for footer)
+  const [apiTotalQty, setApiTotalQty] = useState(0);
+  const [apiTotalAmount, setApiTotalAmount] = useState(0);
+
   // const [salesmens, setSalesmens] = useState([]);
 
   // const minParam = query.get("min") || "0";
@@ -171,6 +175,37 @@ export default function AmericanCurrentMonthSalesReport() {
     getdatafontsize,
   } = useTheme();
 
+  // const fetchData = async () => {
+  //   try {
+  //     setIsLoading(true);
+
+  //     const form = new FormData();
+  //     form.append("code", "AMRELEC");
+  //     form.append("FLocCod", "001");
+  //     form.append("FYerDsc", "2019-2025");
+  //     form.append("FIntDat", fromDate);
+  //     form.append("FFnlDat", toDate);
+  //     form.append("FCmpCod", company?.value || "");
+  //     form.append("FCtgCod", category?.value || "");
+  //     form.append("FTrnTyp", "");
+  //     form.append("FStrCod", store?.value || "");
+  //     form.append("FSchTxt", "");
+
+  //     const res = await axios.post(
+  //       "https://crystalsolutions.pk/api/ItemSaleSummary.php",
+  //       form,
+  //       { timeout: 20000 },
+  //     );
+
+  //     const arr = res?.data?.Detail ?? [];
+  //     setRows(arr);
+  //   } catch (err) {
+  //     console.error("FetchError:", err);
+  //     setRows([]);
+  //   }
+  //   setIsLoading(false);
+  // };
+
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -179,20 +214,13 @@ export default function AmericanCurrentMonthSalesReport() {
       form.append("code", "AMRELEC");
       form.append("FLocCod", "001");
       form.append("FYerDsc", "2019-2025");
-
       form.append("FIntDat", fromDate);
       form.append("FFnlDat", toDate);
-      // form.append("FCtyCod", city?.value || "");
-      // form.append("FRegCod", region?.value || "");
-      // form.append("FSalCod", salesman?.value || "");
       form.append("FCmpCod", company?.value || "");
-      // form.append("FCstCod", customer?.value || "");
       form.append("FCtgCod", category?.value || "");
       form.append("FTrnTyp", "");
       form.append("FStrCod", store?.value || "");
       form.append("FSchTxt", "");
-
-      // form.append("FSalCod", "");
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/ItemSaleSummary.php",
@@ -200,12 +228,23 @@ export default function AmericanCurrentMonthSalesReport() {
         { timeout: 20000 },
       );
 
-      const arr = res?.data?.Detail ?? [];
-      setRows(arr);
+      setRows(res?.data?.Detail ?? []);
+
+      // ✅ TOTALS DIRECT FROM API
+      setApiTotalQty(
+        Number(String(res?.data?.["Total Qnty"] || 0).replace(/,/g, "")),
+      );
+
+      setApiTotalAmount(
+        Number(String(res?.data?.["Total Amount"] || 0).replace(/,/g, "")),
+      );
     } catch (err) {
       console.error("FetchError:", err);
       setRows([]);
+      setApiTotalQty(0);
+      setApiTotalAmount(0);
     }
+
     setIsLoading(false);
   };
 
@@ -436,7 +475,7 @@ export default function AmericanCurrentMonthSalesReport() {
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = sortedTableData.length.toString();
 
-    totalRow[keys.length - 1] = totalSaleAmount.toLocaleString();
+    totalRow[keys.length - 1] = apiTotalAmount.toLocaleString();
     const rowsPDF = [...dataRows, totalRow];
 
     rowsPDF.forEach((row, index) => {
@@ -674,19 +713,23 @@ export default function AmericanCurrentMonthSalesReport() {
     });
   }, [sortedTableData, searchQuery]);
 
-  const totalQuantity = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(String(row.Qnty || "0").replace(/,/g, ""));
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
+  // const totalQuantity = useMemo(() => {
+  //   return filteredData.reduce((sum, row) => {
+  //     const val = Number(String(row.Qnty || "0").replace(/,/g, ""));
+  //     return sum + (isNaN(val) ? 0 : val);
+  //   }, 0);
+  // }, [filteredData]);
 
-  const totalSaleAmount = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(String(row["Sale Amount"] || "0").replace(/,/g, ""));
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
+  // const totalSaleAmount = useMemo(() => {
+  //   return filteredData.reduce((sum, row) => {
+  //     const qty = Number(String(row.Qnty || "0").replace(/,/g, ""));
+  //     const rate = Number(String(row.Rate || "0").replace(/,/g, ""));
+
+  //     if (isNaN(qty) || isNaN(rate)) return sum;
+
+  //     return sum + qty * rate; // 🔥 SOURCE OF TRUTH
+  //   }, 0);
+  // }, [filteredData]);
 
   const filterRowStyle = {
     display: "flex",
@@ -786,8 +829,8 @@ export default function AmericanCurrentMonthSalesReport() {
     exportCSV({
       rows: sortedTableData,
       columnsConfig,
-      totalCollection: totalSaleAmount,
-      totalQnty: totalQuantity,
+      totalCollection: apiTotalAmount, // ✅ API TOTAL
+      totalQnty: apiTotalQty, // ✅ API TOTAL
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -1330,24 +1373,12 @@ export default function AmericanCurrentMonthSalesReport() {
                   }}
                 >
                   {column.key === "Qnty" ? (
-                    <span
-                      style={{
-                        display: "block",
-                        textAlign: "right",
-                        width: "100%",
-                      }}
-                    >
-                      {totalQuantity.toLocaleString()}
+                    <span style={{ width: "100%", textAlign: "right" }}>
+                      {apiTotalQty.toLocaleString()}
                     </span>
                   ) : column.key === "Sale Amount" ? (
-                    <span
-                      style={{
-                        display: "block",
-                        textAlign: "right",
-                        width: "100%",
-                      }}
-                    >
-                      {totalSaleAmount.toLocaleString()}
+                    <span style={{ width: "100%", textAlign: "right" }}>
+                      {apiTotalAmount.toLocaleString()}
                     </span>
                   ) : index === 0 ? (
                     <span>{filteredData.length}</span>
