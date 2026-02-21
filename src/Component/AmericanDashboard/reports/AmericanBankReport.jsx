@@ -507,12 +507,12 @@ export default function AmericanBankReport() {
     });
   }, [sortedTableData, searchQuery]);
 
-  const totalBalance = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(row.Balance ?? 0);
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
+  // const totalBalance = useMemo(() => {
+  //   return filteredData.reduce((sum, row) => {
+  //     const val = Number(row.Balance ?? 0);
+  //     return sum + (isNaN(val) ? 0 : val);
+  //   }, 0);
+  // }, [filteredData]);
 
   const totalItems = filteredData.length;
 
@@ -848,9 +848,9 @@ export default function AmericanBankReport() {
                   }}
                 >
                   {column.key === "Balance" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
+                    <span>{apiTotalBalance.toLocaleString()}</span>
                   ) : index === 0 ? (
-                    <span>{totalItems}</span>
+                    <span>{apiTotal.toLocaleString()}</span>
                   ) : (
                     ""
                   )}
