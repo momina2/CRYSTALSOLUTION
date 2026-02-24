@@ -14,7 +14,16 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "American Sale Report 2026";
+// ===== CURRENT YEAR HELPERS =====
+const today = new Date();
+const currentYear = today.getFullYear();
+
+// FROM → 1st Jan of current year
+const firstDayOfCurrentYear = `${currentYear}-01-01`;
+
+// TO → 31st Dec of current year (timezone safe)
+const lastDayOfCurrentYear = `${currentYear}-12-31`;
+const REPORT_NAME = `American Sale Report ${currentYear}`;
 const COMPANY_NAME = "American Trading";
 
 const columnsConfig = [
@@ -109,8 +118,8 @@ export default function AmericanSalesReportCurrentYear() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("01-01-2026");
-  const [toDate, setToDate] = useState("31-12-2026");
+  const [fromDate, setFromDate] = useState(firstDayOfCurrentYear);
+  const [toDate, setToDate] = useState(lastDayOfCurrentYear);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -153,6 +162,7 @@ export default function AmericanSalesReportCurrentYear() {
   const companyOptions = toOptions(companies, "tcmpcod", "tcmpdsc");
   const storeOptions = toOptions(stores, "tstrcod", "tstrdsc");
   const categoryOptions = toOptions(categoryList, "tctgcod", "tctgdsc");
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
 
   const {
     isSidebarVisible,
@@ -212,6 +222,7 @@ export default function AmericanSalesReportCurrentYear() {
       form.append("FIntDat", fromDate);
       form.append("FFnlDat", toDate);
       form.append("FCmpCod", company?.value || "");
+      form.append("FSalCod", salesman?.value || "");
       form.append("FCtgCod", category?.value || "");
       form.append("FTrnTyp", "");
       form.append("FStrCod", store?.value || "");
@@ -353,6 +364,11 @@ export default function AmericanSalesReportCurrentYear() {
     fetchCompany();
   }, []);
 
+  useEffect(() => {
+    setFromDate(firstDayOfCurrentYear);
+    setToDate(lastDayOfCurrentYear);
+  }, []);
+
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
 
@@ -366,7 +382,8 @@ export default function AmericanSalesReportCurrentYear() {
       `?from=${fromDate}&to=${toDate}` +
         `&company=${company?.value || ""}` +
         `&category=${category?.value || ""}` +
-        `&store=${store?.value || ""}`, // ✅ ADD THIS
+        `&salesman=${salesman?.value || ""}` +
+        `&store=${store?.value || ""}`,
       { replace: true },
     );
 
@@ -1057,7 +1074,19 @@ export default function AmericanSalesReportCurrentYear() {
                     styles={selectStyles}
                   />
                 </div>
-                {/* CITY */}
+                {/* SALESMAN*/}
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Salesman :</span>
+                  <Select
+                    options={salesmanOptions}
+                    value={salesman}
+                    onChange={setSalesman}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* <div style={filterRowStyle}>
                   <span style={filterLabelStyle}>City :</span>

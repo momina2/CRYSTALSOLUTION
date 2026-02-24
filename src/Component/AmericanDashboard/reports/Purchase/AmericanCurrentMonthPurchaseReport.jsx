@@ -14,7 +14,26 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "February Purchase Report 2026";
+// ===== CURRENT MONTH HELPERS =====
+const today = new Date();
+
+const currentYear = today.getFullYear();
+const currentMonthIndex = today.getMonth(); // 0–11
+
+const monthName = today.toLocaleString("en-US", { month: "long" });
+
+// From → 1st day of current month
+const firstDayOfCurrentMonth = `${currentYear}-${String(
+  currentMonthIndex + 1,
+).padStart(2, "0")}-01`;
+
+// To → last day of current month (leap year safe)
+const lastDayDateObj = new Date(currentYear, currentMonthIndex + 1, 0);
+const lastDayOfCurrentMonth = `${currentYear}-${String(
+  currentMonthIndex + 1,
+).padStart(2, "0")}-${String(lastDayDateObj.getDate()).padStart(2, "0")}`;
+
+const REPORT_NAME = `${monthName} Purchase Report ${currentYear}`;
 const COMPANY_NAME = "American Traders";
 
 const columnsConfig = [
@@ -109,8 +128,8 @@ export default function AmericanCurrentMonthPurchaseReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("2026-02-01");
-  const [toDate, setToDate] = useState("2026-02-28");
+  const [fromDate, setFromDate] = useState(firstDayOfCurrentMonth);
+  const [toDate, setToDate] = useState(lastDayOfCurrentMonth);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -310,6 +329,10 @@ export default function AmericanCurrentMonthPurchaseReport() {
     fetchCompany();
   }, []);
 
+  useEffect(() => {
+    setFromDate(firstDayOfCurrentMonth);
+    setToDate(lastDayOfCurrentMonth);
+  }, []);
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
 

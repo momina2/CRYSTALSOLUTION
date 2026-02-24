@@ -20,9 +20,26 @@ const currentDate = new Date();
 const monthName = currentDate.toLocaleString("en-US", { month: "long" });
 const year = currentDate.getFullYear();
 
+// ===== CURRENT MONTH HELPERS =====
+const today = new Date();
+
+const currentMonthName = today.toLocaleString("en-US", { month: "long" });
+const currentYear = today.getFullYear();
+const currentMonth = today.getMonth() + 1;
+
+// First day
+const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`;
+
+// Last day (timezone safe)
+const lastDateObj = new Date(currentYear, currentMonth, 0);
+const lastDayOfMonth = `${currentYear}-${String(currentMonth).padStart(
+  2,
+  "0",
+)}-${String(lastDateObj.getDate()).padStart(2, "0")}`;
+
 // Example:
 // February 2026
-const REPORT_NAME = `American Sale Report - ${monthName} ${year}`;
+const REPORT_NAME = `American Sale Report - ${currentMonthName} ${currentYear}`;
 
 const COMPANY_NAME = "American Trading";
 
@@ -118,8 +135,8 @@ export default function AmericanCurrentMonthSalesReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("01-02-2026");
-  const [toDate, setToDate] = useState("28-02-2026");
+  const [fromDate, setFromDate] = useState(firstDayOfMonth);
+  const [toDate, setToDate] = useState(lastDayOfMonth);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -165,6 +182,7 @@ export default function AmericanCurrentMonthSalesReport() {
   const companyOptions = toOptions(companies, "tcmpcod", "tcmpdsc");
   const storeOptions = toOptions(stores, "tstrcod", "tstrdsc");
   const categoryOptions = toOptions(categoryList, "tctgcod", "tctgdsc");
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
 
   const {
     isSidebarVisible,
@@ -218,6 +236,7 @@ export default function AmericanCurrentMonthSalesReport() {
       form.append("FFnlDat", toDate);
       form.append("FCmpCod", company?.value || "");
       form.append("FCtgCod", category?.value || "");
+      form.append("FSalCod", salesman?.value || "");
       form.append("FTrnTyp", "");
       form.append("FStrCod", store?.value || "");
       form.append("FSchTxt", "");
@@ -358,6 +377,11 @@ export default function AmericanCurrentMonthSalesReport() {
     fetchCompany();
   }, []);
 
+  useEffect(() => {
+    setFromDate(firstDayOfMonth);
+    setToDate(lastDayOfMonth);
+  }, []);
+
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
 
@@ -371,7 +395,8 @@ export default function AmericanCurrentMonthSalesReport() {
       `?from=${fromDate}&to=${toDate}` +
         `&company=${company?.value || ""}` +
         `&category=${category?.value || ""}` +
-        `&store=${store?.value || ""}`, // ✅ ADD THIS
+        `&salesman=${salesman?.value || ""}` +
+        `&store=${store?.value || ""}`, 
       { replace: true },
     );
 
@@ -1080,7 +1105,19 @@ export default function AmericanCurrentMonthSalesReport() {
                     styles={selectStyles}
                   />
                 </div>
-                {/* CITY */}
+                {/* SALESMAN */}
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Salesman :</span>
+                  <Select
+                    options={salesmanOptions}
+                    value={salesman}
+                    onChange={setSalesman}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* <div style={filterRowStyle}>
                   <span style={filterLabelStyle}>City :</span>

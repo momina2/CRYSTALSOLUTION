@@ -15,7 +15,15 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "American Purchase Report 2025";
+// ===== LAST YEAR HELPERS =====
+const today = new Date();
+const currentYear = today.getFullYear();
+const lastYear = currentYear - 1;
+
+const firstDayOfLastYear = `${lastYear}-01-01`;
+const lastDayOfLastYear = `${lastYear}-12-31`;
+
+const REPORT_NAME = `American Purchase Report ${lastYear}`;
 const COMPANY_NAME = "American Traders";
 
 const columnsConfig = [
@@ -110,8 +118,8 @@ export default function AmericanPurchaseReportLastYear() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("2025-01-01");
-  const [toDate, setToDate] = useState("2025-12-31");
+  const [fromDate, setFromDate] = useState(firstDayOfLastYear);
+  const [toDate, setToDate] = useState(lastDayOfLastYear);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -309,6 +317,11 @@ export default function AmericanPurchaseReportLastYear() {
     fetchStores();
     fetchCategory();
     fetchCompany();
+  }, []);
+
+  useEffect(() => {
+    setFromDate(firstDayOfLastYear);
+    setToDate(lastDayOfLastYear);
   }, []);
 
   const handleSelect = () => {

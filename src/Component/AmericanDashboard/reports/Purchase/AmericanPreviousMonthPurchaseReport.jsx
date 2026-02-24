@@ -14,7 +14,31 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "January Purchase Report 2026";
+// ===== PREVIOUS MONTH (CURRENT YEAR) HELPERS =====
+const today = new Date();
+
+// Previous month date object
+const prevMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+const prevMonthYear = prevMonthDate.getFullYear();
+const prevMonthIndex = prevMonthDate.getMonth(); // 0–11
+
+const prevMonthName = prevMonthDate.toLocaleString("en-US", {
+  month: "long",
+});
+
+// From → 1st day of previous month
+const firstDayOfPrevMonth = `${prevMonthYear}-${String(
+  prevMonthIndex + 1,
+).padStart(2, "0")}-01`;
+
+// To → last day of previous month
+const lastDayObj = new Date(prevMonthYear, prevMonthIndex + 1, 0);
+const lastDayOfPrevMonth = `${prevMonthYear}-${String(
+  prevMonthIndex + 1,
+).padStart(2, "0")}-${String(lastDayObj.getDate()).padStart(2, "0")}`;
+
+const REPORT_NAME = `${prevMonthName} Purchase Report ${prevMonthYear}`;
 const COMPANY_NAME = "American Traders";
 
 const columnsConfig = [
@@ -109,8 +133,8 @@ export default function AmericanPreviousMonthPurchaseReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("2026-01-01");
-  const [toDate, setToDate] = useState("2026-01-31");
+  const [fromDate, setFromDate] = useState(firstDayOfPrevMonth);
+  const [toDate, setToDate] = useState(lastDayOfPrevMonth);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -308,6 +332,11 @@ export default function AmericanPreviousMonthPurchaseReport() {
     fetchStores();
     fetchCategory();
     fetchCompany();
+  }, []);
+
+  useEffect(() => {
+    setFromDate(firstDayOfPrevMonth);
+    setToDate(lastDayOfPrevMonth);
   }, []);
 
   const handleSelect = () => {

@@ -14,7 +14,39 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "February Sale Report 2025";
+// ===== LAST YEAR SAME MONTH HELPERS =====
+const today = new Date();
+
+// Current month (0–11)
+const currentMonthIndex = today.getMonth();
+
+// Last year
+const lastYear = today.getFullYear() - 1;
+
+// Month name (same as current month, but last year)
+const lastYearMonthName = new Date(
+  lastYear,
+  currentMonthIndex,
+  1,
+).toLocaleString("en-US", { month: "long" });
+
+// Month number (1–12)
+const monthNumber = currentMonthIndex + 1;
+
+// FROM → first day of same month last year
+const firstDayOfLastYearSameMonth = `${lastYear}-${String(monthNumber).padStart(
+  2,
+  "0",
+)}-01`;
+
+// TO → last day of same month last year (timezone safe)
+const lastDateObj = new Date(lastYear, monthNumber, 0);
+const lastDayOfLastYearSameMonth = `${lastYear}-${String(monthNumber).padStart(
+  2,
+  "0",
+)}-${String(lastDateObj.getDate()).padStart(2, "0")}`;
+
+const REPORT_NAME = `${lastYearMonthName} Sale Report ${lastYear}`;
 const COMPANY_NAME = "American Traders";
 
 const columnsConfig = [
@@ -109,8 +141,8 @@ export default function AmericanLastYearSameMonthSalesReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("01-02-2025");
-  const [toDate, setToDate] = useState("28-02-2025");
+  const [fromDate, setFromDate] = useState(firstDayOfLastYearSameMonth);
+  const [toDate, setToDate] = useState(lastDayOfLastYearSameMonth);
   const [apiTotalQty, setApiTotalQty] = useState(0);
   const [apiTotalAmount, setApiTotalAmount] = useState(0);
   const [sortConfig, setSortConfig] = useState({
@@ -154,7 +186,7 @@ export default function AmericanLastYearSameMonthSalesReport() {
   const companyOptions = toOptions(companies, "tcmpcod", "tcmpdsc");
   const storeOptions = toOptions(stores, "tstrcod", "tstrdsc");
   const categoryOptions = toOptions(categoryList, "tctgcod", "tctgdsc");
-
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
   const {
     isSidebarVisible,
     getcolor,
@@ -213,6 +245,7 @@ export default function AmericanLastYearSameMonthSalesReport() {
       form.append("FIntDat", fromDate);
       form.append("FFnlDat", toDate);
       form.append("FCmpCod", company?.value || "");
+      form.append("FSalCod", salesman?.value || "");
       form.append("FCtgCod", category?.value || "");
       form.append("FTrnTyp", "");
       form.append("FStrCod", store?.value || "");
@@ -354,6 +387,11 @@ export default function AmericanLastYearSameMonthSalesReport() {
     fetchCompany();
   }, []);
 
+  useEffect(() => {
+    setFromDate(firstDayOfLastYearSameMonth);
+    setToDate(lastDayOfLastYearSameMonth);
+  }, []);
+
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
 
@@ -367,7 +405,8 @@ export default function AmericanLastYearSameMonthSalesReport() {
       `?from=${fromDate}&to=${toDate}` +
         `&company=${company?.value || ""}` +
         `&category=${category?.value || ""}` +
-        `&store=${store?.value || ""}`, // ✅ ADD THIS
+        `&salesman=${salesman?.value || ""}` + 
+        `&store=${store?.value || ""}`,
       { replace: true },
     );
 
@@ -1072,8 +1111,19 @@ export default function AmericanLastYearSameMonthSalesReport() {
                     styles={selectStyles}
                   />
                 </div>
-                {/* CITY */}
-
+                {/* SALESMAN*/}
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Salesman :</span>
+                  <Select
+                    options={salesmanOptions}
+                    value={salesman}
+                    onChange={setSalesman}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
                 {/* <div style={filterRowStyle}>
                   <span style={filterLabelStyle}>City :</span>
                   <Select

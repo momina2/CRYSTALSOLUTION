@@ -14,7 +14,18 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "American Sale Report 2025";
+// ===== PREVIOUS YEAR HELPERS =====
+const today = new Date();
+const currentYear = today.getFullYear();
+const previousYear = currentYear - 1;
+
+// From → 1st Jan of previous year
+const firstDayOfPreviousYear = `${previousYear}-01-01`;
+
+// To → 31st Dec of previous year
+const lastDayOfPreviousYear = `${previousYear}-12-31`;
+
+const REPORT_NAME = `American Sale Report ${previousYear}`;
 const COMPANY_NAME = "American Trading";
 
 const columnsConfig = [
@@ -109,8 +120,8 @@ export default function AmericanSalesReportLastYear() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("01-01-2025");
-  const [toDate, setToDate] = useState("31-12-2025");
+  const [fromDate, setFromDate] = useState(firstDayOfPreviousYear);
+  const [toDate, setToDate] = useState(lastDayOfPreviousYear);
   const [apiTotalQty, setApiTotalQty] = useState(0);
   const [apiTotalAmount, setApiTotalAmount] = useState(0);
   const [sortConfig, setSortConfig] = useState({
@@ -154,6 +165,7 @@ export default function AmericanSalesReportLastYear() {
   const companyOptions = toOptions(companies, "tcmpcod", "tcmpdsc");
   const storeOptions = toOptions(stores, "tstrcod", "tstrdsc");
   const categoryOptions = toOptions(categoryList, "tctgcod", "tctgdsc");
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
 
   const {
     isSidebarVisible,
@@ -175,6 +187,7 @@ export default function AmericanSalesReportLastYear() {
       form.append("FIntDat", fromDate);
       form.append("FFnlDat", toDate);
       form.append("FCmpCod", company?.value || "");
+      form.append("FSalCod", salesman?.value || "");
       form.append("FCtgCod", category?.value || "");
       form.append("FTrnTyp", "");
       form.append("FStrCod", store?.value || "");
@@ -315,6 +328,11 @@ export default function AmericanSalesReportLastYear() {
     fetchCompany();
   }, []);
 
+  useEffect(() => {
+    setFromDate(firstDayOfPreviousYear);
+    setToDate(lastDayOfPreviousYear);
+  }, []);
+
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
 
@@ -328,7 +346,8 @@ export default function AmericanSalesReportLastYear() {
       `?from=${fromDate}&to=${toDate}` +
         `&company=${company?.value || ""}` +
         `&category=${category?.value || ""}` +
-        `&store=${store?.value || ""}`, // ✅ ADD THIS
+        `&salesman=${salesman?.value || ""}` +
+        `&store=${store?.value || ""}`,
       { replace: true },
     );
 
@@ -1019,7 +1038,20 @@ export default function AmericanSalesReportLastYear() {
                     styles={selectStyles}
                   />
                 </div>
-                {/* CITY */}
+                
+                {/* SALESMAN*/}
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Salesman :</span>
+                  <Select
+                    options={salesmanOptions}
+                    value={salesman}
+                    onChange={setSalesman}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* <div style={filterRowStyle}>
                   <span style={filterLabelStyle}>City :</span>

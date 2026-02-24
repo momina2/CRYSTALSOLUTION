@@ -14,7 +14,28 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
-const REPORT_NAME = "February Purchase Report 2025";
+// ===== LAST YEAR SAME MONTH HELPERS =====
+const today = new Date();
+
+const currentYear = today.getFullYear();
+const currentMonthIndex = today.getMonth(); // 0–11
+
+const lastYear = currentYear - 1;
+
+const monthName = today.toLocaleString("en-US", { month: "long" });
+
+// From → 1st day of same month last year
+const firstDayOfLastYearSameMonth = `${lastYear}-${String(
+  currentMonthIndex + 1,
+).padStart(2, "0")}-01`;
+
+// To → last day of same month last year (leap year safe)
+const lastDayObj = new Date(lastYear, currentMonthIndex + 1, 0);
+const lastDayOfLastYearSameMonth = `${lastYear}-${String(
+  currentMonthIndex + 1,
+).padStart(2, "0")}-${String(lastDayObj.getDate()).padStart(2, "0")}`;
+
+const REPORT_NAME = `${monthName} Purchase Report ${lastYear}`;
 const COMPANY_NAME = "American Traders";
 
 const columnsConfig = [
@@ -109,8 +130,8 @@ export default function AmericanLastYearSameMonthPurchaseReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("2025-02-01");
-  const [toDate, setToDate] = useState("2025-02-28");
+  const [fromDate, setFromDate] = useState(firstDayOfLastYearSameMonth);
+  const [toDate, setToDate] = useState(lastDayOfLastYearSameMonth);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -308,6 +329,10 @@ export default function AmericanLastYearSameMonthPurchaseReport() {
     fetchStores();
     fetchCategory();
     fetchCompany();
+  }, []);
+  useEffect(() => {
+    setFromDate(firstDayOfLastYearSameMonth);
+    setToDate(lastDayOfLastYearSameMonth);
   }, []);
 
   const handleSelect = () => {

@@ -15,7 +15,36 @@ import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 import { api } from "qz-tray";
 
-const REPORT_NAME = "January Sale Report 2026";
+// ===== PREVIOUS MONTH HELPERS =====
+const today = new Date();
+
+// Previous month date object
+const prevMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+// Year & Month
+const prevYear = prevMonthDate.getFullYear();
+const prevMonthIndex = prevMonthDate.getMonth(); // 0–11
+const prevMonthNumber = prevMonthIndex + 1;
+
+// Month Name
+const prevMonthName = prevMonthDate.toLocaleString("en-US", {
+  month: "long",
+});
+
+// FROM → first day of previous month
+const firstDayOfPrevMonth = `${prevYear}-${String(prevMonthNumber).padStart(
+  2,
+  "0",
+)}-01`;
+
+// TO → last day of previous month (timezone safe)
+const lastDateObj = new Date(prevYear, prevMonthNumber, 0);
+const lastDayOfPrevMonth = `${prevYear}-${String(prevMonthNumber).padStart(
+  2,
+  "0",
+)}-${String(lastDateObj.getDate()).padStart(2, "0")}`;
+
+const REPORT_NAME = `${prevMonthName} Sale Report ${prevYear}`;
 const COMPANY_NAME = "American Trading";
 
 const columnsConfig = [
@@ -110,8 +139,8 @@ export default function AmericanPreviousMonthSalesReport() {
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [fromDate, setFromDate] = useState("01-01-2026");
-  const [toDate, setToDate] = useState("31-01-2026");
+  const [fromDate, setFromDate] = useState(firstDayOfPrevMonth);
+  const [toDate, setToDate] = useState(lastDayOfPrevMonth);
   const [apiTotalQty, setApiTotalQty] = useState(0);
   const [apiTotalAmount, setApiTotalAmount] = useState(0);
   const [sortConfig, setSortConfig] = useState({
@@ -155,6 +184,7 @@ export default function AmericanPreviousMonthSalesReport() {
   const companyOptions = toOptions(companies, "tcmpcod", "tcmpdsc");
   const storeOptions = toOptions(stores, "tstrcod", "tstrdsc");
   const categoryOptions = toOptions(categoryList, "tctgcod", "tctgdsc");
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
 
   const {
     isSidebarVisible,
@@ -176,6 +206,7 @@ export default function AmericanPreviousMonthSalesReport() {
       form.append("FIntDat", fromDate);
       form.append("FFnlDat", toDate);
       form.append("FCmpCod", company?.value || "");
+      form.append("FSalCod", salesman?.value || "");
       form.append("FCtgCod", category?.value || "");
       form.append("FTrnTyp", "");
       form.append("FStrCod", store?.value || "");
@@ -317,6 +348,11 @@ export default function AmericanPreviousMonthSalesReport() {
     fetchCompany();
   }, []);
 
+  useEffect(() => {
+    setFromDate(firstDayOfPrevMonth);
+    setToDate(lastDayOfPrevMonth);
+  }, []);
+
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
 
@@ -330,6 +366,7 @@ export default function AmericanPreviousMonthSalesReport() {
       `?from=${fromDate}&to=${toDate}` +
         `&company=${company?.value || ""}` +
         `&category=${category?.value || ""}` +
+        `&salesman=${salesman?.value || ""}` +
         `&store=${store?.value || ""}`, // ✅ ADD THIS
       { replace: true },
     );
@@ -1035,7 +1072,19 @@ export default function AmericanPreviousMonthSalesReport() {
                     styles={selectStyles}
                   />
                 </div>
-                {/* CITY */}
+                {/* SALESMAN*/}
+                <div style={filterRowStyle}>
+                  <span style={filterLabelStyle}>Salesman :</span>
+                  <Select
+                    options={salesmanOptions}
+                    value={salesman}
+                    onChange={setSalesman}
+                    placeholder="ALL"
+                    isSearchable
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </div>
 
                 {/* <div style={filterRowStyle}>
                   <span style={filterLabelStyle}>City :</span>

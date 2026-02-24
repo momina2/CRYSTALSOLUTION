@@ -456,11 +456,20 @@ export default function AmericanCustomerLedgerDashboard() {
     [filteredData],
   );
 
-  const totalBalance = useMemo(
+  // const totalBalance = useMemo(
+  //   () =>
+  //     filteredData.reduce((sum, row) => {
+  //       const value = parseFloat(row.balance ?? 0);
+  //       return sum + (isNaN(value) ? 0 : value);
+  //     }, 0),
+  //   [filteredData],
+  // );
+
+  const totalQty = useMemo(
     () =>
       filteredData.reduce((sum, row) => {
-        const value = parseFloat(row.balance ?? 0);
-        return sum + (isNaN(value) ? 0 : value);
+        const value = toNumber(row.titmqnt);
+        return sum + value;
       }, 0),
     [filteredData],
   );
@@ -1150,6 +1159,14 @@ export default function AmericanCustomerLedgerDashboard() {
                       return (
                         <td key={index} style={baseStyle}>
                           {filteredData.length}
+                        </td>
+                      );
+                    }
+                    // ✅ QTY TOTAL
+                    if (column.key === "titmqnt") {
+                      return (
+                        <td key={index} className="text-end" style={baseStyle}>
+                          {showIfNonZero(totalQty).toLocaleString()}
                         </td>
                       );
                     }

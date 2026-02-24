@@ -12,6 +12,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
+import Select from "react-select";
 
 const REPORT_NAME = "Total Customers";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
@@ -101,6 +102,111 @@ export default function TotalCustomers() {
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  //DROP-DOWNS
+  const [salesman, setSalesman] = useState(null);
+  const [category, setCategory] = useState(null);
+  const [city, setCity] = useState(null);
+
+  const [salesmen, setSalesmen] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const toOptions = (arr, valueKey, labelKey) =>
+    [...arr]
+      .sort((a, b) =>
+        a[labelKey]?.toLowerCase().localeCompare(b[labelKey]?.toLowerCase()),
+      )
+      .map((item) => ({
+        value: item[valueKey],
+        label: item[labelKey]?.trim(),
+      }));
+
+  //DROP-DOWNS OPTIONS
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
+  const categoryOptions = toOptions(categories, "tctgcod", "tctgdsc");
+  const cityOptions = toOptions(cities, "tctycod", "tctydsc");
+
+  const selectStyles = {
+    container: (base) => ({
+      ...base,
+      width: "220px",
+      fontFamily: getfontstyle,
+      fontSize: getdatafontsize,
+    }),
+
+    control: (base) => ({
+      ...base,
+      minHeight: "28px",
+      height: "28px",
+      backgroundColor: "#fff",
+      border: "1px solid #000",
+      borderRadius: "0px",
+      boxShadow: "none",
+      justifyContent: "flex-start",
+    }),
+
+    valueContainer: (base) => ({
+      ...base,
+      padding: "0 6px",
+      justifyContent: "flex-start",
+      textAlign: "left",
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      color: "#000",
+      lineHeight: "26px",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#000",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    input: (base) => ({
+      ...base,
+      textAlign: "left",
+    }),
+
+    indicatorsContainer: (base) => ({
+      ...base,
+      height: "28px",
+    }),
+
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: "2px 6px",
+      color: "#000",
+    }),
+
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+
+    menu: (base) => ({
+      ...base,
+      borderRadius: "0px",
+      border: "1px solid #000",
+      boxShadow: "none",
+    }),
+
+    option: (base) => ({
+      ...base,
+      textAlign: "left",
+      padding: "4px 8px",
+      color: "#000",
+    }),
+
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
+  };
+
   const {
     isSidebarVisible,
     getcolor,
@@ -115,6 +221,13 @@ export default function TotalCustomers() {
     fetchData();
   }, [minParam, maxParam]);
 
+  useEffect(() => {
+    fetchData();
+    fetchSalesmen();
+    fetchCategories();
+    fetchCities();
+  }, []);
+
   const fetchData = async () => {
     setIsLoading(true);
     setErrorMessage("");
@@ -124,10 +237,13 @@ export default function TotalCustomers() {
       form.append("code", "AMRELEC");
       form.append("FIntAmt", "-99999999");
       form.append("FFnlAmt", "99999999");
+      form.append("FSalCod", salesman?.value || "");
+      form.append("FCtgCod", category?.value || "");
+      form.append("FCtyCod", city?.value || "");
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanCustomerBalance.php",
-        form
+        form,
       );
 
       let dataRows = [];
@@ -153,6 +269,42 @@ export default function TotalCustomers() {
     setIsLoading(false);
   };
 
+  //FETCH SALES-MAN
+  const fetchSalesmen = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetSalesMen.php",
+      form,
+    );
+    setSalesmen(res.data || []);
+  };
+
+  //FETCH CATEGORIES
+  const fetchCategories = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetCatg.php",
+      form,
+    );
+    setCategories(res.data || []);
+  };
+
+  //FETCH CITIES
+  const fetchCities = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetCities.php",
+      form,
+    );
+    setCities(res.data || []);
+  };
+
   const exportPDFHandler = () => {
     const doc = new jsPDF({ orientation: "portrait" });
 
@@ -175,7 +327,7 @@ export default function TotalCustomers() {
 
     // --------- TABLE HEADER ---------
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn"
+      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn",
     );
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
@@ -245,7 +397,7 @@ export default function TotalCustomers() {
     drawHeader();
 
     const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? "")
+      keys.map((key) => row[key] ?? ""),
     );
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = sortedTableData.length.toString();
@@ -276,7 +428,7 @@ export default function TotalCustomers() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -343,14 +495,14 @@ export default function TotalCustomers() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
 
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -438,7 +590,7 @@ export default function TotalCustomers() {
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q) // ✅ BALANCE
+          row.Balance?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -480,7 +632,6 @@ export default function TotalCustomers() {
       );
     });
   }, [sortedTableData, searchQuery]);
-  
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
@@ -535,68 +686,87 @@ export default function TotalCustomers() {
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
           <NavComponent textdata={REPORT_NAME} />
 
-          {/* SEARCH ROW */}
           <div
-            className="row"
             style={{
-              height: "auto",
-              marginTop: "8px",
-              marginBottom: "8px",
               display: "flex",
-              justifyContent: "flex-end",
-              paddingRight: "8px", // table edge se halka gap
+              alignItems: "center",
+              gap: "12px",
+              padding: "8px",
+              flexWrap: "wrap", // responsive
             }}
           >
+            {/* SALESMAN */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "160px" }}>
+              {/* <span style={{ fontSize: getdatafontsize }}>Salesman :</span> */}
+              <Select
+                options={salesmanOptions}
+                value={salesman}
+                onChange={setSalesman}
+                placeholder="Salesman"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div>
+
+            {/* CATEGORY */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "160px" }}>
+              {/* <span style={{ fontSize: getdatafontsize }}>Category :</span> */}
+              <Select
+                options={categoryOptions}
+                value={category}
+                onChange={setCategory}
+                placeholder="Category"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div>
+
+            {/* CITY */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" , width: "160px"}}>
+              {/* <span style={{ fontSize: getdatafontsize }}>City :</span> */}
+              <Select
+                options={cityOptions}
+                value={city}
+                onChange={setCity}
+                placeholder="City"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div>
+
+            {/* SEARCH — RIGHT SIDE */}
             <div
               style={{
+                marginLeft: "auto", // 🔥 keeps search on right
+                minWidth: "250px",
+                maxWidth: "360px",
+                border: `1px solid ${softTableStyles.softBorderColor}`,
+                borderRadius: "2px",
+                backgroundColor: "white",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "10px",
+                padding: "2px 8px",
+                height: "28px",
               }}
             >
-              <div
+              <MagnifyingGlassIcon style={{ width: "16px", height: "16px" }} />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
-                  minWidth: "260px",
-                  maxWidth: "400px",
-                  border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "2px",
-                  backgroundColor: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "2px 8px",
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  paddingLeft: "6px",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                 }}
-              >
-                <div
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MagnifyingGlassIcon
-                    className="text-gray-500"
-                    style={{ width: "16px", height: "16px" }}
-                  />
-                </div>
-
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    paddingLeft: "6px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                />
-              </div>
+              />
             </div>
           </div>
 
@@ -697,8 +867,8 @@ export default function TotalCustomers() {
                         selectedRowIndex === i
                           ? getnavbarbackgroundcolor // ✅ theme color
                           : i % 2 === 0
-                          ? getcolor
-                          : "#f8f9ff",
+                            ? getcolor
+                            : "#f8f9ff",
                       transition: "background-color 0.2s ease",
                     }}
                   >
@@ -734,7 +904,7 @@ export default function TotalCustomers() {
                                   }/crystalsol/AmericanProgressReportDashboard?code=${
                                     item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             />
@@ -757,7 +927,7 @@ export default function TotalCustomers() {
                                   }/crystalsol/AmericanCustomerLedgerDashboard?code=${
                                     item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             />
@@ -792,7 +962,7 @@ export default function TotalCustomers() {
                         </td>
                       ))}
                     </tr>
-                  )
+                  ),
                 )}
               </tbody>
             </table>
@@ -811,7 +981,7 @@ export default function TotalCustomers() {
               const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
+                isTotalColumn ? "right" : "left",
               );
 
               return (

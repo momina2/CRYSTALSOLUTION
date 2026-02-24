@@ -659,42 +659,56 @@ const NewSalesCard = ({ salesData }) => {
 
       {/* TOP 2024 & 2025 */}
       <div className="grid grid-cols-2 gap-1 leading-tight">
-        <div className="text-center">
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanSalesReportLastYear",
+              "_blank",
+            )
+          }
+          className="
+    text-center
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+  "
+        >
           <p className="text-[10px] font-bold text-gray-700">{lastYear}</p>
+
           <h4 className="text-[16px] font-semibold text-indigo-800">
             {quantity2025}
           </h4>
-          <p
-            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
-            title={amount2025}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanSalesReportLastYear",
-                "_blank",
-              )
-            }
-          >
+
+          <p className="text-[10px] text-gray-700" title={amount2025}>
             {amount2025}
           </p>
         </div>
 
-        <div className="text-center">
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanSalesReportCurrentYear",
+              "_blank",
+            )
+          }
+          className="
+    text-center
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+  "
+        >
           <p className="text-[10px] font-bold text-gray-700">{currentYear}</p>
+
           <h4 className="text-[16px] font-semibold text-indigo-800">
             {quantity2026}
           </h4>
-          <p
-            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
-            title={amount2026}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanSalesReportCurrentYear",
-                "_blank",
-              )
-            }
-          >
+
+          <p className="text-[10px] text-gray-700" title={amount2026}>
             {amount2026}
           </p>
         </div>
@@ -702,18 +716,27 @@ const NewSalesCard = ({ salesData }) => {
 
       {/* BOTTOM STATS */}
       <div className="grid grid-cols-3 gap-1 text-center leading-tight">
-        <div>
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanLastYearSameMonthSalesReport",
+              "_blank",
+            )
+          }
+          className="
+    text-center
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+  "
+        >
           <p className="text-[10px] text-gray-500">{labelLastYearSameMonth}</p>
+
           <h4
-            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            className="text-[14px] font-semibold text-sky-700"
             title={lastYearMonthQuantity}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanLastYearSameMonthSalesReport",
-                "_blank",
-              )
-            }
           >
             {lastYearMonthQuantity}
           </h4>
@@ -723,18 +746,27 @@ const NewSalesCard = ({ salesData }) => {
           </p>
         </div>
 
-        <div>
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanCurrentMonthSalesReport",
+              "_blank",
+            )
+          }
+          className="
+    text-center
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+  "
+        >
           <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
+
           <h4
-            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            className="text-[14px] font-semibold text-sky-700"
             title={currentMonthQuantity}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanCurrentMonthSalesReport",
-                "_blank",
-              )
-            }
           >
             {currentMonthQuantity}
           </h4>
@@ -744,18 +776,27 @@ const NewSalesCard = ({ salesData }) => {
           </p>
         </div>
 
-        <div>
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanPreviousMonthSalesReport",
+              "_blank",
+            )
+          }
+          className="
+    text-center
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+  "
+        >
           <p className="text-[10px] text-gray-500">{labelPreviousMonth}</p>
+
           <h4
-            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            className="text-[14px] font-semibold text-sky-700"
             title={previousMonthQuantity}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanPreviousMonthSalesReport",
-                "_blank",
-              )
-            }
           >
             {previousMonthQuantity}
           </h4>
@@ -814,42 +855,44 @@ const NewPurchaseCard = ({ purchaseData }) => {
 
       {/* TOP 2024 & 2025 */}
       <div className="grid grid-cols-2 gap-1 text-center leading-tight">
-        <div className="text-center">
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanPurchaseReportLastYear",
+              "_blank",
+            )
+          }
+          className="text-center cursor-pointer rounded-md p-1 transition-colors hover:bg-gray-100"
+        >
           <p className="text-[10px] font-bold text-gray-800">{lastYear}</p>
+
           <h4 className="text-[16px] font-semibold text-indigo-800">
             {quantityLastYear}
           </h4>
-          <p
-            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
-            title={amountLastYear}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanPurchaseReportLastYear",
-                "_blank",
-              )
-            }
-          >
+
+          <p className="text-[10px] text-gray-700" title={amountLastYear}>
             {amountLastYear}
           </p>
         </div>
 
-        <div className="text-center">
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanPurchaseReportCurrentYear",
+              "_blank",
+            )
+          }
+          className="text-center cursor-pointer rounded-md p-1 transition-colors hover:bg-gray-100"
+        >
           <p className="text-[10px] font-bold text-gray-800">{currentYear}</p>
+
           <h4 className="text-[16px] font-semibold text-indigo-800">
             {quantityCurrentYear}
           </h4>
-          <p
-            className="text-[10px] text-gray-700 cursor-pointer hover:underline"
-            title={amountCurrentYear}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanPurchaseReportCurrentYear",
-                "_blank",
-              )
-            }
-          >
+
+          <p className="text-[10px] text-gray-700" title={amountCurrentYear}>
             {amountCurrentYear}
           </p>
         </div>
@@ -857,67 +900,79 @@ const NewPurchaseCard = ({ purchaseData }) => {
 
       {/* BOTTOM STATS */}
       <div className="grid grid-cols-3 gap-1 text-center leading-tight">
-        <div>
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanLastYearSameMonthPurchaseReport",
+              "_blank",
+            )
+          }
+          className="text-center cursor-pointer rounded-md p-1 transition-colors hover:bg-gray-100"
+        >
           <p className="text-[10px] font-bold text-gray-800">
             {labelLastYearSameMonth}
           </p>
+
           <h4
-            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            className="text-[14px] font-semibold text-sky-700"
             title={lastYearMonthQuantity}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanLastYearSameMonthPurchaseReport",
-                "_blank",
-              )
-            }
           >
             {lastYearMonthQuantity}
           </h4>
+
           <p className="text-[10px] text-gray-500 mt-[-2px]">
             {lastYearMonthAmount}
           </p>
         </div>
 
-        <div>
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanCurrentMonthPurchaseReport",
+              "_blank",
+            )
+          }
+          className="text-center cursor-pointer rounded-md p-1 transition-colors hover:bg-gray-100"
+        >
           <p className="text-[10px] font-bold text-gray-800">
             {labelCurrentMonth}
           </p>
+
           <h4
-            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            className="text-[14px] font-semibold text-sky-700"
             title={currentMonthQuantity}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanCurrentMonthPurchaseReport",
-                "_blank",
-              )
-            }
           >
             {currentMonthQuantity}
           </h4>
+
           <p className="text-[10px] text-gray-500 mt-[-2px]">
             {currentMonthAmount}
           </p>
         </div>
 
-        <div>
+        <div
+          onClick={() =>
+            window.open(
+              window.location.origin +
+                "/crystalsol/AmericanPreviousMonthPurchaseReport",
+              "_blank",
+            )
+          }
+          className="text-center cursor-pointer rounded-md p-1 transition-colors hover:bg-gray-100"
+        >
           <p className="text-[10px] font-bold text-gray-800">
             {labelPreviousMonth}
           </p>
+
           <h4
-            className="text-[14px] font-semibold text-sky-700 cursor-pointer hover:underline"
+            className="text-[14px] font-semibold text-sky-700"
             title={previousMonthQuantity}
-            onClick={() =>
-              window.open(
-                window.location.origin +
-                  "/crystalsol/AmericanPreviousMonthPurchaseReport",
-                "_blank",
-              )
-            }
           >
             {previousMonthQuantity}
           </h4>
+
           <p className="text-[10px] text-gray-500 mt-[-2px]">
             {previousMonthAmount}
           </p>

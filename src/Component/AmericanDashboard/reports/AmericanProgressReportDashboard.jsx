@@ -162,7 +162,15 @@ export default function AmericanProgressReportDashboard() {
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [appliedYear, setAppliedYear] = useState(currentYear);
 
-  const [cusDate, setCusDate] = useState(`31-12-${currentYear}`);
+  const formatDateDDMMYYYY = (date) => {
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  const [cusDate] = useState(formatDateDDMMYYYY(new Date()));
+  // const [cusDate, setCusDate] = useState(`31-12-${currentYear}`);
   const [appliedDate, setAppliedDate] = useState(`31-12-${currentYear}`);
 
   const {
@@ -218,7 +226,7 @@ export default function AmericanProgressReportDashboard() {
 
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("cusId", custCode); 
+      form.append("cusId", custCode);
       form.append("cusYear", year);
       form.append("cusDate", date);
       console.log("API Request FormData:", custCode, year, date);
@@ -255,15 +263,24 @@ export default function AmericanProgressReportDashboard() {
     }
   };
 
-  useEffect(() => {
-    const initDate = `31-12-${currentYear}`;
-    fetchProgress(currentYear, initDate);
-  }, []);
+  // useEffect(() => {
+  //   const initDate = `31-12-${currentYear}`;
+  //   fetchProgress(currentYear, initDate);
+  // }, []);
 
   useEffect(() => {
     if (!custCode) {
       alert("Customer not selected properly");
     }
+  }, []);
+
+  useEffect(() => {
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayDate = formatDateDDMMYYYY(today);
+
+    // setCusDate(todayDate);
+    fetchProgress(todayYear, todayDate);
   }, []);
 
   const getAlignmentClass = (alignment) => {
@@ -279,7 +296,13 @@ export default function AmericanProgressReportDashboard() {
     }
   };
 
-  const yearOptions = [currentYear, currentYear - 1, currentYear - 2];
+  const yearOptions = [
+    currentYear,
+    currentYear - 1,
+    currentYear - 2,
+    currentYear - 3,
+    currentYear - 4,
+  ];
 
   const getSortIcon = (key) => {
     if (sortConfig.key === key) {
@@ -398,6 +421,31 @@ export default function AmericanProgressReportDashboard() {
       ? apiData["credit amount"]
       : null;
 
+  // const handleSelect = () => {
+  //   const today = new Date();
+  //   const todayYear = today.getFullYear();
+
+  //   let apiDate;
+  //   let apiYear;
+
+  //   if (selectedYear > todayYear) {
+  //     const dd = String(today.getDate()).padStart(2, "0");
+  //     const mm = String(today.getMonth() + 1).padStart(2, "0");
+  //     const yyyy = todayYear;
+
+  //     apiDate = `${dd}-${mm}-${yyyy}`;
+  //     apiYear = todayYear;
+  //   } else {
+  //     apiDate = `31-12-${selectedYear}`;
+  //     apiYear = selectedYear;
+  //   }
+
+  //   setAppliedYear(apiYear);
+  //   setCusDate(apiDate);
+
+  //   fetchProgress(apiYear, apiDate);
+  // };
+
   const handleSelect = () => {
     const today = new Date();
     const todayYear = today.getFullYear();
@@ -406,11 +454,7 @@ export default function AmericanProgressReportDashboard() {
     let apiYear;
 
     if (selectedYear > todayYear) {
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const yyyy = todayYear;
-
-      apiDate = `${dd}-${mm}-${yyyy}`;
+      apiDate = formatDateDDMMYYYY(today);
       apiYear = todayYear;
     } else {
       apiDate = `31-12-${selectedYear}`;
@@ -418,11 +462,8 @@ export default function AmericanProgressReportDashboard() {
     }
 
     setAppliedYear(apiYear);
-    setCusDate(apiDate);
-
     fetchProgress(apiYear, apiDate);
   };
-
   const exportPDFHandler = () => {
     const doc = new jsPDF({
       orientation: "portrait",
