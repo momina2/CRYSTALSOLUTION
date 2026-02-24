@@ -37,6 +37,10 @@ const lastDayOfMonth = `${currentYear}-${String(currentMonth).padStart(
   "0",
 )}-${String(lastDateObj.getDate()).padStart(2, "0")}`;
 
+const todayDate = `${currentYear}-${String(currentMonth).padStart(
+  2,
+  "0",
+)}-${String(today.getDate()).padStart(2, "0")}`;
 // Example:
 // February 2026
 const REPORT_NAME = `American Sale Report - ${currentMonthName} ${currentYear}`;
@@ -136,7 +140,7 @@ export default function AmericanCurrentMonthSalesReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [fromDate, setFromDate] = useState(firstDayOfMonth);
-  const [toDate, setToDate] = useState(lastDayOfMonth);
+  const [toDate, setToDate] = useState(todayDate);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -379,7 +383,7 @@ export default function AmericanCurrentMonthSalesReport() {
 
   useEffect(() => {
     setFromDate(firstDayOfMonth);
-    setToDate(lastDayOfMonth);
+    setToDate(todayDate);
   }, []);
 
   const handleSelect = () => {
@@ -396,7 +400,7 @@ export default function AmericanCurrentMonthSalesReport() {
         `&company=${company?.value || ""}` +
         `&category=${category?.value || ""}` +
         `&salesman=${salesman?.value || ""}` +
-        `&store=${store?.value || ""}`, 
+        `&store=${store?.value || ""}`,
       { replace: true },
     );
 

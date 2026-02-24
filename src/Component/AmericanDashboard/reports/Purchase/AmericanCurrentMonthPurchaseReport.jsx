@@ -33,6 +33,12 @@ const lastDayOfCurrentMonth = `${currentYear}-${String(
   currentMonthIndex + 1,
 ).padStart(2, "0")}-${String(lastDayDateObj.getDate()).padStart(2, "0")}`;
 
+const currentMonth = today.getMonth() + 1;
+const todayDate = `${currentYear}-${String(currentMonth).padStart(
+  2,
+  "0",
+)}-${String(today.getDate()).padStart(2, "0")}`;
+
 const REPORT_NAME = `${monthName} Purchase Report ${currentYear}`;
 const COMPANY_NAME = "American Traders";
 
@@ -129,7 +135,7 @@ export default function AmericanCurrentMonthPurchaseReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [fromDate, setFromDate] = useState(firstDayOfCurrentMonth);
-  const [toDate, setToDate] = useState(lastDayOfCurrentMonth);
+  const [toDate, setToDate] = useState(todayDate);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -331,7 +337,7 @@ export default function AmericanCurrentMonthPurchaseReport() {
 
   useEffect(() => {
     setFromDate(firstDayOfCurrentMonth);
-    setToDate(lastDayOfCurrentMonth);
+    setToDate(todayDate);
   }, []);
   const handleSelect = () => {
     if (!fromDate || !toDate) return;
