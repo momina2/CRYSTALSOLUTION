@@ -237,9 +237,9 @@ export default function TotalCustomers() {
       form.append("code", "AMRELEC");
       form.append("FIntAmt", "-99999999");
       form.append("FFnlAmt", "99999999");
-      form.append("FSalCod", salesman?.value || "");
-      form.append("FCtgCod", category?.value || "");
-      form.append("FCtyCod", city?.value || "");
+      // form.append("FSalCod", salesman?.value || "");
+      // form.append("FCtgCod", category?.value || "");
+      // form.append("FCtyCod", city?.value || "");
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanCustomerBalance.php",
@@ -309,10 +309,10 @@ export default function TotalCustomers() {
     const doc = new jsPDF({ orientation: "portrait" });
 
     // -------- PDF CONFIG ----------
-    const topMargin = 16; // top space for header
-    const rowHeight = 5; // normal row height
-    const headerHeight = 8; // table header height
-    const maxRowY = 280; // printable area before adding new page
+    const topMargin = 16; 
+    const rowHeight = 5; 
+    const headerHeight = 8; 
+    const maxRowY = 280; 
 
     // ------- TITLE --------
     function drawTitle() {
@@ -334,7 +334,7 @@ export default function TotalCustomers() {
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; // page width 210mm
+    const startX = (210 - tableWidth) / 2; 
     let y = 32;
 
     function drawHeader() {
@@ -552,7 +552,7 @@ export default function TotalCustomers() {
   };
 
   const getSortIcon = (key) => {
-    if (nonSortableKeys.includes(key)) return null; // ❌ no arrows on buttons
+    if (nonSortableKeys.includes(key)) return null; 
 
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
@@ -587,10 +587,10 @@ export default function TotalCustomers() {
       data = data.filter(
         (row) =>
           row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+          row.tcstdsc?.trim().toLowerCase().includes(q) || 
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q), // ✅ BALANCE
+          row.Balance?.toString().includes(q), 
       );
     }
 
@@ -625,10 +625,10 @@ export default function TotalCustomers() {
     return sortedTableData.filter((row) => {
       return (
         row.tacccod?.toLowerCase().includes(q) ||
-        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tcstdsc?.trim().toLowerCase().includes(q) || 
         row.tmobnum?.toLowerCase().includes(q) ||
         row.SalesMan?.toLowerCase().includes(q) ||
-        row.Balance?.toString().includes(q) // ✅ BALANCE
+        row.Balance?.toString().includes(q) 
       );
     });
   }, [sortedTableData, searchQuery]);
@@ -695,52 +695,12 @@ export default function TotalCustomers() {
               flexWrap: "wrap", // responsive
             }}
           >
-            {/* SALESMAN */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "160px" }}>
-              {/* <span style={{ fontSize: getdatafontsize }}>Salesman :</span> */}
-              <Select
-                options={salesmanOptions}
-                value={salesman}
-                onChange={setSalesman}
-                placeholder="Salesman"
-                isSearchable
-                isClearable
-                styles={selectStyles}
-              />
-            </div>
-
-            {/* CATEGORY */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "160px" }}>
-              {/* <span style={{ fontSize: getdatafontsize }}>Category :</span> */}
-              <Select
-                options={categoryOptions}
-                value={category}
-                onChange={setCategory}
-                placeholder="Category"
-                isSearchable
-                isClearable
-                styles={selectStyles}
-              />
-            </div>
-
-            {/* CITY */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" , width: "160px"}}>
-              {/* <span style={{ fontSize: getdatafontsize }}>City :</span> */}
-              <Select
-                options={cityOptions}
-                value={city}
-                onChange={setCity}
-                placeholder="City"
-                isSearchable
-                isClearable
-                styles={selectStyles}
-              />
-            </div>
+          
 
             {/* SEARCH — RIGHT SIDE */}
             <div
               style={{
-                marginLeft: "auto", // 🔥 keeps search on right
+                marginLeft: "auto", 
                 minWidth: "250px",
                 maxWidth: "360px",
                 border: `1px solid ${softTableStyles.softBorderColor}`,
@@ -865,7 +825,7 @@ export default function TotalCustomers() {
                       color: selectedRowIndex === i ? "white" : fontcolor,
                       backgroundColor:
                         selectedRowIndex === i
-                          ? getnavbarbackgroundcolor // ✅ theme color
+                          ? getnavbarbackgroundcolor 
                           : i % 2 === 0
                             ? getcolor
                             : "#f8f9ff",
@@ -958,7 +918,7 @@ export default function TotalCustomers() {
                             borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                           }}
                         >
-                          {/* empty cell */}
+                          
                         </td>
                       ))}
                     </tr>
