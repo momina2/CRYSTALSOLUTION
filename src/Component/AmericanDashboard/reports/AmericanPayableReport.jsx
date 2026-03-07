@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useTheme } from "../../../ThemeContext";
 import NavComponent from "../../MainComponent/Navform/navbarform";
@@ -11,8 +12,9 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
+import Select from "react-select";
 
-const REPORT_NAME = "Customer Balance by Range";
+const REPORT_NAME = "American Payable Report";
 const COMPANY_NAME = "CRYSTAL SOLUTIONS";
 
 const columnsConfig = [
@@ -34,35 +36,19 @@ const columnsConfig = [
   },
   {
     header: "Code",
-    key: "tacccod",
+    key: "Code",
     alignment: "left",
-    uiWidth: 80,
+    uiWidth: 90,
     pdfWidth: 20,
     excelWidth: 15,
   },
   {
-    header: "Name",
-    key: "tcstdsc",
+    header: "Supplier",
+    key: "Supplier",
     alignment: "left",
-    uiWidth: 360,
+    uiWidth: 280,
     pdfWidth: 80,
     excelWidth: 40,
-  },
-  // {
-  //   header: "Salesman",
-  //   key: "SalesMan",
-  //   alignment: "left",
-  //   uiWidth: 200,
-  //   pdfWidth: 35,
-  //   excelWidth: 30,
-  // },
-  {
-    header: "Mobile",
-    key: "tmobnum",
-    alignment: "left",
-    uiWidth: 110,
-    pdfWidth: 25,
-    excelWidth: 20,
   },
 
   {
@@ -73,6 +59,7 @@ const columnsConfig = [
     pdfWidth: 25,
     excelWidth: 18,
   },
+
   {
     header: "",
     key: "scrollSpacer",
@@ -87,12 +74,11 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function CustomerBalance() {
+export default function AmericanPayableReport() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
-  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -100,12 +86,118 @@ export default function CustomerBalance() {
   });
 
   const query = useQueryParams();
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
-  const minParam = query.get("min") || "-99999999";
+  const minParam = query.get("min") || "0";
   const maxParam = query.get("max") || "99999999";
   const labelParam = query.get("label") || "";
 
   const [errorMessage, setErrorMessage] = useState("");
+
+  //DROP-DOWNS
+  const [salesman, setSalesman] = useState(null);
+  const [category, setCategory] = useState(null);
+  const [city, setCity] = useState(null);
+
+  const [salesmen, setSalesmen] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const toOptions = (arr, valueKey, labelKey) =>
+    [...arr]
+      .sort((a, b) =>
+        a[labelKey]?.toLowerCase().localeCompare(b[labelKey]?.toLowerCase()),
+      )
+      .map((item) => ({
+        value: item[valueKey],
+        label: item[labelKey]?.trim(),
+      }));
+
+  //DROP-DOWNS OPTIONS
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
+  const categoryOptions = toOptions(categories, "tctgcod", "tctgdsc");
+  const cityOptions = toOptions(cities, "tctycod", "tctydsc");
+
+  const selectStyles = {
+    container: (base) => ({
+      ...base,
+      width: "220px",
+      fontFamily: getfontstyle,
+      fontSize: getdatafontsize,
+    }),
+
+    control: (base) => ({
+      ...base,
+      minHeight: "28px",
+      height: "28px",
+      backgroundColor: "#fff",
+      border: "1px solid #000",
+      borderRadius: "0px",
+      boxShadow: "none",
+      justifyContent: "flex-start",
+    }),
+
+    valueContainer: (base) => ({
+      ...base,
+      padding: "0 6px",
+      justifyContent: "flex-start",
+      textAlign: "left",
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      color: "#000",
+      lineHeight: "26px",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#000",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    input: (base) => ({
+      ...base,
+      textAlign: "left",
+    }),
+
+    indicatorsContainer: (base) => ({
+      ...base,
+      height: "28px",
+    }),
+
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: "2px 6px",
+      color: "#000",
+    }),
+
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+
+    menu: (base) => ({
+      ...base,
+      borderRadius: "0px",
+      border: "1px solid #000",
+      boxShadow: "none",
+    }),
+
+    option: (base) => ({
+      ...base,
+      textAlign: "left",
+      padding: "4px 8px",
+      color: "#000",
+    }),
+
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
+  };
 
   const {
     isSidebarVisible,
@@ -116,11 +208,17 @@ export default function CustomerBalance() {
     getdatafontsize,
   } = useTheme();
 
-  // ----------- FETCH API (same as pehle) -----------
   // === API CALL =====
   useEffect(() => {
     fetchData();
   }, [minParam, maxParam]);
+
+  useEffect(() => {
+    fetchData();
+    fetchSalesmen();
+    fetchCategories();
+    fetchCities();
+  }, []);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -129,20 +227,18 @@ export default function CustomerBalance() {
     try {
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("FIntAmt", minParam);
-      form.append("FFnlAmt", maxParam);
 
       const res = await axios.post(
-        "https://crystalsolutions.pk/api/AmericanCustomerBalance.php",
+        "https://crystalsolutions.pk/api/TotalPayable.php",
         form,
       );
 
       let dataRows = [];
 
-      if (Array.isArray(res.data)) {
-        dataRows = res.data;
-      } else if (Array.isArray(res.data.Detail)) {
+      if (Array.isArray(res.data.Detail)) {
         dataRows = res.data.Detail;
+      } else if (Array.isArray(res.data)) {
+        dataRows = res.data;
       }
 
       const mapped = dataRows.map((row) => ({
@@ -158,6 +254,42 @@ export default function CustomerBalance() {
     }
 
     setIsLoading(false);
+  };
+
+  //FETCH SALES-MAN
+  const fetchSalesmen = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetSalesMen.php",
+      form,
+    );
+    setSalesmen(res.data || []);
+  };
+
+  //FETCH CATEGORIES
+  const fetchCategories = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetCatg.php",
+      form,
+    );
+    setCategories(res.data || []);
+  };
+
+  //FETCH CITIES
+  const fetchCities = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetCities.php",
+      form,
+    );
+    setCities(res.data || []);
   };
 
   const exportPDFHandler = () => {
@@ -182,9 +314,8 @@ export default function CustomerBalance() {
 
     // --------- TABLE HEADER ---------
     const pdfColumns = columnsConfig.filter(
-      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
+      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn",
     );
-
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
@@ -408,7 +539,7 @@ export default function CustomerBalance() {
   };
 
   const getSortIcon = (key) => {
-    if (nonSortableKeys.includes(key)) return null; // ❌ no sort icon
+    if (nonSortableKeys.includes(key)) return null; // ❌ no arrows on buttons
 
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
@@ -422,6 +553,7 @@ export default function CustomerBalance() {
       <FaSortDown style={{ marginLeft: "5px", color: "white", opacity: 0.4 }} />
     );
   };
+
   const requestSort = (key) => {
     let direction = "ascending";
 
@@ -431,19 +563,21 @@ export default function CustomerBalance() {
 
     setSortConfig({ key, direction });
   };
+  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
     let data = [...rows];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.toLowerCase().includes(q) ||
+          row.Code?.toLowerCase().includes(q) ||
+          row.Supplier?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q),
+          row.SalesMan?.toLowerCase().includes(q) ||
+          row.Balance?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -471,39 +605,20 @@ export default function CustomerBalance() {
   }, [rows, searchQuery, sortConfig]);
 
   const filteredData = useMemo(() => {
-    let data = rows;
+    if (!searchQuery) return sortedTableData;
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      data = data.filter((row) => {
-        return (
-          row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q)
-        );
-      });
-    }
+    const q = searchQuery.toLowerCase().trim();
 
-    if (sortConfig.key) {
-      data = [...data].sort((a, b) => {
-        const valueA = a[sortConfig.key] ?? "";
-        const valueB = b[sortConfig.key] ?? "";
-
-        if (!isNaN(valueA) && !isNaN(valueB)) {
-          return sortConfig.direction === "asc"
-            ? Number(valueA) - Number(valueB)
-            : Number(valueB) - Number(valueA);
-        }
-
-        return sortConfig.direction === "asc"
-          ? String(valueA).localeCompare(String(valueB))
-          : String(valueB).localeCompare(String(valueA));
-      });
-    }
-
-    return data;
-  }, [rows, searchQuery, sortConfig]);
+    return sortedTableData.filter((row) => {
+      return (
+        row.Code?.toLowerCase().includes(q) ||
+        row.Supplier?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tmobnum?.toLowerCase().includes(q) ||
+        row.SalesMan?.toLowerCase().includes(q) ||
+        row.Balance?.toString().includes(q) // ✅ BALANCE
+      );
+    });
+  }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
     return sortedTableData.reduce((sum, row) => {
@@ -555,71 +670,86 @@ export default function CustomerBalance() {
             boxShadow: softTableStyles.softBoxShadow,
           }}
         >
-          {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
           <NavComponent textdata={REPORT_NAME} />
 
-          {/* SEARCH ROW */}
           <div
-            className="row"
             style={{
-              height: "auto",
-              marginTop: "8px",
-              marginBottom: "8px",
               display: "flex",
-              justifyContent: "flex-end",
-              paddingRight: "8px", // table edge se halka gap
+              alignItems: "center",
+              gap: "12px",
+              padding: "8px",
+              flexWrap: "wrap", 
             }}
           >
+            {/* SALESMAN */}
+            {/* <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "160px" }}>
+              <Select
+                options={salesmanOptions}
+                value={salesman}
+                onChange={setSalesman}
+                placeholder="Salesman"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div> */}
+
+            {/* CATEGORY */}
+            {/* <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "160px" }}>
+              <Select
+                options={categoryOptions}
+                value={category}
+                onChange={setCategory}
+                placeholder="Category"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div> */}
+
+            {/* CITY */}
+            {/* <div style={{ display: "flex", alignItems: "center", gap: "6px" , width: "160px"}}>
+              <Select
+                options={cityOptions}
+                value={city}
+                onChange={setCity}
+                placeholder="City"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div> */}
+
+            {/* SEARCH — RIGHT SIDE */}
             <div
               style={{
+                marginLeft: "auto", // 🔥 keeps search on right
+                minWidth: "250px",
+                maxWidth: "360px",
+                border: `1px solid ${softTableStyles.softBorderColor}`,
+                borderRadius: "2px",
+                backgroundColor: "white",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "10px",
+                padding: "2px 8px",
+                height: "28px",
               }}
             >
-              <div
+              <MagnifyingGlassIcon style={{ width: "16px", height: "16px" }} />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
-                  minWidth: "260px",
-                  maxWidth: "400px",
-                  border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "2px",
-                  backgroundColor: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "2px 8px",
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  paddingLeft: "6px",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
                 }}
-              >
-                <div
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MagnifyingGlassIcon
-                    className="text-gray-500"
-                    style={{ width: "16px", height: "16px" }}
-                  />
-                </div>
-
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    paddingLeft: "6px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                />
-              </div>
+              />
             </div>
           </div>
 
@@ -709,202 +839,170 @@ export default function CustomerBalance() {
               }}
             >
               <tbody>
-                {isLoading ? (
-                  <>
-                    <tr
-                      style={{
-                        backgroundColor: getcolor,
-                        color: fontcolor,
-                      }}
-                    >
+                {filteredData.map((item, i) => (
+                  <tr
+                    key={i}
+                    onClick={() => setSelectedRowIndex(i)}
+                    style={{
+                      cursor: "pointer",
+                      color: selectedRowIndex === i ? "white" : fontcolor,
+                      backgroundColor:
+                        selectedRowIndex === i
+                          ? getnavbarbackgroundcolor // ✅ theme color
+                          : i % 2 === 0
+                            ? getcolor
+                            : "#f8f9ff",
+                      transition: "background-color 0.2s ease",
+                    }}
+                  >
+                    {columnsConfig.map((column, index) => (
                       <td
-                        colSpan={columnsConfig.length}
-                        className="text-center"
-                        style={{ padding: "10px" }}
-                      >
-                        Fetching data...
-                      </td>
-                    </tr>
-                    {Array.from({ length: 20 }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-loading-${rowIndex}`}
+                        key={index}
+                        className={getAlignmentClass(column.alignment)}
                         style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
+                          width: column.uiWidth,
+                          padding: "8px 6px",
+                          borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                         }}
                       >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-loading-${rowIndex}-${colIndex}`}>
-                            &nbsp;
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {sortedTableData.map((item, i) => (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedRowIndex(i)}
-                        style={{
-                          cursor: "pointer",
-                          color: selectedRowIndex === i ? "white" : fontcolor,
-                          backgroundColor:
-                            selectedRowIndex === i
-                              ? getnavbarbackgroundcolor // ✅ theme color
-                              : i % 2 === 0
-                                ? getcolor
-                                : "#f8f9ff",
-                          transition: "background-color 0.2s ease",
-                        }}
-                      >
-                        {columnsConfig.map((column, index) => (
-                          <td
-                            key={index}
-                            className={getAlignmentClass(column.alignment)}
+                        {column.key === "scrollSpacer" ? (
+                          ""
+                        ) : column.key === "Balance" ? (
+                          Number(item[column.key] || 0).toLocaleString()
+                        ) : column.key === "progressBtn" ? (
+                          <div
                             style={{
-                              width: column.uiWidth,
-                              padding: "8px 6px",
-                              borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                              display: "flex",
+                              justifyContent: "center",
                             }}
                           >
-                            {column.key === "scrollSpacer" ? (
-                              ""
-                            ) : column.key === "Balance" ? (
-                              Number(item[column.key] || 0).toLocaleString()
-                            ) : column.key === "progressBtn" ? (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <FaClipboardList
-                                  size={20}
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "#17a2b8",
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(
-                                      `${
-                                        window.location.origin
-                                      }/crystalsol/AmericanProgressReportDashboard?code=${
-                                        item.tcstcod
-                                      }&name=${encodeURIComponent(
-                                        item.tcstdsc,
-                                      )}`,
-                                      "_blank",
-                                    );
-                                  }}
-                                />
-                              </div>
-                            ) : column.key === "ledgerBtn" ? (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <FaFileInvoiceDollar
-                                  size={20}
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "#28a745",
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(
-                                      `${
-                                        window.location.origin
-                                      }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                        item.tcstcod
-                                      }&name=${encodeURIComponent(
-                                        item.tcstdsc,
-                                      )}`,
-                                      "_blank",
-                                    );
-                                  }}
-                                />
-                              </div>
-                            ) : (
-                              item[column.key]
-                            )}
-                          </td>
-                        ))}
-                      </tr>
+                            <FaClipboardList
+                              size={20}
+                              style={{ cursor: "pointer", color: "#17a2b8" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanProgressReportDashboard?code=${
+                                    item.Code
+                                  }&name=${encodeURIComponent(item.Supplier)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : column.key === "ledgerBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaFileInvoiceDollar
+                              size={20}
+                              style={{ cursor: "pointer", color: "#28a745" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
+                                    item.Code
+                                  }&name=${encodeURIComponent(item.Supplier)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          item[column.key]
+                        )}
+                      </td>
                     ))}
+                  </tr>
+                ))}
 
-                    {/* Blank rows to keep table height nice */}
-                    {Array.from({
-                      length: Math.max(0, 27 - sortedTableData.length),
-                    }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-${rowIndex}`}
-                        style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
-                        }}
-                      >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                        ))}
-                      </tr>
-                    ))}
-
-                    {/* Dummy row to keep widths */}
-                    <tr>
+                {Array.from({ length: 25 - filteredData.length }).map(
+                  (_, idx) => (
+                    <tr
+                      key={`empty-${idx}`}
+                      style={{
+                        backgroundColor: idx % 2 === 0 ? getcolor : "#f8f9ff",
+                      }}
+                    >
                       {columnsConfig.map((column, index) => (
                         <td
-                          key={`dummy-bottom-${index}`}
-                          style={{ width: column.uiWidth }}
-                        ></td>
+                          key={index}
+                          style={{
+                            width: column.uiWidth,
+                            padding: "8px 6px",
+                            height: "24px",
+                            borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                          }}
+                        >
+                          {/* empty cell */}
+                        </td>
                       ))}
                     </tr>
-                  </>
+                  ),
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* TOTAL ROW (bottom of table) */}
           <div
             style={{
+              borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
               borderTop: `2px solid ${softTableStyles.softBorderColor}`,
               height: "24px",
               display: "flex",
               width: "100%",
             }}
           >
-            {columnsConfig.map((column, index) => (
-              <div
-                key={index}
-                className={getAlignmentClass(column.alignment)}
-                style={{
-                  width: column.uiWidth,
-                  background: getnavbarbackgroundcolor,
-                  color: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent:
-                    column.key === "Balance" ? "flex-end" : "flex-start",
-                  padding: "0 6px",
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                }}
-              >
-                {column.key === "Balance"
-                  ? totalBalance.toLocaleString()
-                  : column.key === "tacccod"
-                    ? sortedTableData.length
-                    : ""}
-              </div>
-            ))}
+            {columnsConfig.map((column, index) => {
+              const isTotalColumn = index === columnsConfig.length - 2;
+
+              const alignmentClass = getAlignmentClass(
+                isTotalColumn ? "right" : "left",
+              );
+
+              return (
+                <div
+                  key={`total-col-${index}`}
+                  className={alignmentClass}
+                  style={{
+                    width: column.uiWidth,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
+                    borderRight:
+                      index < columnsConfig.length - 1
+                        ? `1px solid ${softTableStyles.softBorderColor}`
+                        : "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: isTotalColumn ? "flex-end" : "flex-start",
+                    paddingRight: isTotalColumn ? "5px" : "0px",
+                    paddingLeft: isTotalColumn ? "0px" : "5px",
+                    fontWeight: "bold",
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
+                  }}
+                >
+                  {column.key === "Balance" ? (
+                    <span>{totalBalance.toLocaleString()}</span>
+                  ) : index === 2 ? (
+                    <span>{filteredData.length}</span>
+                  ) : column.key === "scrollSpacer" ? (
+                    ""
+                  ) : (
+                    ""
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          {/* ACTION BUTTONS – Only PDF & Excel */}
           <div
             style={{
               margin: "5px",
