@@ -66,7 +66,7 @@ const columnsConfig = [
   // },
   {
     header: "Code",
-    key: "code",
+    key: "titmcod",
     alignment: "left",
     uiWidth: 150,
     pdfWidth: 20,
@@ -74,7 +74,7 @@ const columnsConfig = [
   },
   {
     header: "Description",
-    key: "Description",
+    key: "ttrndsc",
     alignment: "left",
     uiWidth: 320,
     pdfWidth: 80,
@@ -98,8 +98,8 @@ const columnsConfig = [
     excelWidth: 30,
   },
   {
-    header: "Sale Amount",
-    key: "Sale Amount",
+    header: "Amount",
+    key: "Amount",
     alignment: "right",
     uiWidth: 130,
     pdfWidth: 25,
@@ -213,7 +213,7 @@ export default function AmericanPreviousMonthSalesReport() {
       form.append("FSchTxt", "");
 
       const res = await axios.post(
-        "https://crystalsolutions.pk/api/ItemSaleSummary.php",
+        "https://crystalsolutions.pk/api/AmericanItemSaleReport.php",
         form,
         { timeout: 20000 },
       );
@@ -660,7 +660,7 @@ export default function AmericanPreviousMonthSalesReport() {
           row.Description?.trim().toLowerCase().includes(q) ||
           row.Qnty?.toString().includes(q) ||
           row.Rate?.toString().includes(q) ||
-          row["Sale Amount"]?.toString().includes(q),
+          row["Amount"]?.toString().includes(q),
       );
     }
 
@@ -671,7 +671,7 @@ export default function AmericanPreviousMonthSalesReport() {
         const bVal = b[sortConfig.key];
 
         // 🔢 Numeric columns
-        if (["Qnty", "Rate", "Sale Amount"].includes(sortConfig.key)) {
+        if (["Qnty", "Rate", "Amount"].includes(sortConfig.key)) {
           const aNum = Number(String(aVal || 0).replace(/,/g, ""));
           const bNum = Number(String(bVal || 0).replace(/,/g, ""));
 
@@ -704,7 +704,7 @@ export default function AmericanPreviousMonthSalesReport() {
         row.Description?.trim().toLowerCase().includes(q) ||
         row.Qnty?.toString().includes(q) ||
         row.Rate?.toString().includes(q) ||
-        row["Sale Amount"]?.toString().includes(q)
+        row["Amount"]?.toString().includes(q)
       );
     });
   }, [sortedTableData, searchQuery]);
@@ -1114,19 +1114,7 @@ export default function AmericanPreviousMonthSalesReport() {
                   />
                 </div> */}
 
-                {/* SALESMAN (future API) */}
-                {/* <div style={filterRowStyle}>
-                  <span style={filterLabelStyle}>Salesman :</span>
-                  <Select
-                    options={salesmanOptions}
-                    value={salesman}
-                    onChange={setSalesman}
-                    placeholder="ALL"
-                    isSearchable
-                    isClearable
-                    styles={selectStyles}
-                  />
-                </div> */}
+             
               </div>
             </div>
           </div>
@@ -1380,7 +1368,7 @@ export default function AmericanPreviousMonthSalesReport() {
                     <span style={{ width: "100%", textAlign: "right" }}>
                       {apiTotalQty.toLocaleString()}
                     </span>
-                  ) : column.key === "Sale Amount" ? (
+                  ) : column.key === "Amount" ? (
                     <span style={{ width: "100%", textAlign: "right" }}>
                       {apiTotalAmount.toLocaleString()}
                     </span>
