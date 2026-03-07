@@ -169,7 +169,8 @@ export default function AmericanProgressReportDashboard() {
     return `${dd}-${mm}-${yyyy}`;
   };
 
-  const [cusDate] = useState(formatDateDDMMYYYY(new Date()));
+  const [cusDate, setCusDate] = useState(formatDateDDMMYYYY(new Date()));
+  // const [cusDate] = useState(formatDateDDMMYYYY(new Date()));
   // const [cusDate, setCusDate] = useState(`31-12-${currentYear}`);
   const [appliedDate, setAppliedDate] = useState(`31-12-${currentYear}`);
 
@@ -421,31 +422,6 @@ export default function AmericanProgressReportDashboard() {
       ? apiData["credit amount"]
       : null;
 
-  // const handleSelect = () => {
-  //   const today = new Date();
-  //   const todayYear = today.getFullYear();
-
-  //   let apiDate;
-  //   let apiYear;
-
-  //   if (selectedYear > todayYear) {
-  //     const dd = String(today.getDate()).padStart(2, "0");
-  //     const mm = String(today.getMonth() + 1).padStart(2, "0");
-  //     const yyyy = todayYear;
-
-  //     apiDate = `${dd}-${mm}-${yyyy}`;
-  //     apiYear = todayYear;
-  //   } else {
-  //     apiDate = `31-12-${selectedYear}`;
-  //     apiYear = selectedYear;
-  //   }
-
-  //   setAppliedYear(apiYear);
-  //   setCusDate(apiDate);
-
-  //   fetchProgress(apiYear, apiDate);
-  // };
-
   const handleSelect = () => {
     const today = new Date();
     const todayYear = today.getFullYear();
@@ -462,6 +438,7 @@ export default function AmericanProgressReportDashboard() {
     }
 
     setAppliedYear(apiYear);
+    setCusDate(apiDate);
     fetchProgress(apiYear, apiDate);
   };
   const exportPDFHandler = () => {
@@ -860,7 +837,19 @@ export default function AmericanProgressReportDashboard() {
             >
               <select
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                onChange={(e) => {
+                  const yr = Number(e.target.value);
+                  setSelectedYear(yr);
+
+                  const today = new Date();
+                  const todayYear = today.getFullYear();
+
+                  if (yr === todayYear) {
+                    setCusDate(formatDateDDMMYYYY(today));
+                  } else {
+                    setCusDate(`31-12-${yr}`);
+                  }
+                }}
                 style={{
                   border: "none",
                   outline: "none",
