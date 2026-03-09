@@ -792,7 +792,7 @@ export default function CustomerBalance() {
                                       `${
                                         window.location.origin
                                       }/crystalsol/AmericanProgressReportDashboard?code=${
-                                        item.tcstcod
+                                        item.tacccod
                                       }&name=${encodeURIComponent(
                                         item.tcstdsc,
                                       )}`,
@@ -820,7 +820,7 @@ export default function CustomerBalance() {
                                       `${
                                         window.location.origin
                                       }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                        item.tcstcod
+                                        item.tacccod
                                       }&name=${encodeURIComponent(
                                         item.tcstdsc,
                                       )}`,

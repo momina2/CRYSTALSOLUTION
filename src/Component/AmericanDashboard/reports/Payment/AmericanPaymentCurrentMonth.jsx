@@ -1,61 +1,93 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useTheme } from "../../../ThemeContext";
-import NavComponent from "../../MainComponent/Navform/navbarform";
-import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
+import { useTheme } from "../../../../ThemeContext";
+
+import NavComponent from "../../../MainComponent/Navform/navbarform";
+import SingleButton from "../../../MainComponent/Button/SingleButton/SingleButton";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { FaSortUp, FaSortDown, FaSort } from "react-icons/fa";
-import "../AmericanDashboard.css";
+import "../../AmericanDashboard.css";
 import jsPDF from "jspdf";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
+import Select from "react-select";
 
-const REPORT_NAME = "Managers Report";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const currentDate = new Date();
+
+const monthName = currentDate.toLocaleString("en-US", { month: "long" });
+const year = currentDate.getFullYear();
+
+// ===== CURRENT MONTH HELPERS =====
+const today = new Date();
+
+const currentMonthName = today.toLocaleString("en-US", { month: "long" });
+const currentYear = today.getFullYear();
+const currentMonth = today.getMonth() + 1;
+
+// First day
+const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`;
+
+// Last day (timezone safe)
+const lastDateObj = new Date(currentYear, currentMonth, 0);
+const lastDayOfMonth = `${currentYear}-${String(currentMonth).padStart(
+  2,
+  "0",
+)}-${String(lastDateObj.getDate()).padStart(2, "0")}`;
+
+const todayDate = `${currentYear}-${String(currentMonth).padStart(
+  2,
+  "0",
+)}-${String(today.getDate()).padStart(2, "0")}`;
+// Example:
+// February 2026
+const REPORT_NAME = `American Payment Report - ${currentMonthName} ${currentYear}`;
+
+const COMPANY_NAME = "American Trading";
 
 const columnsConfig = [
-  {
-    header: "Rpt",
-    key: "ReportBtn",
-    alignment: "center",
-    uiWidth: 50,
-    pdfWidth: 0,
-    excelWidth: 0,
-  },
+  // {
+  //   header: "Lgr",
+  //   key: "ledgerBtn",
+  //   alignment: "center",
+  //   uiWidth: 50,
+  //   pdfWidth: 0,
+  //   excelWidth: 0,
+  // },
+  // {
+  //   header: "P.R",
+  //   key: "progressBtn",
+  //   alignment: "center",
+  //   uiWidth: 50,
+  //   pdfWidth: 0,
+  //   excelWidth: 0,
+  // },
   {
     header: "Code",
-    key: "tmgrcod",
-    alignment: "center",
-    uiWidth: 60,
-    pdfWidth: 10,
+    key: "Code",
+    alignment: "left",
+    uiWidth: 80,
+    pdfWidth: 20,
     excelWidth: 15,
   },
   {
-    header: "Manager",
-    key: "Manager",
+    header: "Description",
+    key: "Description",
     alignment: "left",
-    uiWidth: 200,
-    pdfWidth: 35,
-    excelWidth: 30,
+    uiWidth: 350,
+    pdfWidth: 80,
+    excelWidth: 40,
   },
+
   {
-    header: "Nos",
-    key: "Nos",
+    header: "Payment",
+    key: "Payment",
     alignment: "right",
-    uiWidth: 50,
-    pdfWidth: 10,
-    excelWidth: 20,
-  },
-  {
-    header: "Balance",
-    key: "Bal",
-    alignment: "right",
-    uiWidth: 100,
-    pdfWidth: 10,
-    excelWidth: 20,
+    uiWidth: 150,
+    pdfWidth: 80,
+    excelWidth: 40,
   },
   {
     header: "",
@@ -71,28 +103,74 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function AmericanManagersReport() {
+const sortAZ = (arr, labelKey) =>
+  [...arr].sort((a, b) =>
+    a[labelKey]?.toLowerCase().localeCompare(b[labelKey]?.toLowerCase()),
+  );
+
+const toOptions = (arr, valueKey, labelKey) =>
+  [...arr]
+    .sort((a, b) =>
+      a[labelKey]?.toLowerCase().localeCompare(b[labelKey]?.toLowerCase()),
+    )
+    .map((item) => ({
+      value: item[valueKey],
+      label: item[labelKey]?.trim(),
+    }));
+
+export default function AmericanPaymentCurrentMonth() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [apiTotalBalance, setApiTotalBalance] = useState(0);
-  const [apiTotalCity, setApiTotalCity] = useState(0);
-  const [apiTotalCustomers, setApiTotalCustomers] = useState(0);
-
+  const [fromDate, setFromDate] = useState(firstDayOfMonth);
+  const [toDate, setToDate] = useState(todayDate);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
+  const showIfNonZero = (val) => {
+    if (val === null || val === undefined) return "";
+
+    const num = Number(String(val).replace(/,/g, ""));
+    if (!num || num === 0) return "";
+
+    return val;
+  };
+
   const query = useQueryParams();
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  const [city, setCity] = useState(null);
+  const [region, setRegion] = useState(null);
+  const [salesman, setSalesman] = useState(null);
+  const [company, setCompany] = useState(null);
+  const [store, setStore] = useState(null);
+  const [category, setCategory] = useState(null);
 
-  const minParam = query.get("min") || "0";
-  const maxParam = query.get("max") || "99999999";
-  const labelParam = query.get("label") || "";
+  const [cities, setCities] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [salesmen, setSalesmen] = useState([]);
+  const [stores, setStores] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [categoryList, setCategoryList] = useState([]);
 
-  const [errorMessage, setErrorMessage] = useState("");
+  //Totals from API (for footer)
+  const [apiTotalQty, setApiTotalQty] = useState(0);
+  const [apiTotalAmount, setApiTotalAmount] = useState(0);
+
+  // const [salesmens, setSalesmens] = useState([]);
+
+  // const minParam = query.get("min") || "0";
+  // const maxParam = query.get("max") || "99999999";
+  // const labelParam = query.get("label") || "";
+
+  // const [errorMessage, setErrorMessage] = useState("");
+
+  const companyOptions = toOptions(companies, "tcmpcod", "tcmpdsc");
+  const storeOptions = toOptions(stores, "tstrcod", "tstrdsc");
+  const categoryOptions = toOptions(categoryList, "tctgcod", "tctgdsc");
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
 
   const {
     isSidebarVisible,
@@ -103,52 +181,208 @@ export default function AmericanManagersReport() {
     getdatafontsize,
   } = useTheme();
 
-  // === API CALL =====
-  useEffect(() => {
-    fetchData();
-  }, [minParam, maxParam]);
+  // const fetchData = async () => {
+  //   try {
+  //     setIsLoading(true);
+
+  //     const form = new FormData();
+  //     form.append("code", "AMRELEC");
+  //     form.append("FLocCod", "001");
+  //     form.append("FYerDsc", "2019-2025");
+  //     form.append("FIntDat", fromDate);
+  //     form.append("FFnlDat", toDate);
+  //     form.append("FCmpCod", company?.value || "");
+  //     form.append("FCtgCod", category?.value || "");
+  //     form.append("FTrnTyp", "");
+  //     form.append("FStrCod", store?.value || "");
+  //     form.append("FSchTxt", "");
+
+  //     const res = await axios.post(
+  //       "https://crystalsolutions.pk/api/ItemSaleSummary.php",
+  //       form,
+  //       { timeout: 20000 },
+  //     );
+
+  //     const arr = res?.data?.Detail ?? [];
+  //     setRows(arr);
+  //   } catch (err) {
+  //     console.error("FetchError:", err);
+  //     setRows([]);
+  //   }
+  //   setIsLoading(false);
+  // };
 
   const fetchData = async () => {
-    setIsLoading(true);
-    setErrorMessage("");
-
     try {
+      setIsLoading(true);
+
       const form = new FormData();
       form.append("code", "AMRELEC");
+      form.append("FIntDat", fromDate);
+      form.append("FFnlDat", toDate);
+      form.append("FSchTxt", "");
 
       const res = await axios.post(
-        "https://crystalsolutions.pk/api/AmericanManagersInfo.php",
+        "https://crystalsolutions.pk/api/AmericanPaymentReport.php",
         form,
+        { timeout: 20000 },
       );
 
-      let dataRows = [];
+      setRows(res?.data?.Detail ?? []);
 
-      if (Array.isArray(res.data.Detail)) {
-        dataRows = res.data.Detail;
-      } else if (Array.isArray(res.data)) {
-        dataRows = res.data;
-      }
-      if (res.data["Total Balance"]) {
-        const cleanTotal = String(res.data["Total Balance"]).replace(/,/g, "");
-        setApiTotalBalance(Number(cleanTotal) || 0);
-      }
+      // ✅ TOTALS DIRECT FROM API
+      //   setApiTotalQty(
+      //     Number(String(res?.data?.["Total Qnty"] || 0).replace(/,/g, "")),
+      //   );
 
-      const mapped = dataRows.map((row) => ({
-        tmgrcod: row.tmgrcod?.trim(),
-        Manager: row.Manager?.trim(),
-        Nos: Number(row.Nos) || 0,
-        Bal: row.Bal ? Number(row.Bal.replace(/,/g, "")) : 0,
-      }));
-      setRows(mapped);
-
-      setErrorMessage("");
+      setApiTotalAmount(
+        Number(String(res?.data?.["Total"] || 0).replace(/,/g, "")),
+      );
     } catch (err) {
-      console.error("API error:", err);
-      setErrorMessage("Unable to retrieve data. Please try again.");
+      console.error("FetchError:", err);
       setRows([]);
+      setApiTotalQty(0);
+      setApiTotalAmount(0);
     }
 
     setIsLoading(false);
+  };
+
+  //   const fetchCities = async () => {
+  //     try {
+  //       const form = new FormData();
+  //       form.append("code", "AMRELEC");
+
+  //       const res = await axios.post(
+  //         "https://crystalsolutions.pk/api/GetCities.php",
+  //         form,
+  //       );
+
+  //       setCities(res.data || []);
+  //     } catch (err) {
+  //       console.error("City Fetch Error", err);
+  //       setCities([]);
+  //     }
+  //   };
+  //   const fetchRegions = async () => {
+  //     try {
+  //       const form = new FormData();
+  //       form.append("code", "AMRELEC");
+
+  //       const res = await axios.post(
+  //         "https://crystalsolutions.pk/api/GetRegions.php",
+  //         form,
+  //       );
+
+  //       setRegions(res.data || []);
+  //     } catch (err) {
+  //       console.error("Region Fetch Error", err);
+  //       setRegions([]);
+  //     }
+  //   };
+  //   const fetchSalesmen = async () => {
+  //     try {
+  //       const form = new FormData();
+  //       form.append("code", "AMRELEC");
+
+  //       const res = await axios.post(
+  //         "https://crystalsolutions.pk/api/GetSalesMen.php",
+  //         form,
+  //       );
+
+  //       setSalesmen(res.data || []);
+  //     } catch (err) {
+  //       console.error("Salesman Fetch Error", err);
+  //       setSalesmen([]);
+  //     }
+  //   };
+
+  //   const fetchStores = async () => {
+  //     try {
+  //       const form = new FormData();
+  //       form.append("code", "AMRELEC");
+  //       form.append("FLocCod", "001");
+
+  //       const res = await axios.post(
+  //         "https://crystalsolutions.pk/api/GetStore.php",
+  //         form,
+  //       );
+
+  //       setStores(res.data || []);
+  //     } catch (err) {
+  //       console.error("Store Fetch Error", err);
+  //       setStores([]);
+  //     }
+  //   };
+
+  //   const fetchCompany = async () => {
+  //     try {
+  //       const form = new FormData();
+  //       form.append("code", "AMRELEC");
+
+  //       const res = await axios.post(
+  //         "https://crystalsolutions.pk/api/GetCompany.php",
+  //         form,
+  //       );
+
+  //       setCompanies(res.data || []);
+  //     } catch (err) {
+  //       console.error("Company Fetch Error", err);
+  //       setCompanies([]);
+  //     }
+  //   };
+
+  //   const fetchCategory = async () => {
+  //     try {
+  //       const form = new FormData();
+  //       form.append("code", "AMRELEC");
+
+  //       const res = await axios.post(
+  //         "https://crystalsolutions.pk/api/GetCatg.php",
+  //         form,
+  //       );
+
+  //       setCategoryList(res.data || []);
+  //     } catch (err) {
+  //       console.error("Category Fetch Error", err);
+  //       setCategoryList([]);
+  //     }
+  //   };
+
+  useEffect(() => {
+    fetchData();
+    // fetchCities();
+    // fetchRegions();
+    // fetchSalesmen();
+    // fetchStores();
+    // fetchCategory();
+    // fetchCompany();
+  }, []);
+
+  useEffect(() => {
+    setFromDate(firstDayOfMonth);
+    setToDate(todayDate);
+  }, []);
+
+  const handleSelect = () => {
+    if (!fromDate || !toDate) return;
+
+    if (fromDate > toDate) {
+      alert("From date cannot be greater than To date");
+      return;
+    }
+
+    // ✅ URL update
+    navigate(
+      `?from=${fromDate}&to=${toDate}`,
+      // `&company=${company?.value || ""}` +
+      // `&category=${category?.value || ""}` +
+      // `&salesman=${salesman?.value || ""}` +
+      // `&store=${store?.value || ""}`,
+      { replace: true },
+    );
+
+    fetchData();
   };
 
   const exportPDFHandler = () => {
@@ -173,7 +407,7 @@ export default function AmericanManagersReport() {
 
     // --------- TABLE HEADER ---------
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "ReportBtn",
+      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn",
     );
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
@@ -243,22 +477,12 @@ export default function AmericanManagersReport() {
     drawHeader();
 
     const dataRows = sortedTableData.map((row) =>
-      keys.map((key) =>
-        key === "Bal"
-          ? Number(row[key] || 0).toLocaleString()
-          : (row[key] ?? ""),
-      ),
+      keys.map((key) => row[key] ?? ""),
     );
-
     const totalRow = new Array(keys.length).fill("");
+    totalRow[0] = sortedTableData.length.toString();
 
-    // Total Customers (first column – same as UI)
-    totalRow[0] = apiTotalCity.toLocaleString();
-
-    // Total Balance (last column)
-    totalRow[keys.length - 1] = apiTotalBalance.toLocaleString();
-    totalRow[keys.length - 2] = apiTotalCustomers.toLocaleString();
-    // totalRow[keys.length - 1] = totalBalance.toLocaleString();
+    totalRow[keys.length - 1] = apiTotalAmount.toLocaleString();
     const rowsPDF = [...dataRows, totalRow];
 
     rowsPDF.forEach((row, index) => {
@@ -276,7 +500,7 @@ export default function AmericanManagersReport() {
   async function exportCSV({
     rows,
     columnsConfig,
-    totalCollection,
+    totalPayment,
     companyName,
     reportName,
   }) {
@@ -284,7 +508,7 @@ export default function AmericanManagersReport() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ReportBtn", "scrollSpacer"].includes(c.key),
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -329,7 +553,7 @@ export default function AmericanManagersReport() {
 
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
-    totalRowData[headers.length - 1] = totalCollection.toLocaleString();
+    totalRowData[headers.length - 1] = totalPayment.toLocaleString();
     const totalRow = worksheet.addRow(totalRowData);
 
     totalRow.eachCell((cell) => {
@@ -408,7 +632,7 @@ export default function AmericanManagersReport() {
   };
 
   const getSortIcon = (key) => {
-    if (nonSortableKeys.includes(key)) return null;
+    if (nonSortableKeys.includes(key)) return null; // ❌ no arrows on buttons
 
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
@@ -432,50 +656,46 @@ export default function AmericanManagersReport() {
 
     setSortConfig({ key, direction });
   };
-  const nonSortableKeys = ["ReportBtn", "scrollSpacer"];
+  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
     let data = [...rows];
 
+    // 🔍 Search filter
     if (searchQuery) {
       const q = searchQuery.toLowerCase().trim();
-
       data = data.filter(
         (row) =>
-          row.Code?.toLowerCase().includes(q) ||
-          row.Manager?.toLowerCase().includes(q) ||
-          String(row.Nos).includes(q),
+          row.code?.toLowerCase().includes(q) ||
+          row.Description?.trim().toLowerCase().includes(q) ||
+          row.Payment?.toString().includes(q),
       );
     }
 
+    // 🔃 Sorting
     if (sortConfig.key) {
       data.sort((a, b) => {
-        const aVal = a[sortConfig.key] ?? "";
-        const bVal = b[sortConfig.key] ?? "";
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
 
-        // ✅ Balance numeric sort
-        if (sortConfig.key === "Bal") {
-          const aNum = parseFloat(aVal) || 0;
-          const bNum = parseFloat(bVal) || 0;
+        // 🔢 Numeric columns
+        if (["Payment"].includes(sortConfig.key)) {
+          const aNum = Number(String(aVal || 0).replace(/,/g, ""));
+          const bNum = Number(String(bVal || 0).replace(/,/g, ""));
+
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;
         }
 
-        // ✅ Nos numeric sort (FIX)
-        if (sortConfig.key === "Nos") {
-          const aNum = Number(a.Nos) || 0;
-          const bNum = Number(b.Nos) || 0;
-          return sortConfig.direction === "ascending"
-            ? aNum - bNum
-            : bNum - aNum;
-        }
+        // 🔤 Text columns
+        const aStr = String(aVal ?? "").toLowerCase();
+        const bStr = String(bVal ?? "").toLowerCase();
 
-        // 🔤 default string sort
         return sortConfig.direction === "ascending"
-          ? String(aVal).localeCompare(String(bVal))
-          : String(bVal).localeCompare(String(aVal));
+          ? aStr.localeCompare(bStr)
+          : bStr.localeCompare(aStr);
       });
     }
 
@@ -489,44 +709,131 @@ export default function AmericanManagersReport() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.Code?.toLowerCase().includes(q) ||
-        row.Manager?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-        row.Nos?.toLowerCase().includes(q)
+        row.code?.toLowerCase().includes(q) ||
+        row.Description?.trim().toLowerCase().includes(q) ||
+        row.Payment?.toString().includes(q)
       );
     });
   }, [sortedTableData, searchQuery]);
-  const totalBalance = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(row.Bal ?? 0);
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
-  const totalCities = filteredData.length;
-  const totalCustomers = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(row.Nos ?? 0);
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
 
-  //   const totalBalance = useMemo(() => {
-  //     return sortedTableData.reduce((sum, row) => {
-  //       const value = parseFloat(row.Bal ?? 0);
-  //       return sum + (isNaN(value) ? 0 : value);
-  //     }, 0);
-  //   }, [sortedTableData]);
+  // const totalQuantity = useMemo(() => {
+  //   return filteredData.reduce((sum, row) => {
+  //     const val = Number(String(row.Qnty || "0").replace(/,/g, ""));
+  //     return sum + (isNaN(val) ? 0 : val);
+  //   }, 0);
+  // }, [filteredData]);
 
-  const totalNos = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      return sum + (Number(row.Nos) || 0);
-    }, 0);
-  }, [filteredData]);
+  // const totalSaleTotal = useMemo(() => {
+  //   return filteredData.reduce((sum, row) => {
+  //     const qty = Number(String(row.Qnty || "0").replace(/,/g, ""));
+  //     const rate = Number(String(row.Rate || "0").replace(/,/g, ""));
+
+  //     if (isNaN(qty) || isNaN(rate)) return sum;
+
+  //     return sum + qty * rate; // 🔥 SOURCE OF TRUTH
+  //   }, 0);
+  // }, [filteredData]);
+
+  const filterRowStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  };
+
+  const filterLabelStyle = {
+    width: "80px",
+    fontSize: getdatafontsize,
+    fontFamily: getfontstyle,
+    textAlign: "left",
+  };
+
+  const selectStyles = {
+    container: (base) => ({
+      ...base,
+      width: "220px",
+      fontFamily: getfontstyle,
+      fontSize: getdatafontsize,
+    }),
+
+    control: (base) => ({
+      ...base,
+      minHeight: "28px",
+      height: "28px",
+      backgroundColor: "#fff",
+      border: "1px solid #000",
+      borderRadius: "0px",
+      boxShadow: "none",
+      justifyContent: "flex-start",
+    }),
+
+    valueContainer: (base) => ({
+      ...base,
+      padding: "0 6px",
+      justifyContent: "flex-start",
+      textAlign: "left",
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      color: "#000",
+      lineHeight: "26px",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#000",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    input: (base) => ({
+      ...base,
+      textAlign: "left",
+    }),
+
+    indicatorsContainer: (base) => ({
+      ...base,
+      height: "28px",
+    }),
+
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: "2px 6px",
+      color: "#000",
+    }),
+
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+
+    menu: (base) => ({
+      ...base,
+      borderRadius: "0px",
+      border: "1px solid #000",
+      boxShadow: "none",
+    }),
+
+    option: (base) => ({
+      ...base,
+      textAlign: "left",
+      padding: "4px 8px",
+      color: "#000",
+    }),
+
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
+  };
 
   const handleCSV = () => {
     exportCSV({
       rows: sortedTableData,
       columnsConfig,
-      //   totalCollection: totalBalance,
+      totalPayment: apiTotalAmount, // ✅ API TOTAL
+      totalQnty: apiTotalQty, // ✅ API TOTAL
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -565,71 +872,106 @@ export default function AmericanManagersReport() {
             boxShadow: softTableStyles.softBoxShadow,
           }}
         >
-          {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
+          {/* NAV HEADER BAR (same look as MemberPaymentReport) */}
           <NavComponent textdata={REPORT_NAME} />
-
-          {/* SEARCH ROW */}
+          {/* DATE + DROPDOWNS + SEARCH ROW */}
           <div
-            className="row"
             style={{
-              height: "auto",
-              marginTop: "8px",
-              marginBottom: "8px",
               display: "flex",
-              justifyContent: "flex-end",
-              paddingRight: "8px", // table edge se halka gap
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              gap: "14px",
+              padding: "4px 10px", // 👈 important
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "10px",
-              }}
-            >
+            {/* LEFT — DATE FILTERS */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              {/* FROM */}
               <div
-                style={{
-                  minWidth: "260px",
-                  maxWidth: "400px",
-                  border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "2px",
-                  backgroundColor: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "2px 8px",
-                }}
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
-                <div
+                <span
                   style={{
-                    width: "16px",
-                    height: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
                   }}
                 >
-                  <MagnifyingGlassIcon
-                    className="text-gray-500"
-                    style={{ width: "16px", height: "16px" }}
-                  />
-                </div>
+                  From:
+                </span>
 
                 <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
                   style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    paddingLeft: "6px",
+                    height: "26px",
+                    width: "140px",
+                    border: "1px solid #000",
+                    padding: "0 6px",
                     fontSize: getdatafontsize,
                     fontFamily: getfontstyle,
                   }}
                 />
               </div>
+
+              {/* TO */}
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                <span
+                  style={{
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
+                  }}
+                >
+                  To:
+                </span>
+
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  style={{
+                    height: "26px",
+                    width: "140px",
+                    border: "1px solid #000",
+                    padding: "0 6px",
+                    fontSize: getdatafontsize,
+                    fontFamily: getfontstyle,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* RIGHT — SEARCH */}
+            <div
+              style={{
+                width: "200px",
+                border: "1px solid #000",
+                backgroundColor: "white",
+                display: "flex",
+                alignItems: "center",
+                padding: "0px 6px",
+                height: "26px",
+              }}
+            >
+              <MagnifyingGlassIcon style={{ width: "16px", height: "16px" }} />
+
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  paddingLeft: "6px",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                }}
+              />
             </div>
           </div>
 
@@ -743,15 +1085,43 @@ export default function AmericanManagersReport() {
                           width: column.uiWidth,
                           padding: "8px 6px",
                           borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "Nos" ? (
-                          item.Nos.toLocaleString()
-                        ) : column.key === "Bal" ? (
-                          Number(item.Bal).toLocaleString()
-                        ) : column.key === "ReportBtn" ? (
+                        ) : column.key === "Opening" ? (
+                          showIfNonZero(item.Opening)
+                        ) : column.key === "Debit" ? (
+                          showIfNonZero(item.Debit)
+                        ) : column.key === "Credit" ? (
+                          showIfNonZero(item.Credit)
+                        ) : column.key === "Balance" ? (
+                          showIfNonZero(item.Balance)
+                        ) : column.key === "progressBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaClipboardList
+                              size={20}
+                              style={{ cursor: "pointer", color: "#17a2b8" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanProgressReportDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : column.key === "ledgerBtn" ? (
                           <div
                             style={{
                               display: "flex",
@@ -763,13 +1133,12 @@ export default function AmericanManagersReport() {
                               style={{ cursor: "pointer", color: "#28a745" }}
                               onClick={(e) => {
                                 e.stopPropagation();
-
                                 window.open(
                                   `${
                                     window.location.origin
-                                  }/crystalsol/AmericanManagersDetailsReport?PMgrCod=${
-                                    item.tmgrcod
-                                  }&name=${encodeURIComponent(item.Manager)}`,
+                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
+                                    item.tcstcod
+                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank",
                                 );
                               }}
@@ -783,7 +1152,7 @@ export default function AmericanManagersReport() {
                   </tr>
                 ))}
 
-                {Array.from({ length: 18 - filteredData.length }).map(
+                {Array.from({ length: 25 - filteredData.length }).map(
                   (_, idx) => (
                     <tr
                       key={`empty-${idx}`}
@@ -821,7 +1190,9 @@ export default function AmericanManagersReport() {
             }}
           >
             {columnsConfig.map((column, index) => {
-              const isTotalColumn = index === columnsConfig.length - 2;
+              const isTotalColumn = ["Debit", "Credit", "Balance"].includes(
+                column.key,
+              );
 
               const alignmentClass = getAlignmentClass(
                 isTotalColumn ? "right" : "left",
@@ -842,19 +1213,23 @@ export default function AmericanManagersReport() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: isTotalColumn ? "flex-end" : "flex-start",
-                    paddingRight: isTotalColumn ? "5px" : "0px",
+                    paddingRight: isTotalColumn ? "6px" : "5px",
                     paddingLeft: isTotalColumn ? "0px" : "5px",
                     fontWeight: "bold",
                     fontSize: getdatafontsize,
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "tmgrcod" ? (
-                    <span>{filteredData.length}</span> // total managers
-                  ) : column.key === "Nos" ? (
-                    <span>{totalNos.toLocaleString()}</span> // total Nos
-                  ) : column.key === "Bal" ? (
-                    <span>{apiTotalBalance.toLocaleString()}</span> // API total balance
+                  {column.key === "Qnty" ? (
+                    <span style={{ width: "100%", textAlign: "right" }}>
+                      {apiTotalQty.toLocaleString()}
+                    </span>
+                  ) : column.key === "Payment" ? (
+                    <span style={{ width: "100%", textAlign: "right" }}>
+                      {apiTotalAmount.toLocaleString()}
+                    </span>
+                  ) : index === 0 ? (
+                    <span>{filteredData.length}</span>
                   ) : (
                     ""
                   )}
@@ -885,6 +1260,7 @@ export default function AmericanManagersReport() {
                 (e.currentTarget.style.border = `1px solid ${fontcolor}`)
               }
             />
+            <SingleButton text="Select" onClick={handleSelect} />
           </div>
         </div>
       </div>

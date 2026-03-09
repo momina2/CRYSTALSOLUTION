@@ -333,7 +333,7 @@ const FinancialPieChart = ({ webData, balanceData }) => {
   const receivableRaw = toNumber(webData?.Receivable);
   const payableRaw = toNumber(webData?.Payable);
   const stockRaw = toNumber(webData?.["Total Stock"]);
-  const expenseRaw = toNumber(webData?.Expense);
+  const expenseRaw = toNumber(webData?.["Expense"]);
   const cashRaw = toNumber(balanceData?.CashBal);
   const bankRaw = toNumber(balanceData?.BankBal);
 
@@ -435,40 +435,74 @@ const FinanceSummaryCard = ({ webData }) => {
 
       {/* GRID */}
       <div className="grid grid-cols-2 grid-rows-2 text-center leading-tight flex-1">
-        <div className="flex flex-col justify-center border-r border-b border-gray-200 p-1">
+        <div
+          className="flex flex-col justify-center border-r border-b border-gray-200 p-1 
+             cursor-pointer hover:bg-gray-100 transition"
+          title={webData?.Receivable}
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanReceivableReport",
+              "_blank",
+            )
+          }
+        >
           <p className="text-[12px] text-gray-800">Receivable</p>
 
-          <h4
-            className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
-            title={webData?.Receivable}
-            onClick={() =>
-              window.open(
-                window.location.origin + "/crystalsol/AmericanReceivableReport",
-                "_blank",
-              )
-            }
-          >
+          <h4 className="text-[15px] font-semibold text-indigo-800 hover:underline">
             {webData?.Receivable || "-"}
           </h4>
         </div>
 
-        <div className="flex flex-col justify-center border-b border-gray-200 p-1">
+        <div
+          className="flex flex-col justify-center border-b border-gray-200 p-1 
+             cursor-pointer hover:bg-gray-100 transition"
+          title={webData?.Payable}
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanPayableReport",
+              "_blank",
+            )
+          }
+        >
           <p className="text-[12px] text-gray-800">Payable</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
+
+          <h4 className="text-[15px] font-semibold text-indigo-800 hover:underline">
             {webData?.Payable || "-"}
           </h4>
         </div>
 
-        <div className="flex flex-col justify-center border-r border-gray-200 p-1">
+        <div
+          className="flex flex-col justify-center border-r border-gray-200 p-1
+             cursor-pointer hover:bg-gray-100 transition"
+          title={webData?.["Total Stock"]}
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanStockReport",
+              "_blank",
+            )
+          }
+        >
           <p className="text-[12px] text-gray-800">Stock</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
+
+          <h4 className="text-[15px] font-semibold text-indigo-800 hover:underline">
             {webData?.["Total Stock"] || "-"}
           </h4>
         </div>
 
-        <div className="flex flex-col justify-center p-1">
+        <div
+          className="flex flex-col justify-center p-1
+             cursor-pointer hover:bg-gray-100 transition"
+          title={webData?.Expense}
+          onClick={() =>
+            window.open(
+              window.location.origin + "/crystalsol/AmericanExpenseReport",
+              "_blank",
+            )
+          }
+        >
           <p className="text-[12px] text-gray-800">Expense</p>
-          <h4 className="text-[15px] font-semibold text-indigo-800">
+
+          <h4 className="text-[15px] font-semibold text-indigo-800 hover:underline">
             {webData?.Expense || "-"}
           </h4>
         </div>
@@ -995,18 +1029,18 @@ const NewCollectionPaymentCard = ({ salesData }) => {
   if (previousMonthIndex < 0) previousMonthIndex = 11;
   const previousMonthName = months[previousMonthIndex];
 
-  const labelDec = `${currentMonthName} ${currentYear}`;
-  const labelNov = `${previousMonthName} ${currentYear}`;
+  const labelCurrentMonth = `${currentMonthName} ${currentYear}`;
+  const labelPreviousMonth = `${previousMonthName} ${currentYear}`;
 
   // ========== COLLECTION ==========
   const totalCollection2025 = salesData.CurrentYearCollection || "N/A";
-  const decCollection = salesData.MonthCollection || "N/A";
-  const novCollection = salesData.PreviousMonthCollection || "N/A";
+  const CurrentMonthCollection = salesData.MonthCollection || "N/A";
+  const PreviousMonthCollection = salesData.PreviousMonthCollection || "N/A";
 
   // ========== PAYMENT ==========
   const totalPayment2025 = salesData.CurrentYearPayment || "N/A";
-  const decPayment = salesData.MonthPayment || "N/A";
-  const novPayment = salesData.PreviousMonthPayment || "N/A";
+  const CurrentMonthPayment = salesData.MonthPayment || "N/A";
+  const PreviousMonthPayment = salesData.PreviousMonthPayment || "N/A";
 
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between leading-tight">
@@ -1026,17 +1060,48 @@ const NewCollectionPaymentCard = ({ salesData }) => {
         </div>
 
         <div className="grid grid-cols-2 text-center mt-1">
-          <div>
-            <p className="text-[10px] text-gray-500">{labelDec}</p>
+          <div
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanCollectionCurrentMonth",
+                "_blank",
+              )
+            }
+            className="
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+    p-1
+  "
+          >
+            <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
+
             <p className="text-[14px] font-semibold text-sky-700">
-              {decCollection}
+              {CurrentMonthCollection}
             </p>
           </div>
 
-          <div>
-            <p className="text-[10px] text-gray-500">{labelNov}</p>
+          <div
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanCollectionPreviousMonth",
+                "_blank",
+              )
+            }
+            className="
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+    p-1
+  "
+          >
+            <p className="text-[10px] text-gray-500">{labelPreviousMonth}</p>
             <p className="text-[14px] font-semibold text-sky-700">
-              {novCollection}
+              {PreviousMonthCollection}
             </p>
           </div>
         </div>
@@ -1058,17 +1123,49 @@ const NewCollectionPaymentCard = ({ salesData }) => {
         </div>
 
         <div className="grid grid-cols-2 text-center mt-1">
-          <div>
-            <p className="text-[10px] text-gray-500">{labelDec}</p>
+          <div
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanPaymentCurrentMonth",
+                "_blank",
+              )
+            }
+            className="
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+    p-1
+  "
+          >
+            <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
+
             <p className="text-[14px] font-semibold text-emerald-700">
-              {decPayment}
+              {CurrentMonthPayment}
             </p>
           </div>
 
-          <div>
-            <p className="text-[10px] text-gray-500">{labelNov}</p>
+          <div
+            onClick={() =>
+              window.open(
+                window.location.origin +
+                  "/crystalsol/AmericanPaymentPreviousMonth",
+                "_blank",
+              )
+            }
+            className="
+    cursor-pointer
+    transition-all duration-200
+    hover:bg-gray-100
+    hover:rounded-md
+    p-1
+  "
+          >
+            <p className="text-[10px] text-gray-500">{labelPreviousMonth}</p>
+
             <p className="text-[14px] font-semibold text-emerald-700">
-              {novPayment}
+              {PreviousMonthPayment}
             </p>
           </div>
         </div>
