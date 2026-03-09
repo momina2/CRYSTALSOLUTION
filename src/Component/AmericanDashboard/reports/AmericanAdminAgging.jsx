@@ -185,7 +185,7 @@ export default function AmericanAdminAgging() {
       form.append("FDayNum", NumDays);
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanAdminAgging.php",
+        "https://crystalsolutions.pk/api/AmericanAdminAgging.php",
         form
       );
 
