@@ -229,7 +229,7 @@ export default function AmericanSalesReportCurrentYear() {
       form.append("FSchTxt", "");
 
       const res = await axios.post(
-        "https://crystalsolutions.pk/api/ItemSaleSummary.php",
+        "https://crystalsolutions.pk/api/AmericanItemSaleReport.php",
         form,
         { timeout: 20000 },
       );
