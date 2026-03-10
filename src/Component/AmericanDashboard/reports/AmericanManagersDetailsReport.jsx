@@ -36,39 +36,32 @@ const columnsConfig = [
 
   {
     header: "Code",
-    key: "tacccod",
+    key: "tsalcod",
     alignment: "center",
-    uiWidth: 90,
+    uiWidth: 60,
     pdfWidth: 20,
     excelWidth: 8,
   },
   {
-    header: "Description",
-    key: "tcstdsc",
+    header: "Salesman",
+    key: "SalesMan",
     alignment: "left",
-    uiWidth: 360,
+    uiWidth: 180,
     pdfWidth: 80,
     excelWidth: 20,
   },
+
   {
-    header: "Phone",
-    key: "tmobnum",
-    alignment: "center",
-    uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 15,
-  },
-   {
-    header: "Salesman",
-    key: "tsaldsc",
-    alignment: "left",
-    uiWidth: 160,
+    header: "Nos",
+    key: "Nos",
+    alignment: "right",
+    uiWidth: 50,
     pdfWidth: 25,
     excelWidth: 15,
   },
   {
     header: "Balance",
-    key: "Balance",
+    key: "Bal",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
@@ -94,6 +87,10 @@ export default function AmericanManagersDetailsReport() {
   const [apiData, setApiData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  //Totals
+  const [apiTotalBalance, setApiTotalBalance] = useState(0);
+  const [apiTotalCustomers, setApiTotalCustomers] = useState(0);
+  const [apiTotalSalesMan, setApiTotalSalesMan] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
@@ -102,7 +99,7 @@ export default function AmericanManagersDetailsReport() {
   });
 
   const query = useQueryParams();
-  const CtyCod = query.get("PMgrCod");
+  const CtyCod = query.get("FMgrCod");
   const CtyName = query.get("name");
 
   const [headerCode] = useState(CtyCod);
@@ -124,17 +121,31 @@ export default function AmericanManagersDetailsReport() {
 
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("PMgrCod", CtyCod);
+      form.append("FMgrCod", CtyCod);
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanManagersCustomers.php",
-        form
+        "https://crystalsolutions.pk/api/AmericanManagerSalesMan.php",
+        form,
       );
+      if (res.data["Total Balance"]) {
+        const cleanTotal = String(res.data["Total Balance"]).replace(/,/g, "");
+        setApiTotalBalance(Number(cleanTotal) || 0);
+      }
 
-      const DetailsList = Array.isArray(res.data)
-        ? res.data.map((row) => ({
-            ...row,
-            balance: Number(String(row.Balance ?? 0).replace(/,/g, "")),
+      if (res.data["Total Customers"]) {
+        setApiTotalCustomers(Number(res.data["Total Customers"]) || 0);
+      }
+
+      if (res.data["Total SalesMan"]) {
+        setApiTotalSalesMan(Number(res.data["Total SalesMan"]) || 0);
+      }
+
+      const DetailsList = Array.isArray(res.data.Detail)
+        ? res.data.Detail.map((row) => ({
+            tsalcod: row.tsalcod?.trim(),
+            SalesMan: row.SalesMan?.trim(),
+            Nos: Number(row.Nos) || 0,
+            Bal: Number(String(row.Bal ?? 0).replace(/,/g, "")),
           }))
         : [];
 
@@ -181,7 +192,7 @@ export default function AmericanManagersDetailsReport() {
 
     // --------- TABLE HEADER ---------
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn"
+      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn",
     );
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
@@ -251,7 +262,7 @@ export default function AmericanManagersDetailsReport() {
     drawHeader();
 
     const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? "")
+      keys.map((key) => row[key] ?? ""),
     );
     const totalRow = new Array(keys.length).fill("");
     totalRow[0] = sortedTableData.length.toString();
@@ -283,7 +294,7 @@ export default function AmericanManagersDetailsReport() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -351,14 +362,14 @@ export default function AmericanManagersDetailsReport() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
 
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -442,11 +453,10 @@ export default function AmericanManagersDetailsReport() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.tsaldsc?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q) // ✅ BALANCE
+          row.tsalcod?.toLowerCase().includes(q) ||
+          row.SalesMan?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+          row.Nos?.toString().includes(q) ||
+          row.Bal?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -456,13 +466,22 @@ export default function AmericanManagersDetailsReport() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "Balance") {
+        if (sortConfig.key === "Bal") {
           const aNum = parseFloat(aVal) || 0;
           const bNum = parseFloat(bVal) || 0;
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;
         }
+          // Customers numeric sort
+        if (sortConfig.key === "Nos") {
+          const aNum = parseFloat(aVal) || 0;
+          const bNum = parseFloat(bVal) || 0;
+          return sortConfig.direction === "ascending"
+            ? aNum - bNum
+            : bNum - aNum;
+        }
+
 
         return sortConfig.direction === "ascending"
           ? String(aVal).localeCompare(String(bVal))
@@ -480,11 +499,10 @@ export default function AmericanManagersDetailsReport() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.tacccod?.toLowerCase().includes(q) ||
-        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-        row.tmobnum?.toLowerCase().includes(q) ||
-        row.tsaldsc?.toLowerCase().includes(q) ||
-        row.Balance?.toString().includes(q) // ✅ BALANCE
+        row.tsalcod?.toLowerCase().includes(q) ||
+        row.SalesMan?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.Nos?.toString().includes(q) ||
+        row.Bal?.toString().includes(q) // ✅ BALANCE
       );
     });
   }, [sortedTableData, searchQuery]);
@@ -703,8 +721,8 @@ export default function AmericanManagersDetailsReport() {
                         selectedRowIndex === i
                           ? getnavbarbackgroundcolor // ✅ theme color
                           : i % 2 === 0
-                          ? getcolor
-                          : "#f8f9ff",
+                            ? getcolor
+                            : "#f8f9ff",
                       transition: "background-color 0.2s ease",
                     }}
                   >
@@ -720,7 +738,7 @@ export default function AmericanManagersDetailsReport() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "Balance" ? (
+                        ) : column.key === "Bal" ? (
                           Number(item[column.key] || 0).toLocaleString()
                         ) : column.key === "progressBtn" ? (
                           <div
@@ -738,9 +756,9 @@ export default function AmericanManagersDetailsReport() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanProgressReportDashboard?code=${
-                                    item.tacccod
-                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                    item.tsalcod
+                                  }&name=${encodeURIComponent(item.SalesMan)}`,
+                                  "_blank",
                                 );
                               }}
                             />
@@ -761,9 +779,9 @@ export default function AmericanManagersDetailsReport() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                    item.tacccod
-                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                    item.tsalcod
+                                  }&name=${encodeURIComponent(item.SalesMan)}`,
+                                  "_blank",
                                 );
                               }}
                             />
@@ -798,7 +816,7 @@ export default function AmericanManagersDetailsReport() {
                         </td>
                       ))}
                     </tr>
-                  )
+                  ),
                 )}
               </tbody>
             </table>
@@ -817,7 +835,7 @@ export default function AmericanManagersDetailsReport() {
               const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
+                isTotalColumn ? "right" : "left",
               );
 
               return (
@@ -842,12 +860,12 @@ export default function AmericanManagersDetailsReport() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "Balance" ? (
-                    <span>{formatNumber(totalBalance)}</span>
-                  ) : index === 2 ? (
-                    <span>{filteredData.length}</span>
-                  ) : column.key === "scrollSpacer" ? (
-                    ""
+                  {column.key === "tsalcod" ? (
+                    <span>{apiTotalSalesMan}</span>
+                  ) : column.key === "Nos" ? (
+                    <span>{apiTotalCustomers.toLocaleString()}</span>
+                  ) : column.key === "Bal" ? (
+                    <span>{apiTotalBalance.toLocaleString()}</span>
                   ) : (
                     ""
                   )}

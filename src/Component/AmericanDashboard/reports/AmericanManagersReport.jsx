@@ -767,7 +767,7 @@ export default function AmericanManagersReport() {
                                 window.open(
                                   `${
                                     window.location.origin
-                                  }/crystalsol/AmericanManagersDetailsReport?PMgrCod=${
+                                  }/crystalsol/AmericanManagersDetailsReport?FMgrCod=${
                                     item.tmgrcod
                                   }&name=${encodeURIComponent(item.Manager)}`,
                                   "_blank",
