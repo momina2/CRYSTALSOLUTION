@@ -429,7 +429,7 @@ export default function AmericanSalesManDetailsReport() {
       const q = searchQuery.toLowerCase().trim();
       data = data.filter(
         (row) =>
-          row.tcstcod?.toLowerCase().includes(q) ||
+          row.tacccod?.toLowerCase().includes(q) ||
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
@@ -443,7 +443,7 @@ export default function AmericanSalesManDetailsReport() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "Bal" ) {
+        if (sortConfig.key === "Balance" ) {
           const aNum = Number(aVal) || 0;
           const bNum = Number(bVal) || 0;
           return sortConfig.direction === "ascending"
@@ -467,7 +467,7 @@ export default function AmericanSalesManDetailsReport() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.tcstcod?.toLowerCase().includes(q) ||
+        row.tacccod?.toLowerCase().includes(q) ||
         row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
         row.SalesMan?.toLowerCase().includes(q) ||
@@ -726,7 +726,7 @@ export default function AmericanSalesManDetailsReport() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanProgressReportDashboard?code=${
-                                    item.tcstcod
+                                    item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
                                 );
@@ -749,7 +749,7 @@ export default function AmericanSalesManDetailsReport() {
                                   `${
                                     window.location.origin
                                   }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                    item.tcstcod
+                                    item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
                                   "_blank"
                                 );
