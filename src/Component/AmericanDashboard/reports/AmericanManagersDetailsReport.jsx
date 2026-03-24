@@ -13,7 +13,7 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "City Details Report";
+const REPORT_NAME = "Manager Details Report";
 const COMPANY_NAME = "AMERICAN ELECTRONIC";
 
 const columnsConfig = [
