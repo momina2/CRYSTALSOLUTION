@@ -14,7 +14,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Region Report";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
@@ -119,7 +119,7 @@ export default function AmericanRegionReport() {
       form.append("code", "AMRELEC");
 
       const res = await axios.post(
-        "https://crystalsolutions.com.pk/api/AmericanRegionInfo.php",
+        "https://crystalsolutions.pk/api/AmericanRegionInfo.php",
         form
       );
 
@@ -167,49 +167,75 @@ export default function AmericanRegionReport() {
     setIsLoading(false);
   };
 
-  const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+ const exportPDFHandler = () => {
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
+  });
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16; // top space for header
-    const rowHeight = 5; // normal row height
-    const headerHeight = 8; // table header height
-    const maxRowY = 280; // printable area before adding new page
+  const pageWidth = doc.internal.pageSize.getWidth();
 
-    // ------- TITLE --------
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+  const rowHeight = 6;
+  const headerHeight = 7;
+  const startY = 32;
+  const maxY = 280;
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(REPORT_NAME, 105, 24, { align: "center" });
-    }
+  let y = startY;
 
-    // --------- TABLE HEADER ---------
-    const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "ReportBtn"
-    );
-    const keys = pdfColumns.map((c) => c.key);
-    const headers = pdfColumns.map((c) => c.header);
-    const colWidths = pdfColumns.map((c) => c.pdfWidth);
+  // ===== FILTER COLUMNS =====
+  const pdfColumns = columnsConfig.filter(
+    (c) => !["scrollSpacer", "ReportBtn"].includes(c.key)
+  );
 
-    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; // page width 210mm
-    let y = 32;
+  const keys = pdfColumns.map((c) => c.key);
+  const headers = pdfColumns.map((c) => c.header);
+  const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
+  const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+  const startX = (pageWidth - tableWidth) / 2;
+
+  // ===== TITLE =====
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
+
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(REPORT_NAME, pageWidth / 2, 20, { align: "center" });
+
+  // ===== HEADER =====
+  let curX = startX;
+
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(9);
+
+  headers.forEach((h, i) => {
+    const w = colWidths[i];
+    doc.rect(curX, y, w, headerHeight); // ❌ no fill
+    doc.text(h, curX + w / 2, y + headerHeight - 2, {
+      align: "center",
+    });
+    curX += w;
+  });
+
+  y += headerHeight;
+
+  // ===== PAGE BREAK =====
+  const checkPageBreak = () => {
+    if (y + rowHeight > maxY) {
+      doc.addPage();
+      y = startY;
+
       let curX = startX;
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(9);
+
+      headers.forEach((h, i) => {
+        const w = colWidths[i];
         doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
+        doc.text(h, curX + w / 2, y + headerHeight - 2, {
           align: "center",
         });
         curX += w;
@@ -217,73 +243,71 @@ export default function AmericanRegionReport() {
 
       y += headerHeight;
     }
+  };
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
-      let curX = startX;
+  // ===== DATA =====
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(8);
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
-        doc.rect(curX, y, w, rowHeight);
+  sortedTableData.forEach((row) => {
+    checkPageBreak();
 
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
+    let curX = startX;
 
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
-            align: "right",
-          });
-        } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
-        }
-        curX += w;
-      });
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+      let value = row[key] ?? "";
 
-      y += rowHeight;
-    }
-
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
+      if (key === "Bal" || key === "Nos") {
+        value = Number(value || 0).toLocaleString();
       }
-    }
 
-    // ---------- START PRINT ----------
-    drawTitle();
-    y = 32;
-    drawHeader();
+      doc.rect(curX, y, w, rowHeight);
 
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) =>
-        key === "Bal" ? Number(row[key] || 0).toLocaleString() : row[key] ?? ""
-      )
-    );
+      if (key === "Bal" || key === "Nos") {
+        doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
+          align: "right",
+        });
+      } else {
+        doc.text(String(value), curX + 2, y + rowHeight - 2);
+      }
 
-    const totalRow = new Array(keys.length).fill("");
-
-    // Total Customers (first column – same as UI)
-    totalRow[0] = apiTotalRegion.toLocaleString();
-
-    // Total Balance (last column)
-    totalRow[keys.length - 1] = apiTotalBalance.toLocaleString();
-    totalRow[keys.length - 2] = apiTotalCustomers.toLocaleString();
-    // totalRow[keys.length - 1] = totalBalance.toLocaleString();
-    const rowsPDF = [...dataRows, totalRow];
-
-    rowsPDF.forEach((row, index) => {
-      const isTotal = index === rowsPDF.length - 1;
-      checkPageBreak();
-      drawRow(row, isTotal);
+      curX += w;
     });
 
-    // ---------- SAVE ----------
-    doc.save(`${REPORT_NAME}.pdf`);
-  };
+    y += rowHeight;
+  });
+
+  // ===== TOTAL =====
+  checkPageBreak();
+
+  let curX2 = startX;
+
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(8);
+
+  keys.forEach((key, i) => {
+    const w = colWidths[i];
+
+    let value = "";
+
+    if (key === "tregcod") value = totalRegions;
+    else if (key === "Nos") value = totalCustomers.toLocaleString();
+    else if (key === "Bal")
+      value = totalBalance.toLocaleString();
+
+    doc.rect(curX2, y, w, rowHeight);
+
+    doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+      align: "right",
+    });
+
+    curX2 += w;
+  });
+
+  // ===== SAVE =====
+  doc.save(`${REPORT_NAME}.pdf`);
+};
 
   // ======================= EXCEL EXPORT =======================
 

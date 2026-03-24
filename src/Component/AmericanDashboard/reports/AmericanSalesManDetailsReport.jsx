@@ -14,7 +14,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "SalesMan Details Report";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
@@ -126,7 +126,7 @@ export default function AmericanSalesManDetailsReport() {
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanSalesManCustomers.php",
-        form
+        form,
       );
 
       const DetailsList = Array.isArray(res.data) ? res.data : [];
@@ -147,116 +147,146 @@ export default function AmericanSalesManDetailsReport() {
     }
   }, [SalManCode]);
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16; // top space for header
-    const rowHeight = 5; // normal row height
-    const headerHeight = 8; // table header height
-    const maxRowY = 280; // printable area before adding new page
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-    // ------- TITLE --------
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 32;
+    const maxY = 280;
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(headerCode, 105, 24, { align: "center" });
-    }
+    let y = startY;
 
-    // --------- TABLE HEADER ---------
+    // ===== FILTER COLUMNS =====
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn"
+      (c) => !["scrollSpacer", "ledgerBtn", "progressBtn"].includes(c.key),
     );
+
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; // page width 210mm
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
-      let curX = startX;
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-          align: "center",
-        });
-        curX += w;
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`${headerCode} | ${headerName}`, pageWidth / 2, 20, {
+      align: "center",
+    });
+
+    // ===== HEADER =====
+    let curX = startX;
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
+
+    headers.forEach((h, i) => {
+      const w = colWidths[i];
+      doc.rect(curX, y, w, headerHeight); // ✅ no fill
+      doc.text(h, curX + w / 2, y + headerHeight - 2, {
+        align: "center",
       });
+      curX += w;
+    });
 
-      y += headerHeight;
-    }
+    y += headerHeight;
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
+
+        let curX = startX;
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9);
+
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
+        });
+
+        y += headerHeight;
+      }
+    };
+
+    // ===== DATA =====
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(8);
+
+    sortedTableData.forEach((row) => {
+      checkPageBreak();
+
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
+      keys.forEach((key, i) => {
+        const w = colWidths[i];
+        let value = row[key] ?? "";
+
+        if (key === "Balance") {
+          value = formatNumber(value);
+        }
+
         doc.rect(curX, y, w, rowHeight);
 
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
-
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+        if (key === "Balance" || key === "tmobnum") {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
         }
+
         curX += w;
       });
 
       y += rowHeight;
-    }
-
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
-      }
-    }
-
-    // ---------- START PRINT ----------
-    drawTitle();
-    y = 32;
-    drawHeader();
-
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? "")
-    );
-    const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = sortedTableData.length.toString();
-
-    totalRow[keys.length - 1] = formatNumber(totalBalance);
-
-    const rowsPDF = [...dataRows, totalRow];
-
-    rowsPDF.forEach((row, index) => {
-      const isTotal = index === rowsPDF.length - 1;
-      checkPageBreak();
-      drawRow(row, isTotal);
     });
 
-    // ---------- SAVE ----------
-    doc.save(`${headerCode}|${headerName}.pdf`);
-  };
+    // ===== TOTAL =====
+    checkPageBreak();
 
+    let curX2 = startX;
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(8);
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+
+      let value = "";
+
+      if (key === "tacccod") value = sortedTableData.length;
+      else if (key === "Balance") value = formatNumber(totalBalance);
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
+    });
+
+    // ===== SAVE =====
+    doc.save(`${headerCode}_${headerName}.pdf`);
+  };
   // ======================= EXCEL EXPORT =======================
 
   async function exportCSV({
@@ -270,7 +300,7 @@ export default function AmericanSalesManDetailsReport() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -338,14 +368,14 @@ export default function AmericanSalesManDetailsReport() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
 
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -433,7 +463,7 @@ export default function AmericanSalesManDetailsReport() {
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q) // ✅ BALANCE
+          row.Balance?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -443,7 +473,7 @@ export default function AmericanSalesManDetailsReport() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "Balance" ) {
+        if (sortConfig.key === "Balance") {
           const aNum = Number(aVal) || 0;
           const bNum = Number(bVal) || 0;
           return sortConfig.direction === "ascending"
@@ -691,8 +721,8 @@ export default function AmericanSalesManDetailsReport() {
                         selectedRowIndex === i
                           ? getnavbarbackgroundcolor // ✅ theme color
                           : i % 2 === 0
-                          ? getcolor
-                          : "#f8f9ff",
+                            ? getcolor
+                            : "#f8f9ff",
                       transition: "background-color 0.2s ease",
                     }}
                   >
@@ -728,7 +758,7 @@ export default function AmericanSalesManDetailsReport() {
                                   }/crystalsol/AmericanProgressReportDashboard?code=${
                                     item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             />
@@ -751,7 +781,7 @@ export default function AmericanSalesManDetailsReport() {
                                   }/crystalsol/AmericanCustomerLedgerDashboard?code=${
                                     item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             />
@@ -786,7 +816,7 @@ export default function AmericanSalesManDetailsReport() {
                         </td>
                       ))}
                     </tr>
-                  )
+                  ),
                 )}
               </tbody>
             </table>
@@ -805,7 +835,7 @@ export default function AmericanSalesManDetailsReport() {
               const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
+                isTotalColumn ? "right" : "left",
               );
 
               return (

@@ -13,49 +13,41 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "Managers Report";
+const REPORT_NAME = "Manager SalesMan Details Report";
 const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
-    header: "Rpt",
-    key: "ReportBtn",
-    alignment: "center",
-    uiWidth: 50,
-    pdfWidth: 0,
-    excelWidth: 0,
+    header: "Code",
+    key: "tacccod",
+    alignment: "left",
+    uiWidth: 90,
+    pdfWidth: 20,
+    excelWidth: 8,
   },
   {
-    header: "Code",
-    key: "tmgrcod",
-    alignment: "center",
-    uiWidth: 60,
-    pdfWidth: 10,
+    header: "Description",
+    key: "tcstdsc",
+    alignment: "left",
+    uiWidth: 360,
+    pdfWidth: 80,
+    excelWidth: 20,
+  },
+  {
+    header: "Phone",
+    key: "tmobnum",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 25,
     excelWidth: 15,
   },
   {
-    header: "Manager",
-    key: "Manager",
-    alignment: "left",
-    uiWidth: 200,
-    pdfWidth: 70,
-    excelWidth: 30,
-  },
-  {
-    header: "Nos",
-    key: "Nos",
-    alignment: "right",
-    uiWidth: 50,
-    pdfWidth: 10,
-    excelWidth: 20,
-  },
-  {
     header: "Balance",
-    key: "Bal",
+    key: "Balance",
     alignment: "right",
-    uiWidth: 100,
-    pdfWidth: 40,
-    excelWidth: 20,
+    uiWidth: 120,
+    pdfWidth: 25,
+    excelWidth: 15,
   },
   {
     header: "",
@@ -71,28 +63,31 @@ function useQueryParams() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function AmericanManagersReport() {
+export default function AmericanManagerSalesManDetailsReport() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
+  const [apiData, setApiData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [apiTotalBalance, setApiTotalBalance] = useState(0);
-  const [apiTotalCity, setApiTotalCity] = useState(0);
-  const [apiTotalCustomers, setApiTotalCustomers] = useState(0);
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
+  const formatNumber = (val) => {
+    const num = Number(val);
+    if (isNaN(num)) return "0";
+    return Math.trunc(num).toLocaleString();
+  };
+
   const query = useQueryParams();
-  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  const SalManCode = query.get("code");
+  const SaleManName = query.get("name");
 
-  const minParam = query.get("min") || "0";
-  const maxParam = query.get("max") || "99999999";
-  const labelParam = query.get("label") || "";
-
-  const [errorMessage, setErrorMessage] = useState("");
+  const [headerCode] = useState(SalManCode);
+  const [headerName] = useState(SaleManName);
 
   const {
     isSidebarVisible,
@@ -104,53 +99,36 @@ export default function AmericanManagersReport() {
   } = useTheme();
 
   // === API CALL =====
-  useEffect(() => {
-    fetchData();
-  }, [minParam, maxParam]);
-
   const fetchData = async () => {
-    setIsLoading(true);
-    setErrorMessage("");
-
     try {
+      setIsLoading(true);
+
       const form = new FormData();
       form.append("code", "AMRELEC");
+      form.append("FEmpCod", SalManCode);
 
       const res = await axios.post(
-        "https://crystalsolutions.pk/api/AmericanManagersInfo.php",
+        "https://crystalsolutions.pk/api/AmericanSalesManCustomers.php",
         form,
       );
 
-      let dataRows = [];
+      const DetailsList = Array.isArray(res.data) ? res.data : [];
 
-      if (Array.isArray(res.data.Detail)) {
-        dataRows = res.data.Detail;
-      } else if (Array.isArray(res.data)) {
-        dataRows = res.data;
-      }
-      if (res.data["Total Balance"]) {
-        const cleanTotal = String(res.data["Total Balance"]).replace(/,/g, "");
-        setApiTotalBalance(Number(cleanTotal) || 0);
-      }
-
-      const mapped = dataRows.map((row) => ({
-        tmgrcod: row.tmgrcod?.trim(),
-        Manager: row.Manager?.trim(),
-        Nos: Number(row.Nos) || 0,
-        Bal: row.Bal ? Number(row.Bal.replace(/,/g, "")) : 0,
-      }));
-      setRows(mapped);
-
-      setErrorMessage("");
+      setRows(DetailsList);
     } catch (err) {
-      console.error("API error:", err);
-      setErrorMessage("Unable to retrieve data. Please try again.");
+      console.error("Progress API error:", err);
       setRows([]);
+      setApiData(null);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
+  useEffect(() => {
+    if (SalManCode) {
+      fetchData();
+    }
+  }, [SalManCode]);
   const exportPDFHandler = () => {
     const doc = new jsPDF({
       orientation: "portrait",
@@ -174,11 +152,13 @@ export default function AmericanManagersReport() {
 
     doc.setFont("Helvetica", "normal");
     doc.setFontSize(12);
-    doc.text(REPORT_NAME, pageWidth / 2, 20, { align: "center" });
+    doc.text(`${headerCode} | ${headerName}`, pageWidth / 2, 20, {
+      align: "center",
+    });
 
-    // ===== FILTER COLUMNS (REMOVE RPT + SPACER) =====
+    // ===== FILTER COLUMNS (FIXED) =====
     const pdfColumns = columnsConfig.filter(
-      (c) => !["scrollSpacer", "ReportBtn"].includes(c.key),
+      (c) => !["scrollSpacer"].includes(c.key),
     );
 
     const keys = pdfColumns.map((c) => c.key);
@@ -236,13 +216,13 @@ export default function AmericanManagersReport() {
         const w = colWidths[i];
         let value = row[key] ?? "";
 
-        if (key === "Bal" || key === "Nos") {
-          value = Number(value || 0).toLocaleString();
+        if (key === "Balance") {
+          value = formatNumber(value);
         }
 
         doc.rect(curX, y, w, rowHeight);
 
-        if (key === "Bal" || key === "Nos") {
+        if (key === "Balance") {
           doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
@@ -268,9 +248,8 @@ export default function AmericanManagersReport() {
 
       let value = "";
 
-      if (key === "tmgrcod") value = filteredData.length;
-      else if (key === "Nos") value = totalNos.toLocaleString();
-      else if (key === "Bal") value = apiTotalBalance.toLocaleString();
+      if (i === 0) value = sortedTableData.length;
+      else if (key === "Balance") value = formatNumber(totalBalance);
 
       doc.rect(curX2, y, w, rowHeight);
 
@@ -282,7 +261,7 @@ export default function AmericanManagersReport() {
     });
 
     // ===== SAVE =====
-    doc.save(`${REPORT_NAME}.pdf`);
+    doc.save(`${headerCode}_${headerName}.pdf`);
   };
 
   // ======================= EXCEL EXPORT =======================
@@ -298,7 +277,7 @@ export default function AmericanManagersReport() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ReportBtn", "scrollSpacer"].includes(c.key),
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -343,7 +322,8 @@ export default function AmericanManagersReport() {
 
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
-    totalRowData[headers.length - 1] = totalCollection.toLocaleString();
+    totalRowData[headers.length - 1] = formatNumber(totalCollection);
+
     const totalRow = worksheet.addRow(totalRowData);
 
     totalRow.eachCell((cell) => {
@@ -422,7 +402,7 @@ export default function AmericanManagersReport() {
   };
 
   const getSortIcon = (key) => {
-    if (nonSortableKeys.includes(key)) return null;
+    if (nonSortableKeys.includes(key)) return null; // ❌ no arrows on buttons
 
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
@@ -446,7 +426,7 @@ export default function AmericanManagersReport() {
 
     setSortConfig({ key, direction });
   };
-  const nonSortableKeys = ["ReportBtn", "scrollSpacer"];
+  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
@@ -454,12 +434,13 @@ export default function AmericanManagersReport() {
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase().trim();
-
       data = data.filter(
         (row) =>
-          row.Code?.toLowerCase().includes(q) ||
-          row.Manager?.toLowerCase().includes(q) ||
-          String(row.Nos).includes(q),
+          row.tacccod?.toLowerCase().includes(q) ||
+          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+          row.tmobnum?.toLowerCase().includes(q) ||
+          row.SalesMan?.toLowerCase().includes(q) ||
+          row.Balance?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -468,25 +449,15 @@ export default function AmericanManagersReport() {
         const aVal = a[sortConfig.key] ?? "";
         const bVal = b[sortConfig.key] ?? "";
 
-        // ✅ Balance numeric sort
-        if (sortConfig.key === "Bal") {
-          const aNum = parseFloat(aVal) || 0;
-          const bNum = parseFloat(bVal) || 0;
+        // Balance numeric sort
+        if (sortConfig.key === "Balance") {
+          const aNum = Number(aVal) || 0;
+          const bNum = Number(bVal) || 0;
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;
         }
 
-        // ✅ Nos numeric sort (FIX)
-        if (sortConfig.key === "Nos") {
-          const aNum = Number(a.Nos) || 0;
-          const bNum = Number(b.Nos) || 0;
-          return sortConfig.direction === "ascending"
-            ? aNum - bNum
-            : bNum - aNum;
-        }
-
-        // 🔤 default string sort
         return sortConfig.direction === "ascending"
           ? String(aVal).localeCompare(String(bVal))
           : String(bVal).localeCompare(String(aVal));
@@ -503,44 +474,27 @@ export default function AmericanManagersReport() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.Code?.toLowerCase().includes(q) ||
-        row.Manager?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-        row.Nos?.toLowerCase().includes(q)
+        row.tacccod?.toLowerCase().includes(q) ||
+        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tmobnum?.toLowerCase().includes(q) ||
+        row.SalesMan?.toLowerCase().includes(q) ||
+        row.Balance?.toString().includes(q) // ✅ BALANCE
       );
     });
   }, [sortedTableData, searchQuery]);
+
   const totalBalance = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(row.Bal ?? 0);
-      return sum + (isNaN(val) ? 0 : val);
+    return sortedTableData.reduce((sum, row) => {
+      const value = parseFloat(row.Balance ?? 0);
+      return sum + (isNaN(value) ? 0 : value);
     }, 0);
-  }, [filteredData]);
-  const totalCities = filteredData.length;
-  const totalCustomers = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      const val = Number(row.Nos ?? 0);
-      return sum + (isNaN(val) ? 0 : val);
-    }, 0);
-  }, [filteredData]);
-
-  //   const totalBalance = useMemo(() => {
-  //     return sortedTableData.reduce((sum, row) => {
-  //       const value = parseFloat(row.Bal ?? 0);
-  //       return sum + (isNaN(value) ? 0 : value);
-  //     }, 0);
-  //   }, [sortedTableData]);
-
-  const totalNos = useMemo(() => {
-    return filteredData.reduce((sum, row) => {
-      return sum + (Number(row.Nos) || 0);
-    }, 0);
-  }, [filteredData]);
+  }, [sortedTableData]);
 
   const handleCSV = () => {
     exportCSV({
       rows: sortedTableData,
       columnsConfig,
-      //   totalCollection: totalBalance,
+      totalCollection: totalBalance,
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -580,7 +534,7 @@ export default function AmericanManagersReport() {
           }}
         >
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
-          <NavComponent textdata={REPORT_NAME} />
+          <NavComponent textdata={`${headerCode} | ${headerName}`} />
 
           {/* SEARCH ROW */}
           <div
@@ -759,45 +713,17 @@ export default function AmericanManagersReport() {
                           borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                         }}
                       >
-                        {column.key === "scrollSpacer" ? (
-                          ""
-                        ) : column.key === "Nos" ? (
-                          item.Nos.toLocaleString()
-                        ) : column.key === "Bal" ? (
-                          Number(item.Bal).toLocaleString()
-                        ) : column.key === "ReportBtn" ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <FaFileInvoiceDollar
-                              size={20}
-                              style={{ cursor: "pointer", color: "#28a745" }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-
-                                window.open(
-                                  `${
-                                    window.location.origin
-                                  }/crystalsol/AmericanManagersDetailsReport?FMgrCod=${
-                                    item.tmgrcod
-                                  }&name=${encodeURIComponent(item.Manager)}`,
-                                  "_blank",
-                                );
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          item[column.key]
-                        )}
+                        {column.key === "scrollSpacer"
+                          ? ""
+                          : column.key === "Balance"
+                            ? formatNumber(item[column.key])
+                            : item[column.key]}
                       </td>
                     ))}
                   </tr>
                 ))}
 
-                {Array.from({ length: 18 - filteredData.length }).map(
+                {Array.from({ length: 25 - filteredData.length }).map(
                   (_, idx) => (
                     <tr
                       key={`empty-${idx}`}
@@ -863,12 +789,12 @@ export default function AmericanManagersReport() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "tmgrcod" ? (
-                    <span>{filteredData.length}</span> // total managers
-                  ) : column.key === "Nos" ? (
-                    <span>{totalNos.toLocaleString()}</span> // total Nos
-                  ) : column.key === "Bal" ? (
-                    <span>{apiTotalBalance.toLocaleString()}</span> // API total balance
+                  {column.key === "Balance" ? (
+                    <span>{formatNumber(totalBalance)}</span>
+                  ) : index === 2 ? (
+                    <span>{filteredData.length}</span>
+                  ) : column.key === "scrollSpacer" ? (
+                    ""
                   ) : (
                     ""
                   )}

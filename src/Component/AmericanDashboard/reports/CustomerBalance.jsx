@@ -13,7 +13,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Customer Balance by Range";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
@@ -163,24 +163,16 @@ export default function CustomerBalance() {
   const exportPDFHandler = () => {
     const doc = new jsPDF({ orientation: "portrait" });
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16; // top space for header
-    const rowHeight = 5; // normal row height
-    const headerHeight = 8; // table header height
-    const maxRowY = 280; // printable area before adding new page
+    // ===== CONFIG =====
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 32;
+    const maxY = 280;
 
-    // ------- TITLE --------
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+    let y = startY;
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(REPORT_NAME, 105, 24, { align: "center" });
-    }
-
-    // --------- TABLE HEADER ---------
+    // ===== FILTER COLUMNS =====
     const pdfColumns = columnsConfig.filter(
       (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
     );
@@ -190,75 +182,107 @@ export default function CustomerBalance() {
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; // page width 210mm
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
 
-    function drawHeader() {
+    // ===== TITLE =====
+    const drawTitle = () => {
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
+      doc.setFontSize(16);
+      doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(12);
+      doc.text(REPORT_NAME, pageWidth / 2, 20, { align: "center" });
+    };
+
+    // ===== HEADER =====
+    const drawHeader = () => {
       let curX = startX;
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(9);
+
+      headers.forEach((h, i) => {
+        const w = colWidths[i];
+
+        doc.rect(curX, y, w, headerHeight); // ✅ no grey fill
+
+        doc.text(h, curX + w / 2, y + headerHeight - 2, {
           align: "center",
         });
+
         curX += w;
       });
 
       y += headerHeight;
-    }
+    };
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
+
+        drawTitle();
+        y = 32;
+        drawHeader();
+
+        // 🔥 IMPORTANT FIX (bold bug)
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(8);
+      }
+    };
+
+    // ===== ROW =====
+    const drawRow = (row, isTotal = false) => {
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
+      // 🔥 ALWAYS RESET FONT (fix bold bug)
+      doc.setFont("Helvetica", isTotal ? "bold" : "normal");
+      doc.setFontSize(8);
+
+      row.forEach((cell, i) => {
+        const w = colWidths[i];
+
         doc.rect(curX, y, w, rowHeight);
 
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
-
-        if (cIndex === colWidths.length - 1) {
+        if (keys[i] === "Balance" || keys[i] === "tmobnum") {
           doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
           doc.text(String(cell), curX + 2, y + rowHeight - 2);
         }
+
         curX += w;
       });
 
       y += rowHeight;
-    }
+    };
 
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
-      }
-    }
-
-    // ---------- START PRINT ----------
+    // ===== START =====
     drawTitle();
     y = 32;
     drawHeader();
 
+    // ===== DATA =====
     const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? ""),
-    );
-    const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = sortedTableData.length.toString();
+      keys.map((key) => {
+        let value = row[key] ?? "";
 
+        if (key === "Balance") {
+          value = Number(value || 0).toLocaleString();
+        }
+
+        return value;
+      }),
+    );
+
+    // ===== TOTAL =====
+    const totalRow = new Array(keys.length).fill("");
+    totalRow[0] = sortedTableData.length;
     totalRow[keys.length - 1] = totalBalance.toLocaleString();
+
     const rowsPDF = [...dataRows, totalRow];
 
     rowsPDF.forEach((row, index) => {
@@ -267,7 +291,7 @@ export default function CustomerBalance() {
       drawRow(row, isTotal);
     });
 
-    // ---------- SAVE ----------
+    // ===== SAVE =====
     doc.save(`${REPORT_NAME}.pdf`);
   };
 

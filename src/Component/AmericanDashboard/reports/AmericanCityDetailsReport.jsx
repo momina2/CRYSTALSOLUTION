@@ -14,7 +14,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "City Details Report";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
@@ -120,7 +120,7 @@ export default function AmericanCityDetailsReport() {
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanCityCustomers.php",
-        form
+        form,
       );
 
       const DetailsList = Array.isArray(res.data)
@@ -152,116 +152,139 @@ export default function AmericanCityDetailsReport() {
     }
   }, [CtyCod]);
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16;
-    const rowHeight = 5;
-    const headerHeight = 8;
-    const maxRowY = 280;
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-    // ------- TITLE --------
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 30;
+    const maxY = 280;
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(headerCode, 105, 24, { align: "center" });
-    }
+    let y = startY;
 
-    // --------- TABLE HEADER ---------
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
+
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`${headerCode} | ${headerName}`, pageWidth / 2, 20, {
+      align: "center",
+    });
+
+    // ===== FILTER COLUMNS (REMOVE ICONS) =====
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn"
+      (c) => !["scrollSpacer", "progressBtn", "ledgerBtn"].includes(c.key),
     );
+
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2;
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
-      let curX = startX;
+    // ===== HEADER (NO COLOR) =====
+    let curX = startX;
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-          align: "center",
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
+
+    headers.forEach((h, i) => {
+      const w = colWidths[i];
+      doc.rect(curX, y, w, headerHeight);
+      doc.text(h, curX + w / 2, y + headerHeight - 2, { align: "center" });
+      curX += w;
+    });
+
+    y += headerHeight;
+
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
+
+        let curX = startX;
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
         });
-        curX += w;
-      });
 
-      y += headerHeight;
-    }
+        y += headerHeight;
+      }
+    };
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+    // ===== DATA =====
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(8); // 👈 compact
+
+    filteredData.forEach((row) => {
+      checkPageBreak();
+
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
+      keys.forEach((key, i) => {
+        const w = colWidths[i];
+        let value = row[key] ?? "";
+
+        if (key === "Balance") {
+          value = Number(value || 0).toLocaleString();
+        }
+
         doc.rect(curX, y, w, rowHeight);
 
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
-
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+        if (key === "Balance") {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
         }
+
         curX += w;
       });
 
       y += rowHeight;
-    }
-
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
-      }
-    }
-
-    // ---------- START PRINT ----------
-    drawTitle();
-    y = 32;
-    drawHeader();
-
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? "")
-    );
-    const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = sortedTableData.length.toString();
-
-    totalRow[keys.length - 1] = formatNumber(totalBalance);
-
-    const rowsPDF = [...dataRows, totalRow];
-
-    rowsPDF.forEach((row, index) => {
-      const isTotal = index === rowsPDF.length - 1;
-      checkPageBreak();
-      drawRow(row, isTotal);
     });
 
-    // ---------- SAVE ----------
-    doc.save(`${headerCode}|${headerName}.pdf`);
-  };
+    // ===== TOTAL =====
+    checkPageBreak();
 
+    let curX2 = startX;
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(8);
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+
+      let value = "";
+
+      if (key === "tacccod") value = filteredData.length;
+      else if (key === "Balance") value = formatNumber(totalBalance);
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
+    });
+
+    // ===== SAVE =====
+    doc.save(`${headerCode}_${headerName}.pdf`);
+  };
   // ======================= EXCEL EXPORT =======================
 
   async function exportCSV({
@@ -275,7 +298,7 @@ export default function AmericanCityDetailsReport() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key)
+      (c) => !["ledgerBtn", "progressBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -343,14 +366,14 @@ export default function AmericanCityDetailsReport() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
 
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -438,7 +461,7 @@ export default function AmericanCityDetailsReport() {
           row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q) // ✅ BALANCE
+          row.Balance?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -695,8 +718,8 @@ export default function AmericanCityDetailsReport() {
                         selectedRowIndex === i
                           ? getnavbarbackgroundcolor // ✅ theme color
                           : i % 2 === 0
-                          ? getcolor
-                          : "#f8f9ff",
+                            ? getcolor
+                            : "#f8f9ff",
                       transition: "background-color 0.2s ease",
                     }}
                   >
@@ -732,7 +755,7 @@ export default function AmericanCityDetailsReport() {
                                   }/crystalsol/AmericanProgressReportDashboard?code=${
                                     item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             />
@@ -755,7 +778,7 @@ export default function AmericanCityDetailsReport() {
                                   }/crystalsol/AmericanCustomerLedgerDashboard?code=${
                                     item.tacccod
                                   }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             />
@@ -790,7 +813,7 @@ export default function AmericanCityDetailsReport() {
                         </td>
                       ))}
                     </tr>
-                  )
+                  ),
                 )}
               </tbody>
             </table>
@@ -809,7 +832,7 @@ export default function AmericanCityDetailsReport() {
               const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
+                isTotalColumn ? "right" : "left",
               );
 
               return (

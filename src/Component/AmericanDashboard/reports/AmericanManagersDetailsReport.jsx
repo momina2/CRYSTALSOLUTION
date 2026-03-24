@@ -14,20 +14,12 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "City Details Report";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
-    header: "Lgr",
-    key: "ledgerBtn",
-    alignment: "center",
-    uiWidth: 50,
-    pdfWidth: 0,
-    excelWidth: 0,
-  },
-  {
-    header: "P.R",
-    key: "progressBtn",
+    header: "Rpt",
+    key: "rptBtn",
     alignment: "center",
     uiWidth: 50,
     pdfWidth: 0,
@@ -171,114 +163,139 @@ export default function AmericanManagersDetailsReport() {
     }
   }, [CtyCod]);
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16;
-    const rowHeight = 5;
-    const headerHeight = 8;
-    const maxRowY = 280;
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-    // ------- TITLE --------
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 30;
+    const maxY = 280;
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(headerCode, 105, 24, { align: "center" });
-    }
+    let y = startY;
 
-    // --------- TABLE HEADER ---------
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
+
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`${headerCode} | ${headerName}`, pageWidth / 2, 20, {
+      align: "center",
+    });
+
+    // ===== FILTER COLUMNS (REMOVE RPT + SPACER) =====
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn",
+      (c) => !["scrollSpacer", "rptBtn"].includes(c.key),
     );
+
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2;
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
-      let curX = startX;
+    // ===== HEADER (NO COLOR) =====
+    let curX = startX;
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-          align: "center",
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
+
+    headers.forEach((h, i) => {
+      const w = colWidths[i];
+      doc.rect(curX, y, w, headerHeight);
+      doc.text(h, curX + w / 2, y + headerHeight - 2, { align: "center" });
+      curX += w;
+    });
+
+    y += headerHeight;
+
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
+
+        let curX = startX;
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
         });
-        curX += w;
-      });
 
-      y += headerHeight;
-    }
+        y += headerHeight;
+      }
+    };
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+    // ===== DATA =====
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(8);
+
+    sortedTableData.forEach((row) => {
+      checkPageBreak();
+
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
+      keys.forEach((key, i) => {
+        const w = colWidths[i];
+        let value = row[key] ?? "";
+
+        if (key === "Bal") {
+          value = Number(value || 0).toLocaleString();
+        }
+
         doc.rect(curX, y, w, rowHeight);
 
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
-
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+        if (key === "Bal" || key === "Nos") {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
         }
+
         curX += w;
       });
 
       y += rowHeight;
-    }
-
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
-      }
-    }
-
-    // ---------- START PRINT ----------
-    drawTitle();
-    y = 32;
-    drawHeader();
-
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? ""),
-    );
-    const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = sortedTableData.length.toString();
-
-    totalRow[keys.length - 1] = formatNumber(totalBalance);
-
-    const rowsPDF = [...dataRows, totalRow];
-
-    rowsPDF.forEach((row, index) => {
-      const isTotal = index === rowsPDF.length - 1;
-      checkPageBreak();
-      drawRow(row, isTotal);
     });
 
-    // ---------- SAVE ----------
-    doc.save(`${headerCode}|${headerName}.pdf`);
+    // ===== TOTAL =====
+    checkPageBreak();
+
+    let curX2 = startX;
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(8);
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+
+      let value = "";
+
+      if (key === "tsalcod") value = apiTotalSalesMan;
+      else if (key === "Nos") value = apiTotalCustomers.toLocaleString();
+      else if (key === "Bal") value = apiTotalBalance.toLocaleString();
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
+    });
+
+    // ===== SAVE =====
+    doc.save(`${headerCode}_${headerName}.pdf`);
   };
 
   // ======================= EXCEL EXPORT =======================
@@ -443,7 +460,7 @@ export default function AmericanManagersDetailsReport() {
 
     setSortConfig({ key, direction });
   };
-  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
+  const nonSortableKeys = ["rptBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
@@ -473,7 +490,7 @@ export default function AmericanManagersDetailsReport() {
             ? aNum - bNum
             : bNum - aNum;
         }
-          // Customers numeric sort
+        // Customers numeric sort
         if (sortConfig.key === "Nos") {
           const aNum = parseFloat(aVal) || 0;
           const bNum = parseFloat(bVal) || 0;
@@ -481,7 +498,6 @@ export default function AmericanManagersDetailsReport() {
             ? aNum - bNum
             : bNum - aNum;
         }
-
 
         return sortConfig.direction === "ascending"
           ? String(aVal).localeCompare(String(bVal))
@@ -740,7 +756,7 @@ export default function AmericanManagersDetailsReport() {
                           ""
                         ) : column.key === "Bal" ? (
                           Number(item[column.key] || 0).toLocaleString()
-                        ) : column.key === "progressBtn" ? (
+                        ) : column.key === "rptBtn" ? (
                           <div
                             style={{
                               display: "flex",
@@ -753,34 +769,7 @@ export default function AmericanManagersDetailsReport() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(
-                                  `${
-                                    window.location.origin
-                                  }/crystalsol/AmericanProgressReportDashboard?code=${
-                                    item.tsalcod
-                                  }&name=${encodeURIComponent(item.SalesMan)}`,
-                                  "_blank",
-                                );
-                              }}
-                            />
-                          </div>
-                        ) : column.key === "ledgerBtn" ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <FaFileInvoiceDollar
-                              size={20}
-                              style={{ cursor: "pointer", color: "#28a745" }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(
-                                  `${
-                                    window.location.origin
-                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                    item.tsalcod
-                                  }&name=${encodeURIComponent(item.SalesMan)}`,
+                                  `${window.location.origin}/crystalsol/AmericanManagerSalesManDetailsReport?code=${item.tsalcod}&name=${encodeURIComponent(item.SalesMan)}`,
                                   "_blank",
                                 );
                               }}

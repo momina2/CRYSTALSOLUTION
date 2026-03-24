@@ -37,7 +37,7 @@ const columnsConfig = [
     header: "Desc",
     key: "Desc",
     alignment: "left",
-    uiWidth: 180,
+    uiWidth: 150,
     pdfWidth: 40,
     excelWidth: 30,
   },
@@ -45,7 +45,7 @@ const columnsConfig = [
     header: "Balance",
     key: "Balance",
     alignment: "right",
-    uiWidth: 140,
+    uiWidth: 120,
     pdfWidth: 25,
     excelWidth: 18,
   },
@@ -110,7 +110,7 @@ export default function AmericanBankReport() {
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/CashBankBalance.php",
-        form
+        form,
       );
 
       let dataRows = [];
@@ -141,8 +141,8 @@ export default function AmericanBankReport() {
               row.Bal ??
               row.tbal ??
               row.tbalance ??
-              0
-          ).replace(/,/g, "")
+              0,
+          ).replace(/,/g, ""),
         ),
       }));
 
@@ -158,122 +158,135 @@ export default function AmericanBankReport() {
   };
 
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16; // top space for header
-    const rowHeight = 5; // normal row height
-    const headerHeight = 8; // table header height
-    const maxRowY = 280; // printable area before adding new page
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-    // ------- TITLE --------
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 30;
+    const maxY = 280;
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(REPORT_NAME, 105, 24, { align: "center" });
-    }
+    let y = startY;
 
-    // --------- TABLE HEADER ---------
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
+
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(REPORT_NAME, pageWidth / 2, 20, { align: "center" });
+
+    // ===== FILTER COLUMNS =====
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "ReportBtn"
+      (c) => !["scrollSpacer", "ReportBtn"].includes(c.key),
     );
+
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; // page width 210mm
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
-      let curX = startX;
+    // ===== HEADER (SIMPLE — NO COLOR) =====
+    let curX = startX;
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-          align: "center",
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
+
+    headers.forEach((h, i) => {
+      const w = colWidths[i];
+      doc.rect(curX, y, w, headerHeight);
+      doc.text(h, curX + w / 2, y + headerHeight - 2, { align: "center" });
+      curX += w;
+    });
+
+    y += headerHeight;
+
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
+
+        let curX = startX;
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
         });
-        curX += w;
-      });
 
-      y += headerHeight;
-    }
+        y += headerHeight;
+      }
+    };
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+    // ===== DATA =====
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(8); // 👈 compact text
+
+    filteredData.forEach((row) => {
+      checkPageBreak();
+
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
+      keys.forEach((key, i) => {
+        const w = colWidths[i];
+        let value = row[key] ?? "";
+
+        if (key === "Balance") {
+          value = Number(value || 0).toLocaleString();
+        }
+
         doc.rect(curX, y, w, rowHeight);
 
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
-
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+        if (key === "Balance") {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
         }
+
         curX += w;
       });
 
       y += rowHeight;
-    }
-
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
-      }
-    }
-
-    // ---------- START PRINT ----------
-    drawTitle();
-    y = 32;
-    drawHeader();
-
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) =>
-        key === "Balance"
-          ? Number(row[key] || 0).toLocaleString()
-          : row[key] ?? ""
-      )
-    );
-
-    const totalRow = new Array(keys.length).fill("");
-
-    // Total Customers (first column – same as UI)
-    totalRow[0] = apiTotal.toLocaleString();
-
-    // Total Balance (last column)
-    totalRow[keys.length - 1] = apiTotalBalance.toLocaleString();
-    // totalRow[keys.length - 2] = apiTotalCustomers.toLocaleString();
-    // totalRow[keys.length - 1] = totalBalance.toLocaleString();
-    const rowsPDF = [...dataRows, totalRow];
-
-    rowsPDF.forEach((row, index) => {
-      const isTotal = index === rowsPDF.length - 1;
-      checkPageBreak();
-      drawRow(row, isTotal);
     });
 
-    // ---------- SAVE ----------
+    // ===== TOTAL =====
+    checkPageBreak();
+
+    let curX2 = startX;
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(8);
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+
+      let value = "";
+
+      if (key === "Code") value = apiTotal;
+      else if (key === "Balance") value = apiTotalBalance.toLocaleString();
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
+    });
+
+    // ===== SAVE =====
     doc.save(`${REPORT_NAME}.pdf`);
   };
 
@@ -290,7 +303,7 @@ export default function AmericanBankReport() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ReportBtn", "scrollSpacer"].includes(c.key)
+      (c) => !["ReportBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -340,7 +353,7 @@ export default function AmericanBankReport() {
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
     totalRowData[headers.length - 1] = Number(
-      totalCollection || 0
+      totalCollection || 0,
     ).toLocaleString();
 
     const totalRow = worksheet.addRow(totalRowData);
@@ -364,13 +377,13 @@ export default function AmericanBankReport() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -456,7 +469,7 @@ export default function AmericanBankReport() {
         (row) =>
           row.Code?.toLowerCase().includes(q) ||
           row.Desc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-          String(row.Balance ?? "").includes(q)
+          String(row.Balance ?? "").includes(q),
       );
     }
 
@@ -730,8 +743,8 @@ export default function AmericanBankReport() {
                         selectedRowIndex === i
                           ? getnavbarbackgroundcolor // ✅ theme color
                           : i % 2 === 0
-                          ? getcolor
-                          : "#f8f9ff",
+                            ? getcolor
+                            : "#f8f9ff",
                       transition: "background-color 0.2s ease",
                     }}
                   >
@@ -768,7 +781,7 @@ export default function AmericanBankReport() {
                                   }/crystalsol/AmericanCityDetailsReport?PCtyCod=${
                                     item.tctycod
                                   }&name=${encodeURIComponent(item.City)}`,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             />
@@ -803,7 +816,7 @@ export default function AmericanBankReport() {
                         </td>
                       ))}
                     </tr>
-                  )
+                  ),
                 )}
               </tbody>
             </table>
@@ -822,7 +835,7 @@ export default function AmericanBankReport() {
               const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
+                isTotalColumn ? "right" : "left",
               );
 
               return (

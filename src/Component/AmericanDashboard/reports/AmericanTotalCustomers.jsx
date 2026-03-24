@@ -15,7 +15,7 @@ import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 import Select from "react-select";
 
 const REPORT_NAME = "Total Customers";
-const COMPANY_NAME = "CRYSTAL SOLUTIONS";
+const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
@@ -306,112 +306,142 @@ export default function TotalCustomers() {
   };
 
   const exportPDFHandler = () => {
-    const doc = new jsPDF({ orientation: "portrait" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-    // -------- PDF CONFIG ----------
-    const topMargin = 16; 
-    const rowHeight = 5; 
-    const headerHeight = 8; 
-    const maxRowY = 280; 
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-    // ------- TITLE --------
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(20);
-      doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 32;
+    const maxY = 280;
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(13);
-      doc.text(REPORT_NAME, 105, 24, { align: "center" });
-    }
+    let y = startY;
 
-    // --------- TABLE HEADER ---------
+    // ===== FILTER COLUMNS =====
     const pdfColumns = columnsConfig.filter(
-      (c) => c.key !== "scrollSpacer" && "progressBtn" && "ledgerBtn",
+      (c) => !["scrollSpacer", "ledgerBtn", "progressBtn"].includes(c.key),
     );
+
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-    const startX = (210 - tableWidth) / 2; 
-    let y = 32;
+    const startX = (pageWidth - tableWidth) / 2;
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
-      let curX = startX;
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
 
-      headers.forEach((header, i) => {
-        let w = colWidths[i];
-        doc.setFillColor(220);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-          align: "center",
-        });
-        curX += w;
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(REPORT_NAME, pageWidth / 2, 20, { align: "center" });
+
+    // ===== HEADER =====
+    let curX = startX;
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
+
+    headers.forEach((h, i) => {
+      const w = colWidths[i];
+      doc.rect(curX, y, w, headerHeight); // ✅ no fill
+      doc.text(h, curX + w / 2, y + headerHeight - 2, {
+        align: "center",
       });
+      curX += w;
+    });
 
-      y += headerHeight;
-    }
+    y += headerHeight;
 
-    // ---------- DRAW ONE ROW ----------
-    function drawRow(row, isTotal) {
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
+
+        let curX = startX;
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9);
+
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
+        });
+
+        y += headerHeight;
+      }
+    };
+
+    // ===== DATA =====
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(8);
+
+    sortedTableData.forEach((row) => {
+      checkPageBreak();
+
       let curX = startX;
 
-      row.forEach((cell, cIndex) => {
-        let w = colWidths[cIndex];
+      keys.forEach((key, i) => {
+        const w = colWidths[i];
+        let value = row[key] ?? "";
+
+        if (key === "Balance" || key === "tmobnum") {
+          value = Number(value || 0).toLocaleString();
+        }
+
         doc.rect(curX, y, w, rowHeight);
 
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
-
-        if (cIndex === colWidths.length - 1) {
-          doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
+        if (key === "Balance" || key === "tmobnum") {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
-          doc.text(String(cell), curX + 2, y + rowHeight - 2);
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
         }
+
         curX += w;
       });
 
       y += rowHeight;
-    }
-
-    // ---------- PAGE BREAK HANDLER -----------
-    function checkPageBreak() {
-      if (y > maxRowY) {
-        doc.addPage();
-        y = topMargin;
-        drawTitle();
-        y = 32;
-        drawHeader();
-      }
-    }
-
-    // ---------- START PRINT ----------
-    drawTitle();
-    y = 32;
-    drawHeader();
-
-    const dataRows = sortedTableData.map((row) =>
-      keys.map((key) => row[key] ?? ""),
-    );
-    const totalRow = new Array(keys.length).fill("");
-    totalRow[0] = sortedTableData.length.toString();
-
-    totalRow[keys.length - 1] = totalBalance.toLocaleString();
-    const rowsPDF = [...dataRows, totalRow];
-
-    rowsPDF.forEach((row, index) => {
-      const isTotal = index === rowsPDF.length - 1;
-      checkPageBreak();
-      drawRow(row, isTotal);
     });
 
-    // ---------- SAVE ----------
+    // ===== TOTAL =====
+    checkPageBreak();
+
+    let curX2 = startX;
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(8);
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+
+      let value = "";
+
+      if (key === "tacccod") value = sortedTableData.length;
+      else if (key === "Balance") value = totalBalance.toLocaleString();
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
+    });
+
+    // ===== SAVE =====
     doc.save(`${REPORT_NAME}.pdf`);
   };
 
@@ -552,7 +582,7 @@ export default function TotalCustomers() {
   };
 
   const getSortIcon = (key) => {
-    if (nonSortableKeys.includes(key)) return null; 
+    if (nonSortableKeys.includes(key)) return null;
 
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
@@ -587,10 +617,10 @@ export default function TotalCustomers() {
       data = data.filter(
         (row) =>
           row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.trim().toLowerCase().includes(q) || 
+          row.tcstdsc?.trim().toLowerCase().includes(q) ||
           row.tmobnum?.toLowerCase().includes(q) ||
           row.SalesMan?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q), 
+          row.Balance?.toString().includes(q),
       );
     }
 
@@ -625,10 +655,10 @@ export default function TotalCustomers() {
     return sortedTableData.filter((row) => {
       return (
         row.tacccod?.toLowerCase().includes(q) ||
-        row.tcstdsc?.trim().toLowerCase().includes(q) || 
+        row.tcstdsc?.trim().toLowerCase().includes(q) ||
         row.tmobnum?.toLowerCase().includes(q) ||
         row.SalesMan?.toLowerCase().includes(q) ||
-        row.Balance?.toString().includes(q) 
+        row.Balance?.toString().includes(q)
       );
     });
   }, [sortedTableData, searchQuery]);
@@ -695,12 +725,10 @@ export default function TotalCustomers() {
               flexWrap: "wrap", // responsive
             }}
           >
-          
-
             {/* SEARCH — RIGHT SIDE */}
             <div
               style={{
-                marginLeft: "auto", 
+                marginLeft: "auto",
                 minWidth: "250px",
                 maxWidth: "360px",
                 border: `1px solid ${softTableStyles.softBorderColor}`,
@@ -825,7 +853,7 @@ export default function TotalCustomers() {
                       color: selectedRowIndex === i ? "white" : fontcolor,
                       backgroundColor:
                         selectedRowIndex === i
-                          ? getnavbarbackgroundcolor 
+                          ? getnavbarbackgroundcolor
                           : i % 2 === 0
                             ? getcolor
                             : "#f8f9ff",
@@ -917,9 +945,7 @@ export default function TotalCustomers() {
                             height: "24px",
                             borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                           }}
-                        >
-                          
-                        </td>
+                        ></td>
                       ))}
                     </tr>
                   ),

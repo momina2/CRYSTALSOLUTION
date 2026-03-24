@@ -186,7 +186,7 @@ export default function AmericanAdminAgging() {
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanAdminAgging.php",
-        form
+        form,
       );
 
       let dataRows = [];
@@ -338,32 +338,27 @@ export default function AmericanAdminAgging() {
 
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    const topMargin = 16;
-    const rowHeight = 5;
-    const headerHeight = 8;
-    const maxRowY = 190;
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 25;
+    const maxY = 190;
 
-    const numericKeys = [
-      "Amt001",
-      "Amt002",
-      "Amt003",
-      "Amt004",
-      "Amt005",
-      "Amt006",
-      "Total",
-    ];
+    let y = startY;
 
-    function drawTitle() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(18);
-      doc.text("CRYSTAL SOLUTIONS", pageWidth / 2, 14, { align: "center" });
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 10, { align: "center" });
 
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(12);
-      doc.text(REPORT_NAME, pageWidth / 2, 22, { align: "center" });
-    }
+    doc.setFontSize(12);
+    doc.setFont("Helvetica", "normal");
+    doc.text(REPORT_NAME, pageWidth / 2, 17, { align: "center" });
 
-    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
+    // ===== COLUMNS =====
+    const pdfColumns = columnsConfig.filter(
+      (c) => !["scrollSpacer", "ledgerBtn", "progressBtn"].includes(c.key),
+    );
+
     const keys = pdfColumns.map((c) => c.key);
     const headers = pdfColumns.map((c) => c.header);
     const colWidths = pdfColumns.map((c) => c.pdfWidth);
@@ -371,78 +366,105 @@ export default function AmericanAdminAgging() {
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
     const startX = (pageWidth - tableWidth) / 2;
 
-    let y = 30;
+    // ===== HEADER (NO COLOR - SIMPLE) =====
+    let curX = startX;
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
 
-    function drawHeader() {
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
+    headers.forEach((h, i) => {
+      const w = colWidths[i];
 
-      let curX = startX;
-      headers.forEach((h, i) => {
-        const w = colWidths[i];
-        doc.setFillColor(230);
-        doc.rect(curX, y, w, headerHeight, "F");
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(h, curX + w / 2, y + headerHeight - 3, { align: "center" });
-        curX += w;
-      });
+      doc.rect(curX, y, w, headerHeight); // simple border
+      doc.text(h, curX + w / 2, y + headerHeight - 2, { align: "center" });
 
-      y += headerHeight;
-    }
+      curX += w;
+    });
 
-    function checkPageBreak() {
-      if (y + rowHeight > maxRowY) {
+    y += headerHeight;
+
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
         doc.addPage();
-        drawTitle();
-        y = 30;
-        drawHeader();
-      }
-    }
+        y = startY;
 
-    function drawRow(row, isTotal = false) {
+        // redraw header
+        let curX = startX;
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
+        });
+
+        y += headerHeight;
+      }
+    };
+
+    // ===== DATA ROWS =====
+    doc.setFont("Helvetica", "normal");
+
+    sortedTableData.forEach((row) => {
+      checkPageBreak();
+
       let curX = startX;
 
-      row.forEach((cell, i) => {
+      keys.forEach((key, i) => {
         const w = colWidths[i];
-        const key = keys[i];
+        const value = row[key] ?? "";
 
         doc.rect(curX, y, w, rowHeight);
-        doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-        doc.setFontSize(8);
 
-        if (numericKeys.includes(key)) {
-          doc.text(String(cell || ""), curX + w - 2, y + rowHeight - 2, {
+        if (
+          [
+            "Amt001",
+            "Amt002",
+            "Amt003",
+            "Amt004",
+            "Amt005",
+            "Amt006",
+            "Total",
+          ].includes(key)
+        ) {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
         } else {
-          doc.text(String(cell || ""), curX + 2, y + rowHeight - 2);
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
         }
 
         curX += w;
       });
 
       y += rowHeight;
-    }
-
-    // ===== START =====
-    drawTitle();
-    drawHeader();
-
-    sortedTableData.forEach((row) => {
-      checkPageBreak();
-      drawRow(keys.map((k) => row[k] ?? ""));
     });
 
     // ===== TOTAL ROW =====
-    const totalRow = keys.map((key) => {
-      if (key === "Code") return sortedTableData.length.toString();
-      if (columnTotals?.[key]) return columnTotals[key];
-      return "";
+    checkPageBreak();
+
+    let curX2 = startX;
+    doc.setFont("Helvetica", "bold");
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+
+      let value = "";
+
+      if (key === "Code") value = sortedTableData.length;
+      else if (runtimeColumnTotals[key]) value = runtimeColumnTotals[key];
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
     });
 
-    checkPageBreak();
-    drawRow(totalRow, true);
-
+    // ===== SAVE =====
     doc.save(`${REPORT_NAME}.pdf`);
   };
 
@@ -625,14 +647,14 @@ export default function AmericanAdminAgging() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
 
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -741,7 +763,7 @@ export default function AmericanAdminAgging() {
           row.Amt005?.toLowerCase().includes(q) ||
           row.Amt006?.toLowerCase().includes(q) ||
           row.Customer?.toLowerCase().includes(q) ||
-          row.Total?.toLowerCase().includes(q)
+          row.Total?.toLowerCase().includes(q),
       );
     }
 
@@ -1071,8 +1093,8 @@ export default function AmericanAdminAgging() {
                             selectedRowIndex === i
                               ? getnavbarbackgroundcolor // ✅ theme color
                               : i % 2 === 0
-                              ? getcolor
-                              : "#f8f9ff",
+                                ? getcolor
+                                : "#f8f9ff",
                           transition: "background-color 0.2s ease",
                         }}
                       >
@@ -1128,9 +1150,9 @@ export default function AmericanAdminAgging() {
                                       }/crystalsol/AmericanProgressReportDashboard?code=${
                                         item.Code
                                       }&name=${encodeURIComponent(
-                                        item.Customer
+                                        item.Customer,
                                       )}`,
-                                      "_blank"
+                                      "_blank",
                                     );
                                   }}
                                 />
@@ -1156,9 +1178,9 @@ export default function AmericanAdminAgging() {
                                       }/crystalsol/AmericanCustomerLedgerDashboard?code=${
                                         item.Code
                                       }&name=${encodeURIComponent(
-                                        item.Customer
+                                        item.Customer,
                                       )}`,
-                                      "_blank"
+                                      "_blank",
                                     );
                                   }}
                                 />
@@ -1249,8 +1271,8 @@ export default function AmericanAdminAgging() {
                 {column.key === "Code"
                   ? sortedTableData.length // ✅ total items
                   : runtimeColumnTotals[column.key]
-                  ? runtimeColumnTotals[column.key].toLocaleString()
-                  : ""}
+                    ? runtimeColumnTotals[column.key].toLocaleString()
+                    : ""}
               </div>
             ))}
           </div>
