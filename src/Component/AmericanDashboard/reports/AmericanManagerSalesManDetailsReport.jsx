@@ -14,7 +14,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Manager SalesMan Details Report";
-const COMPANY_NAME = "AMERICAN ELECTRONICS";
+const COMPANY_NAME = "AMERICAN ELECTRONIC";
 
 const columnsConfig = [
   {
