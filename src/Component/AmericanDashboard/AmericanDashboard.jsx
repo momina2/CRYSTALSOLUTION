@@ -72,7 +72,7 @@ const getCurrentDateFormatted = () => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-  return `${day}-${month}-${year}`; // e.g., 28-11-2025
+  return `${day}-${month}-${year}`; 
 };
 
 const getAggingDateFormatted = () => {
@@ -80,19 +80,19 @@ const getAggingDateFormatted = () => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-  return `${year}-${month}-${day}`; // e.g., 2025-11-28
+  return `${year}-${month}-${day}`; 
 };
 
 const currentDate = getCurrentDateFormatted();
 
 const ChartColors = {
-  Sales: "rgba(79, 109, 255, 0.8)", // Softer, professional blue
-  Purchase: "rgba(255, 126, 149, 0.8)", // Muted pink/red
-  Expense: "rgba(255, 192, 90, 0.8)", // Warm yellow/orange
-  Collection: "rgba(43, 190, 185, 0.8)", // Calm teal
-  YearlySales: "#5790FF", // Lighter blue for yearly Sales
-  YearlyPurchase: "#FFADAD", // Softer red for yearly Purchase
-  YearlyCollection: "#A0FFD1", // Mint green for yearly Collection
+  Sales: "rgba(79, 109, 255, 0.8)", 
+  Purchase: "rgba(255, 126, 149, 0.8)", 
+  Expense: "rgba(255, 192, 90, 0.8)", 
+  Collection: "rgba(43, 190, 185, 0.8)", 
+  YearlySales: "#5790FF", 
+  YearlyPurchase: "#FFADAD", 
+  YearlyCollection: "#A0FFD1", 
 };
 
 const YearlySPCGraph = ({ apiData }) => {
@@ -192,7 +192,6 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
       {/* 🔹 TOP CASH/BANK ROW */}
       <div className="flex justify-between px-1">
         <div className="flex flex-col justify-center p-1">
-          {/* <p className="text-[15px] font-semibold text-black">Cash</p> */}
           <div className="flex items-center gap-1">
             <BanknotesIcon className="w-4 h-4 text-gray-600" />
             <p className="text-[15px] font-semibold text-black">Cash</p>
@@ -212,7 +211,6 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
         </div>
 
         <div className="flex flex-col justify-center p-1">
-          {/* <p className="text-[15px] font-semibold text-black">Bank</p> */}
           <div className="flex items-center gap-1">
             <BuildingLibraryIcon className="w-4 h-4 text-gray-600" />
             <p className="text-[15px] font-semibold text-black">Bank</p>
@@ -251,16 +249,6 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
             </span>
           </p>
         </div>
-
-        {/* City */}
-        {/* <div className="flex flex-col justify-center border-b border-gray-100 p-1">
-          <p className="text-[14px] text-gray-800">
-            City:
-            <span className="text-[16px] font-semibold text-sky-700 pl-1">
-              {webData?.Stores || "-"}
-            </span>
-          </p>
-        </div> */}
 
         {/* City */}
         <div className="flex flex-col justify-center border-r border-b border-gray-100 p-1">
@@ -323,21 +311,17 @@ const StaffCashSummaryCard = ({ balanceData, webData }) => {
 const FinancialPieChart = ({ webData, balanceData }) => {
   if (!webData || !balanceData) return null;
 
-  // ===== HELPER =====
   const toNumber = (val) =>
     Number((val || "0").toString().replace(/,/g, "")) || 0;
 
   const safeValue = (val) => Math.abs(val || 0);
 
-  // ===== RAW VALUES (CAN BE NEGATIVE) =====
   const receivableRaw = toNumber(webData?.Receivable);
   const payableRaw = toNumber(webData?.Payable);
   const stockRaw = toNumber(webData?.["Total Stock"]);
   const expenseRaw = toNumber(webData?.["Expense"]);
   const cashRaw = toNumber(balanceData?.CashBal);
   const bankRaw = toNumber(balanceData?.BankBal);
-
-  // ===== SAFE VALUES FOR PIE (NO NEGATIVES) =====
   const receivable = safeValue(receivableRaw);
   const payable = safeValue(payableRaw);
   const stock = safeValue(stockRaw);
@@ -345,7 +329,6 @@ const FinancialPieChart = ({ webData, balanceData }) => {
   const cash = safeValue(cashRaw);
   const bank = safeValue(bankRaw);
 
-  // ===== GOOGLE CHART DATA =====
   const chartData = [
     ["Type", "Amount"],
     ["Receivable", receivable],
@@ -356,22 +339,20 @@ const FinancialPieChart = ({ webData, balanceData }) => {
     ["Bank", bank],
   ];
 
-  // ===== COLORS (VALID FOR GOOGLE CHARTS) =====
   const colors = [
-    "#4F6DFF", // Receivable
-    "#FF7E95", // Payable
-    "#FFD66B", // Stock
-    "#2BBEB9", // Expense
-    "#7A5EFF", // Cash
-    "#6FCF97", // Bank
+    "#4F6DFF", 
+    "#FF7E95", 
+    "#FFD66B", 
+    "#2BBEB9", 
+    "#7A5EFF", 
+    "#6FCF97",
   ];
 
-  // ===== CHART OPTIONS (REAL 3D) =====
   const options = {
     is3D: true,
     pieHole: 0.35,
     pieStartAngle: 100,
-    legend: "none", // custom legend
+    legend: "none", 
     colors,
     chartArea: {
       width: "95%",
@@ -381,7 +362,6 @@ const FinancialPieChart = ({ webData, balanceData }) => {
 
   return (
     <div className="w-full h-[170px] bg-white shadow-md border border-gray-200 p-2 rounded-xl flex">
-      {/* ===== LEFT SIDE VERTICAL LEGEND ===== */}
       <div className="w-[40%] flex flex-col justify-center space-y-2 pr-2">
         {[
           { label: "Receivable", raw: receivableRaw, color: colors[0] },
@@ -392,13 +372,11 @@ const FinancialPieChart = ({ webData, balanceData }) => {
           { label: "Bank", raw: bankRaw, color: colors[5] },
         ].map((item, i) => (
           <div key={i} className="flex items-center gap-2">
-            {/* Color Dot */}
             <span
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: item.color }}
             />
 
-            {/* Label */}
             <span className="text-[11px] text-gray-600 truncate">
               {item.label}
             </span>
@@ -406,7 +384,6 @@ const FinancialPieChart = ({ webData, balanceData }) => {
         ))}
       </div>
 
-      {/* ===== RIGHT SIDE REAL 3D PIE ===== */}
       <div className="w-[60%] h-full">
         <Chart
           chartType="PieChart"
@@ -425,7 +402,6 @@ const FinanceSummaryCard = ({ webData }) => {
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      {/* <p className="text-[14px] font-medium text-black">Financial Summary</p> */}
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
           <ScaleIcon className="w-4 h-4 text-gray-700" />
@@ -471,38 +447,35 @@ const FinanceSummaryCard = ({ webData }) => {
           </h4>
         </div>
 
-        <div
-          className="flex flex-col justify-center border-r border-gray-200 p-1
-             cursor-pointer hover:bg-gray-100 transition"
-          title={webData?.["Total Stock"]}
-          onClick={() =>
-            window.open(
-              window.location.origin + "/crystalsol/AmericanStockReport",
-              "_blank",
-            )
-          }
-        >
+        <div className="flex flex-col justify-center border-r border-gray-200 p-1">
           <p className="text-[12px] text-gray-800">Stock</p>
-
-          <h4 className="text-[15px] font-semibold text-indigo-800 hover:underline">
+          <h4
+            className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
+            title={webData?.["Total Stock"]}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/StoreStockReport",
+                "_blank",
+              )
+            }
+          >
             {webData?.["Total Stock"] || "-"}
           </h4>
         </div>
 
-        <div
-          className="flex flex-col justify-center p-1
-             cursor-pointer hover:bg-gray-100 transition"
-          title={webData?.Expense}
-          onClick={() =>
-            window.open(
-              window.location.origin + "/crystalsol/AmericanExpenseReport",
-              "_blank",
-            )
-          }
-        >
+        <div className="flex flex-col justify-center p-1">
           <p className="text-[12px] text-gray-800">Expense</p>
 
-          <h4 className="text-[15px] font-semibold text-indigo-800 hover:underline">
+          <h4
+            className="text-[15px] font-semibold text-indigo-800 cursor-pointer hover:underline"
+            title={webData?.Expense}
+            onClick={() =>
+              window.open(
+                window.location.origin + "/crystalsol/ExpenseReport",
+                "_blank",
+              )
+            }
+          >
             {webData?.Expense || "-"}
           </h4>
         </div>
@@ -521,7 +494,6 @@ const HorizontalBalanceCard = ({ mainData, cardTitle = null }) => {
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 flex flex-col gap-1 rounded-lg transition-all duration-300 hover:shadow-md">
       <div className="flex justify-between items-end">
         <div>
-          {/* <p className="text-[16px] font-medium text-black">Customers</p> */}
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100">
               <UserGroupIcon className="w-4 h-4 text-gray-700" />
@@ -683,7 +655,6 @@ const NewSalesCard = ({ salesData }) => {
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      {/* <p className="text-[16px] font-medium text-black">Sale</p> */}
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100">
           <ChartBarIcon className="w-4 h-4 text-gray-700" />
@@ -796,7 +767,7 @@ const NewSalesCard = ({ salesData }) => {
     hover:rounded-md
   "
         >
-          <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
+          <p className="text-[10px] text-black">{labelCurrentMonth}</p>
 
           <h4
             className="text-[14px] font-semibold text-sky-700"
@@ -805,7 +776,7 @@ const NewSalesCard = ({ salesData }) => {
             {currentMonthQuantity}
           </h4>
 
-          <p className="text-[10px] text-gray-500 mt-[-2px]">
+          <p className="text-[10px] text-black mt-[-2px]">
             {currentMonthAmount}
           </p>
         </div>
@@ -835,7 +806,7 @@ const NewSalesCard = ({ salesData }) => {
             {previousMonthQuantity}
           </h4>
 
-          <p className="text-[10px] text-gray-500 mt-[-2px]">
+          <p className="text-[10px] text-black mt-[-2px]">
             {previousMonthAmount}
           </p>
         </div>
@@ -879,7 +850,6 @@ const NewPurchaseCard = ({ purchaseData }) => {
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      {/* <p className="text-[16px] font-medium text-black">Purchase</p> */}
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100">
           <ShoppingCartIcon className="w-4 h-4 text-gray-700" />
@@ -1046,10 +1016,6 @@ const NewCollectionPaymentCard = ({ salesData }) => {
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between leading-tight">
       {/* COLLECTION */}
       <div>
-        {/* <p className="text-[14px] font-medium text-black">
-          Collection {totalCollection2025}
-        </p> */}
-
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
             <BanknotesIcon className="w-4 h-4 text-gray-700" />
@@ -1109,10 +1075,6 @@ const NewCollectionPaymentCard = ({ salesData }) => {
 
       {/* PAYMENT */}
       <div>
-        {/* <p className="text-[14px] font-medium text-black">
-          Payment {totalPayment2025}
-        </p> */}
-
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
             <CreditCardIcon className="w-4 h-4 text-gray-700" />
@@ -1140,7 +1102,6 @@ const NewCollectionPaymentCard = ({ salesData }) => {
   "
           >
             <p className="text-[10px] text-gray-500">{labelCurrentMonth}</p>
-
             <p className="text-[14px] font-semibold text-emerald-700">
               {CurrentMonthPayment}
             </p>
@@ -1163,7 +1124,6 @@ const NewCollectionPaymentCard = ({ salesData }) => {
   "
           >
             <p className="text-[10px] text-gray-500">{labelPreviousMonth}</p>
-
             <p className="text-[14px] font-semibold text-emerald-700">
               {PreviousMonthPayment}
             </p>
@@ -1187,24 +1147,19 @@ const HorizontalRangeCard = ({ stats }) => {
   const handleRangeClick = (rangeLabel) => {
     const mapping = rangeApiMapping[rangeLabel];
     if (!mapping) return;
-
     const { FIntAmt, FFnlAmt } = mapping;
-
     const url =
       window.location.origin +
       `/crystalsol/CustomerBalance?min=${FIntAmt}&max=${FFnlAmt}&label=${encodeURIComponent(
         rangeLabel,
       )}`;
-
     window.open(url, "_blank");
   };
 
   return (
     <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
       {/* HEADER */}
-      {/* <p className="text-[14px] font-semibold text-black leading-none pl-1">
-        Customer Range
-      </p> */}
+
       <div className="flex items-center gap-2 pl-1">
         <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
           <ArrowsRightLeftIcon className="w-4 h-4 text-gray-700" />
@@ -1271,9 +1226,6 @@ const handleAggingClick = (rangeLabel) => {
 const HorizontalAggingRangeCard = ({ stats }) => (
   <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-2 rounded-lg flex flex-col justify-between">
     {/* HEADER */}
-    {/* <p className="text-[14px] font-semibold text-black leading-none pl-1">
-      Customer Agging
-    </p> */}
     <div className="flex items-center gap-2 pl-1">
       <div className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100">
         <ClockIcon className="w-4 h-4 text-gray-700" />
@@ -1365,7 +1317,7 @@ const CustomerDistributionChart = ({ mainData }) => {
     is3D: true,
     pieHole: 0.35,
     pieStartAngle: 100,
-    legend: "none", // ❌ disable default legend
+    legend: "none", 
     colors,
     chartArea: {
       width: "95%",
@@ -1617,17 +1569,13 @@ const ElectronicsDashboard = () => {
 
               {/* --- BIG LOWER SECTION --- */}
               <section className="grid gap-2 mt-0">
-                {/* ⭐ ROW 1: SPC + Range + Agging (3 Cards) */}
                 <div className="grid gap-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
                   <YearlySPCGraph apiData={webData} />
                   <HorizontalRangeCard stats={newRangeStats} />
                   <HorizontalAggingRangeCard stats={newRangeAggingStats} />
                 </div>
 
-                {/* ⭐ ROW 2: Monthly Graph (FULL WIDTH) */}
-                {/* <div className="bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]"> */}
                 <div className="relative bg-white rounded-lg shadow-sm border border-gray-100 pt-3 px-4 pb-4 h-[300px] w-[660px]">
-                  {/* 🔽 YEAR DROPDOWN (TOP RIGHT) */}
                   <div className="absolute top-2 right-3 z-10">
                     <select
                       value={selectedYear}
@@ -1646,7 +1594,6 @@ const ElectronicsDashboard = () => {
                   <div className="h-[calc(100%-10px)]">
                     {isMonthlyDataAvailable ? (
                       (() => {
-                        // ==== CALCULATING AVERAGES ====
                         const avgSales =
                           salesData.reduce((a, b) => a + b, 0) /
                           salesData.length;
@@ -1699,7 +1646,7 @@ const ElectronicsDashboard = () => {
                                   borderWidth: 1.4,
                                   pointRadius: 0,
                                   fill: false,
-                                  borderDash: [5, 5], // dotted line to distinguish
+                                  borderDash: [5, 5], 
                                   hidden: !salesData.some((v) => v !== 0),
                                 },
                                 {
