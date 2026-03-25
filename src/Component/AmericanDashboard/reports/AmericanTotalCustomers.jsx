@@ -147,7 +147,7 @@ export default function TotalCustomers() {
   const selectStyles = {
     container: (base) => ({
       ...base,
-      width: "140px",
+      width: "180px",
       minWidth: "120px",
       fontFamily: getfontstyle,
       fontSize: getdatafontsize,
