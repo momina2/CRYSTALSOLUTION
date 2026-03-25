@@ -18,6 +18,22 @@ const COMPANY_NAME = "AMERICAN ELECTRONIC";
 
 const columnsConfig = [
   {
+    header: "Lgr",
+    key: "ledgerBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
+    header: "Prg",
+    key: "progressBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
     header: "Code",
     key: "tacccod",
     alignment: "left",
@@ -713,11 +729,51 @@ export default function AmericanManagerSalesManDetailsReport() {
                           borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
                         }}
                       >
-                        {column.key === "scrollSpacer"
-                          ? ""
-                          : column.key === "Balance"
-                            ? formatNumber(item[column.key])
-                            : item[column.key]}
+                        {column.key === "scrollSpacer" ? (
+                          ""
+                        ) : column.key === "Balance" ? (
+                          formatNumber(item[column.key])
+                        ) : column.key === "progressBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaClipboardList
+                              size={20}
+                              style={{ cursor: "pointer", color: "#17a2b8" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${window.location.origin}/crystalsol/AmericanProgressReportDashboard?code=${item.tacccod}&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : column.key === "ledgerBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaFileInvoiceDollar
+                              size={20}
+                              style={{ cursor: "pointer", color: "#28a745" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${window.location.origin}/crystalsol/AmericanCustomerLedgerDashboard?code=${item.tacccod}&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          item[column.key]
+                        )}
                       </td>
                     ))}
                   </tr>
