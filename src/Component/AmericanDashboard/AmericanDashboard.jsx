@@ -1150,7 +1150,7 @@ const HorizontalRangeCard = ({ stats }) => {
     const { FIntAmt, FFnlAmt } = mapping;
     const url =
       window.location.origin +
-      `/crystalsol/CustomerBalance?min=${FIntAmt}&max=${FFnlAmt}&label=${encodeURIComponent(
+      `/crystalsol/TotalCustomers?min=${FIntAmt}&max=${FFnlAmt}&label=${encodeURIComponent(
         rangeLabel,
       )}`;
     window.open(url, "_blank");

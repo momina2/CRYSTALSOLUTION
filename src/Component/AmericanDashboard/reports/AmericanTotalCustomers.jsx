@@ -37,7 +37,7 @@ const columnsConfig = [
   {
     header: "Code",
     key: "tacccod",
-    alignment: "left",
+    alignment: "center",
     uiWidth: 80,
     pdfWidth: 20,
     excelWidth: 15,
@@ -46,14 +46,31 @@ const columnsConfig = [
     header: "Name",
     key: "tcstdsc",
     alignment: "left",
-    uiWidth: 360,
+    uiWidth: 340,
     pdfWidth: 80,
     excelWidth: 40,
   },
   {
+    header: "City",
+    key: "tctydsc",
+    alignment: "left",
+    uiWidth: 170,
+    pdfWidth: 25,
+    excelWidth: 20,
+  },
+  {
+    header: "Salesman",
+    key: "tsaldsc",
+    alignment: "left",
+    uiWidth: 160,
+    pdfWidth: 25,
+    excelWidth: 20,
+  },
+
+  {
     header: "Mobile",
     key: "tmobnum",
-    alignment: "left",
+    alignment: "center",
     uiWidth: 110,
     pdfWidth: 25,
     excelWidth: 20,
@@ -96,7 +113,7 @@ export default function TotalCustomers() {
   const query = useQueryParams();
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
-  const minParam = query.get("min") || "0";
+  const minParam = query.get("min") || "-99999999";
   const maxParam = query.get("max") || "99999999";
   const labelParam = query.get("label") || "";
 
@@ -104,12 +121,15 @@ export default function TotalCustomers() {
 
   //DROP-DOWNS
   const [salesman, setSalesman] = useState(null);
+  // NEW TYPE DROPDOWN
+  const [type, setType] = useState(null);
   const [category, setCategory] = useState(null);
   const [city, setCity] = useState(null);
 
   const [salesmen, setSalesmen] = useState([]);
   const [categories, setCategories] = useState([]);
   const [cities, setCities] = useState([]);
+  const [types, setTypes] = useState([]);
 
   const toOptions = (arr, valueKey, labelKey) =>
     [...arr]
@@ -123,13 +143,14 @@ export default function TotalCustomers() {
 
   //DROP-DOWNS OPTIONS
   const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
-  const categoryOptions = toOptions(categories, "tctgcod", "tctgdsc");
-  const cityOptions = toOptions(cities, "tctycod", "tctydsc");
+  const typeOptions = toOptions(types, "ttypcod", "ttypdsc");
+  // const cityOptions = toOptions(cities, "tctycod", "tctydsc");
 
   const selectStyles = {
     container: (base) => ({
       ...base,
-      width: "220px",
+      width: "140px",
+      minWidth: "120px",
       fontFamily: getfontstyle,
       fontSize: getdatafontsize,
     }),
@@ -224,7 +245,7 @@ export default function TotalCustomers() {
   useEffect(() => {
     fetchData();
     fetchSalesmen();
-    fetchCategories();
+    fetchType();
     fetchCities();
   }, []);
 
@@ -235,11 +256,10 @@ export default function TotalCustomers() {
     try {
       const form = new FormData();
       form.append("code", "AMRELEC");
-      form.append("FIntAmt", "-99999999");
-      form.append("FFnlAmt", "99999999");
-      // form.append("FSalCod", salesman?.value || "");
-      // form.append("FCtgCod", category?.value || "");
-      // form.append("FCtyCod", city?.value || "");
+      form.append("FIntAmt", minParam);
+      form.append("FFnlAmt", maxParam);
+      form.append("FSalCod", salesman?.value || "");
+      form.append("FTypCod", type?.value || "");
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanCustomerBalance.php",
@@ -282,15 +302,15 @@ export default function TotalCustomers() {
   };
 
   //FETCH CATEGORIES
-  const fetchCategories = async () => {
+  const fetchType = async () => {
     const form = new FormData();
     form.append("code", "AMRELEC");
 
     const res = await axios.post(
-      "https://crystalsolutions.pk/api/GetCatg.php",
+      "https://crystalsolutions.pk/api/GetCustTypes.php",
       form,
     );
-    setCategories(res.data || []);
+    setTypes(res.data || []);
   };
 
   //FETCH CITIES
@@ -618,8 +638,9 @@ export default function TotalCustomers() {
         (row) =>
           row.tacccod?.toLowerCase().includes(q) ||
           row.tcstdsc?.trim().toLowerCase().includes(q) ||
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
+          row.tmobnum?.toString().includes(q) ||
+          row.tsaldsc?.toLowerCase().includes(q) ||
+          row.tctydsc?.toLowerCase().includes(q) ||
           row.Balance?.toString().includes(q),
       );
     }
@@ -656,8 +677,9 @@ export default function TotalCustomers() {
       return (
         row.tacccod?.toLowerCase().includes(q) ||
         row.tcstdsc?.trim().toLowerCase().includes(q) ||
-        row.tmobnum?.toLowerCase().includes(q) ||
-        row.SalesMan?.toLowerCase().includes(q) ||
+        row.tmobnum?.toString().includes(q) ||
+        row.tsaldsc?.toLowerCase().includes(q) ||
+        row.tctydsc?.toLowerCase().includes(q) ||
         row.Balance?.toString().includes(q)
       );
     });
@@ -678,6 +700,10 @@ export default function TotalCustomers() {
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
+  };
+
+  const handleSelect = () => {
+    fetchData();
   };
 
   return (
@@ -720,17 +746,59 @@ export default function TotalCustomers() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
+              gap: "10px",
               padding: "8px",
-              flexWrap: "wrap", // responsive
+              flexWrap: "nowrap",
             }}
           >
-            {/* SEARCH — RIGHT SIDE */}
+            {/* LEFT SIDE — DROPDOWNS */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {/* SALESMAN */}
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "2px" }}
+              >
+                <span style={{ width: "70px", fontSize: getdatafontsize }}>
+                  Salesman :
+                </span>
+                <Select
+                  options={salesmanOptions}
+                  value={salesman}
+                  onChange={setSalesman}
+                  placeholder="ALL"
+                  isSearchable
+                  isClearable
+                  styles={selectStyles}
+                />
+              </div>
+
+              {/* TYPE */}
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: getdatafontsize,
+                  alignItems: "center",
+                  gap: "2px",
+                }}
+              >
+                <span style={{ width: "50px" }}>Type :</span>
+                <Select
+                  options={typeOptions}
+                  value={type}
+                  onChange={setType}
+                  placeholder="ALL"
+                  isSearchable
+                  isClearable
+                  styles={selectStyles}
+                />
+              </div>
+            </div>
+
+            {/* RIGHT SIDE — SEARCH */}
             <div
               style={{
                 marginLeft: "auto",
-                minWidth: "250px",
-                maxWidth: "360px",
+                minWidth: "160px",
+                maxWidth: "340px",
                 border: `1px solid ${softTableStyles.softBorderColor}`,
                 borderRadius: "2px",
                 backgroundColor: "white",
@@ -740,7 +808,7 @@ export default function TotalCustomers() {
                 height: "28px",
               }}
             >
-              <MagnifyingGlassIcon style={{ width: "16px", height: "16px" }} />
+              <MagnifyingGlassIcon style={{ width: "10px", height: "16px" }} />
               <input
                 type="text"
                 placeholder="Search..."
@@ -1012,6 +1080,7 @@ export default function TotalCustomers() {
               marginBottom: "2px",
             }}
           >
+            <SingleButton text="Select" onClick={handleSelect} />
             <SingleButton
               text="PDF"
               onClick={exportPDFHandler}

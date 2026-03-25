@@ -86,6 +86,9 @@ export default function AmericanManagerSalesManDetailsReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
+
+  
+
   const [isLoading, setIsLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
     key: null,
