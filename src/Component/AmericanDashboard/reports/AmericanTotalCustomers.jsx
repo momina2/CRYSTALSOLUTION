@@ -59,15 +59,6 @@ const columnsConfig = [
     excelWidth: 20,
   },
   {
-    header: "Salesman",
-    key: "tsaldsc",
-    alignment: "left",
-    uiWidth: 160,
-    pdfWidth: 25,
-    excelWidth: 20,
-  },
-
-  {
     header: "Mobile",
     key: "tmobnum",
     alignment: "center",
@@ -75,7 +66,14 @@ const columnsConfig = [
     pdfWidth: 25,
     excelWidth: 20,
   },
-
+  {
+    header: "Salesman",
+    key: "tsaldsc",
+    alignment: "left",
+    uiWidth: 160,
+    pdfWidth: 25,
+    excelWidth: 20,
+  },
   {
     header: "Balance",
     key: "Balance",
