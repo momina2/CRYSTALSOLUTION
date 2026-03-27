@@ -12,6 +12,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
+import Select from "react-select";
 
 const REPORT_NAME = "Non-Active Customers";
 const COMPANY_NAME = "AMERICAN ELECTRONICS";
@@ -58,9 +59,17 @@ const columnsConfig = [
   //   excelWidth: 30,
   // },
   {
+    header: "City",
+    key: "tctydsc",
+    alignment: "left",
+    uiWidth: 150,
+    pdfWidth: 25,
+    excelWidth: 20,
+  },
+  {
     header: "Mobile",
     key: "tmobnum",
-    alignment: "left",
+    alignment: "center",
     uiWidth: 110,
     pdfWidth: 25,
     excelWidth: 20,
@@ -69,7 +78,7 @@ const columnsConfig = [
     header: "SalesMan",
     key: "tsaldsc",
     alignment: "left",
-    uiWidth: 250,
+    uiWidth: 180,
     pdfWidth: 25,
     excelWidth: 20,
   },
@@ -105,6 +114,12 @@ export default function AmericanNonActive() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
+  const [salesman, setSalesman] = useState(null);
+  const [city, setCity] = useState(null);
+
+  const [salesmen, setSalesmen] = useState([]);
+  const [cities, setCities] = useState([]);
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -128,36 +143,151 @@ export default function AmericanNonActive() {
     getdatafontsize,
   } = useTheme();
 
-  // === API CALL =====
-  // useEffect(() => {
-  //   fetchData();
-  // }, [minParam, maxParam]);
+  const selectStyles = {
+    container: (base) => ({
+      ...base,
+      width: "180px",
+      minWidth: "120px",
+      fontFamily: getfontstyle,
+      fontSize: getdatafontsize,
+    }),
+
+    control: (base) => ({
+      ...base,
+      minHeight: "28px",
+      height: "28px",
+      backgroundColor: "#fff",
+      border: "1px solid #000",
+      borderRadius: "0px",
+      boxShadow: "none",
+      justifyContent: "flex-start",
+    }),
+
+    valueContainer: (base) => ({
+      ...base,
+      padding: "0 6px",
+      justifyContent: "flex-start",
+      textAlign: "left",
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      color: "#000",
+      lineHeight: "26px",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#000",
+      textAlign: "left",
+      marginLeft: "0px",
+    }),
+
+    indicatorsContainer: (base) => ({
+      ...base,
+      height: "28px",
+    }),
+
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: "2px 6px",
+      color: "#000",
+    }),
+
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+
+    menu: (base) => ({
+      ...base,
+      borderRadius: "0px",
+      border: "1px solid #000",
+      boxShadow: "none",
+    }),
+
+    option: (base) => ({
+      ...base,
+      textAlign: "left",
+      padding: "4px 8px",
+      color: "#000",
+    }),
+
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
+  };
+
+  const toOptions = (arr, valueKey, labelKey) =>
+    [...arr]
+      .sort((a, b) =>
+        a[labelKey]?.toLowerCase().localeCompare(b[labelKey]?.toLowerCase()),
+      )
+      .map((item) => ({
+        value: item[valueKey],
+        label: item[labelKey]?.trim(),
+      }));
+
+  const salesmanOptions = toOptions(salesmen, "tsalcod", "tsaldsc");
+  const cityOptions = toOptions(cities, "tctycod", "tctydsc");
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+
+      const form = new FormData();
+      form.append("code", "AMRELEC");
+      form.append("FSalCod", salesman?.value || "");
+      form.append("FCtyCod", city?.value || "");
+
+      const res = await axios.post(
+        "https://crystalsolutions.pk/api/AmericanNonActiveCustomers.php",
+        form,
+        { timeout: 20000 },
+      );
+
+      const arr = res?.data ?? [];
+      setRows(arr);
+    } catch (err) {
+      console.error("FetchError:", err);
+      setRows([]);
+    }
+    setIsLoading(false);
+  };
+
+  const fetchSalesmen = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetSalesMen.php",
+      form,
+    );
+    setSalesmen(res.data || []);
+  };
+
+  const fetchCities = async () => {
+    const form = new FormData();
+    form.append("code", "AMRELEC");
+
+    const res = await axios.post(
+      "https://crystalsolutions.pk/api/GetCities.php",
+      form,
+    );
+    setCities(res.data || []);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-
-        const form = new FormData();
-        form.append("code", "AMRELEC");
-
-        const res = await axios.post(
-          "https://crystalsolutions.pk/api/AmericanNonActiveCustomers.php",
-          form,
-          { timeout: 20000 },
-        );
-
-        const arr = res?.data ?? [];
-        setRows(arr);
-      } catch (err) {
-        console.error("FetchError:", err);
-        setRows([]);
-      }
-      setIsLoading(false);
-    };
     fetchData();
+    fetchSalesmen();
+    fetchCities();
   }, []);
 
+  const handleSelect = () => {
+    fetchData();
+  };
   const exportPDFHandler = () => {
     const doc = new jsPDF({
       orientation: "portrait",
@@ -463,10 +593,11 @@ export default function AmericanNonActive() {
       data = data.filter(
         (row) =>
           row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+          row.tctydsc?.toLowerCase().includes(q) ||
+          row.tcstdsc?.toLowerCase().includes(q) || // ✅ NAME FIX
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.tsaldsc?.toLowerCase().includes(q),
-        // row.balance?.toString().includes(q) // ✅ BALANCE
+          row.tsaldsc?.toLowerCase().includes(q) ||
+          row.balance?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -501,10 +632,11 @@ export default function AmericanNonActive() {
     return sortedTableData.filter((row) => {
       return (
         row.tacccod?.toLowerCase().includes(q) ||
-        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tctydsc?.toLowerCase().includes(q) ||
+        row.tcstdsc?.toLowerCase().includes(q) || // ✅ NAME FIX
         row.tmobnum?.toLowerCase().includes(q) ||
-        row.tsaldsc?.toLowerCase().includes(q)
-        // row.balance?.toString().includes(q) // ✅ BALANCE
+        row.tsaldsc?.toLowerCase().includes(q) ||
+        row.balance?.toString().includes(q) // ✅ BALANCE
       );
     });
   }, [sortedTableData, searchQuery]);
@@ -562,68 +694,64 @@ export default function AmericanNonActive() {
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
           <NavComponent textdata={REPORT_NAME} />
 
-          {/* SEARCH ROW */}
           <div
-            className="row"
             style={{
-              height: "auto",
-              marginTop: "8px",
-              marginBottom: "8px",
               display: "flex",
-              justifyContent: "flex-end",
-              paddingRight: "8px", // table edge se halka gap
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px",
             }}
           >
+            {/* DROPDOWNS */}
+            <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+              <span style={{ width: "70px", fontSize: getdatafontsize }}>
+                Salesman :
+              </span>
+              <Select
+                options={salesmanOptions}
+                value={salesman}
+                onChange={setSalesman}
+                placeholder="ALL"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+              <span style={{ width: "50px", fontSize: getdatafontsize }}>
+                City :
+              </span>
+              <Select
+                options={cityOptions}
+                value={city}
+                onChange={setCity}
+                placeholder="ALL"
+                isSearchable
+                isClearable
+                styles={selectStyles}
+              />
+            </div>
+
+            {/* SEARCH */}
             <div
               style={{
+                marginLeft: "auto",
+                minWidth: "220px",
+                border: "1px solid #ccc",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "10px",
+                padding: "2px 8px",
               }}
             >
-              <div
-                style={{
-                  minWidth: "260px",
-                  maxWidth: "400px",
-                  border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "2px",
-                  backgroundColor: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "2px 8px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MagnifyingGlassIcon
-                    className="text-gray-500"
-                    style={{ width: "16px", height: "16px" }}
-                  />
-                </div>
-
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    paddingLeft: "6px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                />
-              </div>
+              <MagnifyingGlassIcon style={{ width: "14px" }} />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ border: "none", outline: "none", flex: 1 }}
+              />
             </div>
           </div>
 
@@ -883,6 +1011,7 @@ export default function AmericanNonActive() {
               marginBottom: "2px",
             }}
           >
+            <SingleButton text="Select" onClick={handleSelect} />
             <SingleButton
               text="PDF"
               onClick={exportPDFHandler}
@@ -905,4 +1034,3 @@ export default function AmericanNonActive() {
     </>
   );
 }
-
