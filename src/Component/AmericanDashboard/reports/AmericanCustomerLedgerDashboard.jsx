@@ -37,7 +37,7 @@ const columnsConfig = [
     key: "ttrndat",
     alignment: "left",
     uiWidth: 90,
-    pdfWidth: 16,
+    pdfWidth: 20,
     excelWidth: 15,
   },
   {
@@ -61,7 +61,7 @@ const columnsConfig = [
     key: "ttrndsc",
     alignment: "left",
     uiWidth: 360,
-    pdfWidth: 65,
+    pdfWidth: 75,
     excelWidth: 40,
   },
   {
@@ -488,184 +488,197 @@ export default function AmericanCustomerLedgerDashboard() {
   }, [apiData]);
 
   const exportPDFHandler = () => {
-  const doc = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-  const pageWidth = doc.internal.pageSize.getWidth();
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-  const rowHeight = 5;
-  const headerHeight = 6;
-  const startY = 30;
-  const maxY = 280;
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 30;
+    const maxY = 280;
 
-  let y = startY;
+    let y = startY;
 
-  // ===== TITLE =====
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
 
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text(`Customer Ledger (${toDate})`, pageWidth / 2, 20, {
-    align: "center",
-  });
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Customer Ledger (${toDate})`, pageWidth / 2, 20, {
+      align: "center",
+    });
+    const accountText = `${custCode} | ${custName}`.substring(0, 60);
 
-  doc.setFontSize(10);
-  // doc.text(`Account: ${headerName}`, 10, 26);
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(11);
 
-  // ===== COLUMNS =====
-  const pdfColumns = columnsConfig.filter(
-    (c) => c.key !== "scrollSpacer"
-  );
+    doc.text(accountText, pageWidth / 2, 26, {
+      align: "center",
+    });
 
-  const keys = pdfColumns.map((c) => c.key);
-  const headers = pdfColumns.map((c) => c.header);
-  const colWidths = pdfColumns.map((c) => c.pdfWidth);
+    // ===== COLUMNS =====
+    const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
 
-  const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-  const startX = (pageWidth - tableWidth) / 2;
+    const keys = pdfColumns.map((c) => c.key);
+    const headers = pdfColumns.map((c) => c.header);
+    const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
-  // ===== HEADER (NO COLOR) =====
-  let curX = startX;
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+    const startX = (pageWidth - tableWidth) / 2;
 
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(9);
+    doc.setFontSize(10);
+    // doc.setFont("Helvetica", "bold");
+    // doc.text("Account:", startX, 26);
 
-  headers.forEach((h, i) => {
-    const w = colWidths[i];
-    doc.rect(curX, y, w, headerHeight);
-    doc.text(h, curX + w / 2, y + headerHeight - 2, { align: "center" });
-    curX += w;
-  });
+    // doc.setFont("Helvetica", "normal");
+    // const safeName = `${headerCode} - ${headerName}`.substring(0, 50);
+    // doc.text(`Account: ${safeName}`, startX, 26);
 
-  y += headerHeight;
-
-  // ===== PAGE BREAK =====
-  const checkPageBreak = () => {
-    if (y + rowHeight > maxY) {
-      doc.addPage();
-      y = startY;
-
-      let curX = startX;
-      headers.forEach((h, i) => {
-        const w = colWidths[i];
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(h, curX + w / 2, y + headerHeight - 2, {
-          align: "center",
-        });
-        curX += w;
-      });
-
-      y += headerHeight;
-    }
-  };
-
-  // ===== DATA =====
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(8);
-
-  filteredData.forEach((row) => {
-    checkPageBreak();
-
+    // ===== HEADER =====
     let curX = startX;
 
-    keys.forEach((key, i) => {
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
+
+    headers.forEach((h, i) => {
       const w = colWidths[i];
-      let value = row[key] ?? "";
-
-      if (
-        ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
-      ) {
-        value = showIfNonZero(value);
-      }
-
-      doc.rect(curX, y, w, rowHeight);
-
-      if (
-        ["debit", "credit", "balance", "titmqnt", "tsalrat"].includes(key)
-      ) {
-        doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
-          align: "right",
-        });
-      } else {
-        doc.text(String(value), curX + 2, y + rowHeight - 2);
-      }
-
+      doc.rect(curX, y, w, headerHeight);
+      doc.text(h, curX + w / 2, y + headerHeight - 2, {
+        align: "center",
+      });
       curX += w;
     });
 
-    y += rowHeight;
-  });
+    y += headerHeight;
 
-  // ===== TOTAL ROW =====
-  checkPageBreak();
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
 
-  let curX2 = startX;
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(8);
+        let curX = startX;
 
-  keys.forEach((key, i) => {
-    const w = colWidths[i];
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
+        });
 
-    let value = "";
+        y += headerHeight;
+      }
+    };
 
-    if (i === 0) value = filteredData.length;
-    else if (key === "titmqnt") value = showIfNonZero(totalQty);
-    else if (key === "debit") value = showIfNonZero(totalDebit);
-    else if (key === "credit") value = showIfNonZero(totalCredit);
-    else if (key === "balance") value = showIfNonZero(apiData?.Balance);
+    // ===== DATA =====
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(8);
 
-    doc.rect(curX2, y, w, rowHeight);
+    const numericFields = ["debit", "credit", "balance", "titmqnt", "tsalrat"];
 
-    doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
-      align: "right",
-    });
+    filteredData.forEach((row) => {
+      checkPageBreak();
 
-    curX2 += w;
-  });
+      let curX = startX;
 
-  y += rowHeight + 4;
+      keys.forEach((key, i) => {
+        const w = colWidths[i];
+        let value = row[key] ?? "";
 
-  // ===== AGING BOX (KEEP BUT CLEAN) =====
-  if (apiData) {
-    const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
-    const values = [
-      apiData?.amt001,
-      apiData?.amt002,
-      apiData?.amt003,
-      apiData?.amt004,
-      apiData?.amt005,
-      apiData?.amt006,
-    ];
+        if (numericFields.includes(key)) {
+          value = showIfNonZero(value);
+        }
 
-    const boxWidth = tableWidth / 6;
-    let x = startX;
+        doc.rect(curX, y, w, rowHeight);
 
-    doc.setFont("Helvetica", "bold");
+        if (numericFields.includes(key)) {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
+            align: "right",
+          });
+        } else {
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
+        }
 
-    labels.forEach((label, i) => {
-      doc.rect(x, y, boxWidth, 10);
-
-      doc.text(label, x + boxWidth / 2, y + 3, { align: "center" });
-
-      doc.setFont("Helvetica", "normal");
-      doc.text(showIfNonZero(values[i]), x + boxWidth / 2, y + 8, {
-        align: "center",
+        curX += w;
       });
 
-      doc.setFont("Helvetica", "bold");
-      x += boxWidth;
+      y += rowHeight;
     });
-  }
 
-  // ===== SAVE =====
-  doc.save(`CustomerLedger_${toDate}.pdf`);
-};
+    // ===== TOTAL ROW =====
+    checkPageBreak();
 
+    let curX2 = startX;
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(8);
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+      let value = "";
+
+      if (i === 0) value = filteredData.length;
+      else if (key === "titmqnt") value = showIfNonZero(totalQty);
+      else if (key === "debit") value = showIfNonZero(totalDebit);
+      else if (key === "credit") value = showIfNonZero(totalCredit);
+      else if (key === "balance") value = showIfNonZero(apiData?.Balance);
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
+    });
+
+    y += rowHeight + 4;
+
+    // ===== AGING BOX =====
+    if (apiData) {
+      const labels = ["01-30", "31-60", "61-90", "91-120", "121-150", "150+"];
+      const values = [
+        apiData?.amt001,
+        apiData?.amt002,
+        apiData?.amt003,
+        apiData?.amt004,
+        apiData?.amt005,
+        apiData?.amt006,
+      ];
+
+      const boxWidth = tableWidth / 6;
+      let x = startX;
+
+      doc.setFont("Helvetica", "bold");
+
+      labels.forEach((label, i) => {
+        doc.rect(x, y, boxWidth, 10);
+
+        doc.text(label, x + boxWidth / 2, y + 3, {
+          align: "center",
+        });
+
+        doc.setFont("Helvetica", "normal");
+        doc.text(showIfNonZero(values[i]), x + boxWidth / 2, y + 8, {
+          align: "center",
+        });
+
+        doc.setFont("Helvetica", "bold");
+        x += boxWidth;
+      });
+    }
+
+    // ===== SAVE =====
+    doc.save(`CustomerLedger_${toDate}.pdf`);
+  };
   // EXCEL EXPORT (Advance style)
   async function exportCSV({
     rows,

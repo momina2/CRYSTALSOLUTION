@@ -46,7 +46,7 @@ const columnsConfig = [
     header: "Description",
     key: "tcstdsc",
     alignment: "left",
-    uiWidth: 360,
+    uiWidth: 380,
     pdfWidth: 80,
     excelWidth: 20,
   },
@@ -102,6 +102,12 @@ export default function AmericanSalesManDetailsReport() {
   const query = useQueryParams();
   const SalManCode = query.get("tsalcod");
   const SaleManName = query.get("name");
+  console.log(
+    "Received query params - SalManCode:",
+    SalManCode,
+    "SaleManName:",
+    SaleManName,
+  );
 
   const [headerCode] = useState(SalManCode);
   const [headerName] = useState(SaleManName);
@@ -184,6 +190,8 @@ export default function AmericanSalesManDetailsReport() {
     doc.text(`${headerCode} | ${headerName}`, pageWidth / 2, 20, {
       align: "center",
     });
+    doc.setFontSize(10);
+    doc.text(`Account: ${headerName}`, startX, 26);
 
     // ===== HEADER =====
     let curX = startX;
