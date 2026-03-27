@@ -38,27 +38,25 @@ const columnsConfig = [
     key: "Region",
     alignment: "left",
     uiWidth: 200,
-    pdfWidth: 35,
+    pdfWidth: 70,
     excelWidth: 30,
   },
   {
     header: "Nos",
     key: "Nos",
-    alignment: "center",
+    alignment: "right",
     uiWidth: 50,
     pdfWidth: 10,
     excelWidth: 20,
   },
-
   {
     header: "Balance",
     key: "Bal",
     alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 18,
+    uiWidth: 100,
+    pdfWidth: 40,
+    excelWidth: 20,
   },
-
   {
     header: "",
     key: "scrollSpacer",
@@ -79,7 +77,7 @@ export default function AmericanRegionReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [apiTotalBalance, setApiTotalBalance] = useState(0);
-  const [apiTotalRegion, setApiTotalRegion] = useState(0);
+  const [apiTotalCity, setApiTotalCity] = useState(0);
   const [apiTotalCustomers, setApiTotalCustomers] = useState(0);
 
   const [sortConfig, setSortConfig] = useState({
@@ -120,7 +118,7 @@ export default function AmericanRegionReport() {
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanRegionInfo.php",
-        form
+        form,
       );
 
       let dataRows = [];
@@ -135,28 +133,18 @@ export default function AmericanRegionReport() {
         setApiTotalBalance(Number(cleanTotal) || 0);
       }
 
-      if (res.data["Total Cities"]) {
-        setApiTotalRegion(Number(res.data["Total Cities"]) || 0);
-      }
       if (res.data["Total Customers"]) {
         setApiTotalCustomers(Number(res.data["Total Customers"]) || 0);
       }
 
       const mapped = dataRows.map((row) => ({
-        ...row,
-        Bal: Number(
-          String(
-            row.Bal ??
-              row.Balance ??
-              row.balance ??
-              row.tbal ??
-              row.tbalance ??
-              0
-          ).replace(/,/g, "")
-        ),
+        tregcod: row.tregcod?.trim(),
+        Region: row.Region?.trim(),
+        Nos: Number(row.Nos) || 0,
+        Bal: row.Bal ? Number(row.Bal.replace(/,/g, "")) : 0,
       }));
-
       setRows(mapped);
+
       setErrorMessage("");
     } catch (err) {
       console.error("API error:", err);
@@ -167,147 +155,139 @@ export default function AmericanRegionReport() {
     setIsLoading(false);
   };
 
- const exportPDFHandler = () => {
-  const doc = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  });
-
-  const pageWidth = doc.internal.pageSize.getWidth();
-
-  const rowHeight = 6;
-  const headerHeight = 7;
-  const startY = 32;
-  const maxY = 280;
-
-  let y = startY;
-
-  // ===== FILTER COLUMNS =====
-  const pdfColumns = columnsConfig.filter(
-    (c) => !["scrollSpacer", "ReportBtn"].includes(c.key)
-  );
-
-  const keys = pdfColumns.map((c) => c.key);
-  const headers = pdfColumns.map((c) => c.header);
-  const colWidths = pdfColumns.map((c) => c.pdfWidth);
-
-  const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-  const startX = (pageWidth - tableWidth) / 2;
-
-  // ===== TITLE =====
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
-
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(12);
-  doc.text(REPORT_NAME, pageWidth / 2, 20, { align: "center" });
-
-  // ===== HEADER =====
-  let curX = startX;
-
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(9);
-
-  headers.forEach((h, i) => {
-    const w = colWidths[i];
-    doc.rect(curX, y, w, headerHeight); // ❌ no fill
-    doc.text(h, curX + w / 2, y + headerHeight - 2, {
-      align: "center",
+  const exportPDFHandler = () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
     });
-    curX += w;
-  });
 
-  y += headerHeight;
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-  // ===== PAGE BREAK =====
-  const checkPageBreak = () => {
-    if (y + rowHeight > maxY) {
-      doc.addPage();
-      y = startY;
+    const rowHeight = 6;
+    const headerHeight = 7;
+    const startY = 30;
+    const maxY = 280;
 
-      let curX = startX;
+    let y = startY;
 
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(9);
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
 
-      headers.forEach((h, i) => {
-        const w = colWidths[i];
-        doc.rect(curX, y, w, headerHeight);
-        doc.text(h, curX + w / 2, y + headerHeight - 2, {
-          align: "center",
-        });
-        curX += w;
-      });
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(REPORT_NAME, pageWidth / 2, 20, { align: "center" });
 
-      y += headerHeight;
-    }
-  };
+    // ===== FILTER COLUMNS (REMOVE RPT + SPACER) =====
+    const pdfColumns = columnsConfig.filter(
+      (c) => !["scrollSpacer", "ReportBtn"].includes(c.key),
+    );
 
-  // ===== DATA =====
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(8);
+    const keys = pdfColumns.map((c) => c.key);
+    const headers = pdfColumns.map((c) => c.header);
+    const colWidths = pdfColumns.map((c) => c.pdfWidth);
 
-  sortedTableData.forEach((row) => {
-    checkPageBreak();
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+    const startX = (pageWidth - tableWidth) / 2;
 
+    // ===== HEADER (NO COLOR) =====
     let curX = startX;
 
-    keys.forEach((key, i) => {
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(9);
+
+    headers.forEach((h, i) => {
       const w = colWidths[i];
-      let value = row[key] ?? "";
-
-      if (key === "Bal" || key === "Nos") {
-        value = Number(value || 0).toLocaleString();
-      }
-
-      doc.rect(curX, y, w, rowHeight);
-
-      if (key === "Bal" || key === "Nos") {
-        doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
-          align: "right",
-        });
-      } else {
-        doc.text(String(value), curX + 2, y + rowHeight - 2);
-      }
-
+      doc.rect(curX, y, w, headerHeight);
+      doc.text(h, curX + w / 2, y + headerHeight - 2, { align: "center" });
       curX += w;
     });
 
-    y += rowHeight;
-  });
+    y += headerHeight;
 
-  // ===== TOTAL =====
-  checkPageBreak();
+    // ===== PAGE BREAK =====
+    const checkPageBreak = () => {
+      if (y + rowHeight > maxY) {
+        doc.addPage();
+        y = startY;
 
-  let curX2 = startX;
+        let curX = startX;
+        headers.forEach((h, i) => {
+          const w = colWidths[i];
+          doc.rect(curX, y, w, headerHeight);
+          doc.text(h, curX + w / 2, y + headerHeight - 2, {
+            align: "center",
+          });
+          curX += w;
+        });
 
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(8);
+        y += headerHeight;
+      }
+    };
 
-  keys.forEach((key, i) => {
-    const w = colWidths[i];
+    // ===== DATA =====
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(8);
 
-    let value = "";
+    sortedTableData.forEach((row) => {
+      checkPageBreak();
 
-    if (key === "tregcod") value = totalRegions;
-    else if (key === "Nos") value = totalCustomers.toLocaleString();
-    else if (key === "Bal")
-      value = totalBalance.toLocaleString();
+      let curX = startX;
 
-    doc.rect(curX2, y, w, rowHeight);
+      keys.forEach((key, i) => {
+        const w = colWidths[i];
+        let value = row[key] ?? "";
 
-    doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
-      align: "right",
+        if (key === "Bal" || key === "Nos") {
+          value = Number(value || 0).toLocaleString();
+        }
+
+        doc.rect(curX, y, w, rowHeight);
+
+        if (key === "Bal" || key === "Nos") {
+          doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
+            align: "right",
+          });
+        } else {
+          doc.text(String(value), curX + 2, y + rowHeight - 2);
+        }
+
+        curX += w;
+      });
+
+      y += rowHeight;
     });
 
-    curX2 += w;
-  });
+    // ===== TOTAL =====
+    checkPageBreak();
 
-  // ===== SAVE =====
-  doc.save(`${REPORT_NAME}.pdf`);
-};
+    let curX2 = startX;
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(8);
+
+    keys.forEach((key, i) => {
+      const w = colWidths[i];
+
+      let value = "";
+
+      if (key === "tmgrcod") value = filteredData.length;
+      else if (key === "Nos") value = totalNos.toLocaleString();
+      else if (key === "Bal") value = apiTotalBalance.toLocaleString();
+
+      doc.rect(curX2, y, w, rowHeight);
+
+      doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
+        align: "right",
+      });
+
+      curX2 += w;
+    });
+
+    // ===== SAVE =====
+    doc.save(`${REPORT_NAME}.pdf`);
+  };
 
   // ======================= EXCEL EXPORT =======================
 
@@ -322,7 +302,7 @@ export default function AmericanRegionReport() {
     const worksheet = workbook.addWorksheet("Report");
 
     const excelColumns = columnsConfig.filter(
-      (c) => !["ReportBtn", "scrollSpacer"].includes(c.key)
+      (c) => !["ReportBtn", "scrollSpacer"].includes(c.key),
     );
 
     const headers = excelColumns.map((c) => c.header);
@@ -389,14 +369,14 @@ export default function AmericanRegionReport() {
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `${reportName}.xlsx`
+      `${reportName}.xlsx`,
     );
   }
 
   // ----------- WIDTH / TABLE SIZE -----------
   const totalUiWidth = columnsConfig.reduce(
     (sum, col) => sum + Number(col.uiWidth),
-    0
+    0,
   );
   const tableWidth = `${totalUiWidth}px`;
 
@@ -446,7 +426,7 @@ export default function AmericanRegionReport() {
   };
 
   const getSortIcon = (key) => {
-    if (nonSortableKeys.includes(key)) return null; // ❌ no arrows on buttons
+    if (nonSortableKeys.includes(key)) return null;
 
     if (sortConfig.key === key) {
       return sortConfig.direction === "ascending" ? (
@@ -478,34 +458,15 @@ export default function AmericanRegionReport() {
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase().trim();
+
       data = data.filter(
         (row) =>
           row.tregcod?.toLowerCase().includes(q) ||
-          row.Region?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-          row.Nos?.toLowerCase().includes(q) ||
-          String(row.Bal ?? "").includes(q)
+          row.Region?.toLowerCase().includes(q) ||
+          String(row.Nos).includes(q),
       );
     }
 
-    // if (sortConfig.key) {
-    //   data.sort((a, b) => {
-    //     const aVal = a[sortConfig.key] ?? "";
-    //     const bVal = b[sortConfig.key] ?? "";
-
-    //     // Balance numeric sort
-    //     if (sortConfig.key === "Bal") {
-    //       const aNum = parseFloat(aVal) || 0;
-    //       const bNum = parseFloat(bVal) || 0;
-    //       return sortConfig.direction === "ascending"
-    //         ? aNum - bNum
-    //         : bNum - aNum;
-    //     }
-
-    //     return sortConfig.direction === "ascending"
-    //       ? String(aVal).localeCompare(String(bVal))
-    //       : String(bVal).localeCompare(String(aVal));
-    //   });
-    // }
     if (sortConfig.key) {
       data.sort((a, b) => {
         const aVal = a[sortConfig.key] ?? "";
@@ -522,8 +483,8 @@ export default function AmericanRegionReport() {
 
         // ✅ Nos numeric sort (FIX)
         if (sortConfig.key === "Nos") {
-          const aNum = Number(String(aVal).replace(/,/g, "")) || 0;
-          const bNum = Number(String(bVal).replace(/,/g, "")) || 0;
+          const aNum = Number(a.Nos) || 0;
+          const bNum = Number(b.Nos) || 0;
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;
@@ -547,22 +508,18 @@ export default function AmericanRegionReport() {
     return sortedTableData.filter((row) => {
       return (
         row.tregcod?.toLowerCase().includes(q) ||
-        row.Region?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-        row.Nos?.toLowerCase().includes(q) ||
-        String(row.Bal ?? "").includes(q)
+        row.Region?.trim().toLowerCase().includes(q) ||
+        row.Nos?.toString().includes(q)
       );
     });
   }, [sortedTableData, searchQuery]);
-
   const totalBalance = useMemo(() => {
     return filteredData.reduce((sum, row) => {
       const val = Number(row.Bal ?? 0);
       return sum + (isNaN(val) ? 0 : val);
     }, 0);
   }, [filteredData]);
-
-  const totalRegions = filteredData.length;
-
+  const totalCities = filteredData.length;
   const totalCustomers = useMemo(() => {
     return filteredData.reduce((sum, row) => {
       const val = Number(row.Nos ?? 0);
@@ -576,6 +533,12 @@ export default function AmericanRegionReport() {
   //       return sum + (isNaN(value) ? 0 : value);
   //     }, 0);
   //   }, [sortedTableData]);
+
+  const totalNos = useMemo(() => {
+    return filteredData.reduce((sum, row) => {
+      return sum + (Number(row.Nos) || 0);
+    }, 0);
+  }, [filteredData]);
 
   const handleCSV = () => {
     exportCSV({
@@ -620,7 +583,7 @@ export default function AmericanRegionReport() {
             boxShadow: softTableStyles.softBoxShadow,
           }}
         >
-          {/* NAV HEADER BAR */}
+          {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
           <NavComponent textdata={REPORT_NAME} />
 
           {/* SEARCH ROW */}
@@ -785,8 +748,8 @@ export default function AmericanRegionReport() {
                         selectedRowIndex === i
                           ? getnavbarbackgroundcolor // ✅ theme color
                           : i % 2 === 0
-                          ? getcolor
-                          : "#f8f9ff",
+                            ? getcolor
+                            : "#f8f9ff",
                       transition: "background-color 0.2s ease",
                     }}
                   >
@@ -802,8 +765,10 @@ export default function AmericanRegionReport() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
+                        ) : column.key === "Nos" ? (
+                          item.Nos.toLocaleString()
                         ) : column.key === "Bal" ? (
-                          Number(item.Bal || 0).toLocaleString()
+                          Number(item.Bal).toLocaleString()
                         ) : column.key === "ReportBtn" ? (
                           <div
                             style={{
@@ -817,15 +782,9 @@ export default function AmericanRegionReport() {
                               onClick={(e) => {
                                 e.stopPropagation();
 
-                                if (!item.tregcod) return;
-
                                 window.open(
-                                  `${
-                                    window.location.origin
-                                  }/crystalsol/AmericanRegionDetailsReport?PRegCod=${
-                                    item.tregcod
-                                  }&name=${encodeURIComponent(item.Region)}`,
-                                  "_blank"
+                                  `${window.location.origin}/crystalsol/AmericanRegionDetailsReport?FRegCod=${item.tregcod}&name=${encodeURIComponent(item.Region)}`,
+                                  "_blank",
                                 );
                               }}
                             />
@@ -860,7 +819,7 @@ export default function AmericanRegionReport() {
                         </td>
                       ))}
                     </tr>
-                  )
+                  ),
                 )}
               </tbody>
             </table>
@@ -879,7 +838,7 @@ export default function AmericanRegionReport() {
               const isTotalColumn = index === columnsConfig.length - 2;
 
               const alignmentClass = getAlignmentClass(
-                isTotalColumn ? "right" : "left"
+                isTotalColumn ? "right" : "left",
               );
 
               return (
@@ -904,12 +863,12 @@ export default function AmericanRegionReport() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "Bal" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
-                  ) : index === 1 ? (
-                    <span>{totalRegions}</span>
-                  ) : index === 3 ? (
-                    <span>{totalCustomers.toLocaleString()}</span>
+                  {column.key === "tregcod" ? (
+                    <span>{filteredData.length}</span>
+                  ) : column.key === "Nos" ? (
+                    <span>{totalNos.toLocaleString()}</span>
+                  ) : column.key === "Bal" ? (
+                    <span>{apiTotalBalance.toLocaleString()}</span>
                   ) : (
                     ""
                   )}

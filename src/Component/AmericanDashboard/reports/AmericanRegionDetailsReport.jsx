@@ -18,53 +18,52 @@ const COMPANY_NAME = "AMERICAN ELECTRONICS";
 
 const columnsConfig = [
   {
-    header: "Lgr",
-    key: "ledgerBtn",
+    header: "Rpt",
+    key: "rptBtn",
     alignment: "center",
     uiWidth: 50,
     pdfWidth: 0,
     excelWidth: 0,
   },
-  {
-    header: "P.R",
-    key: "progressBtn",
-    alignment: "center",
-    uiWidth: 50,
-    pdfWidth: 0,
-    excelWidth: 0,
-  },
-
   {
     header: "Code",
     key: "tacccod",
-    alignment: "left",
-    uiWidth: 90,
-    pdfWidth: 20,
-    excelWidth: 8,
-  },
-  {
-    header: "Description",
-    key: "tcstdsc",
-    alignment: "left",
-    uiWidth: 360,
-    pdfWidth: 80,
+    alignment: "center",
+    uiWidth: 120,
+    pdfWidth: 40,
     excelWidth: 20,
   },
   {
-    header: "Phone",
+    header: "Customer",
+    key: "tcstdsc",
+    alignment: "left",
+    uiWidth: 250,
+    pdfWidth: 80,
+    excelWidth: 30,
+  },
+  {
+    header: "Mobile",
     key: "tmobnum",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 15,
+    alignment: "left",
+    uiWidth: 140,
+    pdfWidth: 50,
+    excelWidth: 20,
+  },
+  {
+    header: "Salesman",
+    key: "tsaldsc",
+    alignment: "left",
+    uiWidth: 180,
+    pdfWidth: 60,
+    excelWidth: 25,
   },
   {
     header: "Balance",
-    key: "Balance",
+    key: "Bal",
     alignment: "right",
     uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 15,
+    pdfWidth: 40,
+    excelWidth: 20,
   },
   {
     header: "",
@@ -93,13 +92,12 @@ export default function AmericanRegionDetailsReport() {
     direction: "ascending",
   });
 
+  // State variables ki jagah direct variables use karein
   const query = useQueryParams();
-  //   const RegCod = query.get("PRegCod") || "";
-  //   const RegName = query.get("name") || "";
-
-
-  const RegCod = query.get("Code") || "";
-  const RegName = query.get("name") || "";
+  const RegCod = query.get("FRegCod");
+  const RegName = query.get("name");
+  console.log("Current RegCod from URL:", RegCod);
+  console.log("Current RegName from URL:", RegName);
 
   const {
     isSidebarVisible,
@@ -111,35 +109,50 @@ export default function AmericanRegionDetailsReport() {
   } = useTheme();
 
   // === API CALL =====
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!RegCod) return; // Code nahi toh call nahi
 
-      const form = new FormData();
-      form.append("code", "AMRELEC");
-      form.append("FRegCod", RegCod);
+      try {
+        setIsLoading(true);
+        const form = new FormData();
+        form.append("code", "AMRELEC");
+        form.append("FRegCod", RegCod); // Exact parameter name for API
 
-      const res = await axios.post(
-        "https://crystalsolutions.pk/api/AmericanRegionCustomers.php",
-        form,
-      );
+        const res = await axios.post(
+          "https://crystalsolutions.pk/api/AmericanRegionCustomers.php",
+          form,
+        );
 
-      const DetailsList = Array.isArray(res.data) ? res.data : [];
+        if (res.data) {
+          const DetailsList = Array.isArray(res.data)
+            ? res.data.map((row) => ({
+                tacccod: row.tacccod?.trim(),
+                tcstdsc: row.tcstdsc?.trim(),
+                tmobnum: row.tmobnum?.trim(),
+                tsaldsc: row.tsaldsc?.trim(),
+                Bal: Number(String(row.Balance ?? 0).replace(/,/g, "")),
+              }))
+            : [];
+          setRows(DetailsList);
+        }
+      } catch (err) {
+        console.error("API Error:", err);
+        setRows([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      setRows(DetailsList);
-    } catch (err) {
-      console.error("Progress API error:", err);
-      setRows([]);
-      setApiData(null);
-    } finally {
-      setIsLoading(false);
-    }
+    fetchData();
+  }, [RegCod]); // RegCod milte hi automatically chal pare ga
+
+  const formatNumber = (val) => {
+    const num = Number(val);
+    if (isNaN(num)) return "0";
+    return Math.trunc(num).toLocaleString();
   };
 
-  useEffect(() => {
-    if (!RegCod) return;
-    fetchData();
-  }, [RegCod]);
   const exportPDFHandler = () => {
     const doc = new jsPDF({
       orientation: "portrait",
@@ -156,9 +169,20 @@ export default function AmericanRegionDetailsReport() {
 
     let y = startY;
 
-    // ===== FILTER COLUMNS (REMOVE ICONS) =====
+    // ===== TITLE =====
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
+
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`${RegCod} | ${RegName}`, pageWidth / 2, 20, {
+      align: "center",
+    });
+
+    // ===== FILTER COLUMNS (REMOVE RPT + SPACER) =====
     const pdfColumns = columnsConfig.filter(
-      (c) => !["scrollSpacer", "progressBtn", "ledgerBtn"].includes(c.key),
+      (c) => !["scrollSpacer", "rptBtn"].includes(c.key),
     );
 
     const keys = pdfColumns.map((c) => c.key);
@@ -168,16 +192,7 @@ export default function AmericanRegionDetailsReport() {
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
     const startX = (pageWidth - tableWidth) / 2;
 
-    // ===== TITLE =====
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text(COMPANY_NAME, pageWidth / 2, 12, { align: "center" });
-
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(12);
-    doc.text(RegName, pageWidth / 2, 20, { align: "center" });
-
-    // ===== HEADER =====
+    // ===== HEADER (NO COLOR) =====
     let curX = startX;
 
     doc.setFont("Helvetica", "bold");
@@ -185,10 +200,8 @@ export default function AmericanRegionDetailsReport() {
 
     headers.forEach((h, i) => {
       const w = colWidths[i];
-      doc.rect(curX, y, w, headerHeight); // ✅ no fill
-      doc.text(h, curX + w / 2, y + headerHeight - 2, {
-        align: "center",
-      });
+      doc.rect(curX, y, w, headerHeight);
+      doc.text(h, curX + w / 2, y + headerHeight - 2, { align: "center" });
       curX += w;
     });
 
@@ -201,10 +214,6 @@ export default function AmericanRegionDetailsReport() {
         y = startY;
 
         let curX = startX;
-
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(9);
-
         headers.forEach((h, i) => {
           const w = colWidths[i];
           doc.rect(curX, y, w, headerHeight);
@@ -231,13 +240,13 @@ export default function AmericanRegionDetailsReport() {
         const w = colWidths[i];
         let value = row[key] ?? "";
 
-        if (key === "Balance") {
+        if (key === "Bal") {
           value = Number(value || 0).toLocaleString();
         }
 
         doc.rect(curX, y, w, rowHeight);
 
-        if (key === "Balance") {
+        if (key === "Bal" || key === "Nos") {
           doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
@@ -251,11 +260,10 @@ export default function AmericanRegionDetailsReport() {
       y += rowHeight;
     });
 
-    // ===== TOTAL ROW =====
+    // ===== TOTAL =====
     checkPageBreak();
 
     let curX2 = startX;
-
     doc.setFont("Helvetica", "bold");
     doc.setFontSize(8);
 
@@ -263,9 +271,6 @@ export default function AmericanRegionDetailsReport() {
       const w = colWidths[i];
 
       let value = "";
-
-      if (key === "tacccod") value = sortedTableData.length;
-      else if (key === "Balance") value = totalBalance.toLocaleString();
 
       doc.rect(curX2, y, w, rowHeight);
 
@@ -338,7 +343,8 @@ export default function AmericanRegionDetailsReport() {
 
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
-    totalRowData[headers.length - 1] = totalCollection.toLocaleString();
+    totalRowData[headers.length - 1] = formatNumber(totalCollection);
+
     const totalRow = worksheet.addRow(totalRowData);
 
     totalRow.eachCell((cell) => {
@@ -441,7 +447,7 @@ export default function AmericanRegionDetailsReport() {
 
     setSortConfig({ key, direction });
   };
-  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
+  const nonSortableKeys = ["rptBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
@@ -452,10 +458,9 @@ export default function AmericanRegionDetailsReport() {
       data = data.filter(
         (row) =>
           row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+          row.tcstdsc?.toLowerCase().includes(q) ||
           row.tmobnum?.toLowerCase().includes(q) ||
-          row.SalesMan?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q), // ✅ BALANCE
+          row.tsaldsc?.toLowerCase().includes(q),
       );
     }
 
@@ -465,7 +470,15 @@ export default function AmericanRegionDetailsReport() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "balance") {
+        if (sortConfig.key === "Bal") {
+          const aNum = parseFloat(aVal) || 0;
+          const bNum = parseFloat(bVal) || 0;
+          return sortConfig.direction === "ascending"
+            ? aNum - bNum
+            : bNum - aNum;
+        }
+        // Customers numeric sort
+        if (sortConfig.key === "Nos") {
           const aNum = parseFloat(aVal) || 0;
           const bNum = parseFloat(bVal) || 0;
           return sortConfig.direction === "ascending"
@@ -489,21 +502,19 @@ export default function AmericanRegionDetailsReport() {
 
     return sortedTableData.filter((row) => {
       return (
-        row.tcstcod?.toLowerCase().includes(q) ||
-        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
+        row.tacccod?.toLowerCase().includes(q) ||
+        row.tcstdsc?.toLowerCase().includes(q) ||
         row.tmobnum?.toLowerCase().includes(q) ||
-        row.SalesMan?.toLowerCase().includes(q) ||
-        row.balance?.toString().includes(q) // ✅ BALANCE
+        row.tsaldsc?.toLowerCase().includes(q)
       );
     });
   }, [sortedTableData, searchQuery]);
 
   const totalBalance = useMemo(() => {
-    return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.Balance ?? 0);
-      return sum + (isNaN(value) ? 0 : value);
+    return filteredData.reduce((sum, row) => {
+      return sum + (Number(row.Bal) || 0);
     }, 0);
-  }, [sortedTableData]);
+  }, [filteredData]);
 
   const handleCSV = () => {
     exportCSV({
@@ -549,11 +560,8 @@ export default function AmericanRegionDetailsReport() {
           }}
         >
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
-          <NavComponent
-            textdata={
-              RegCod ? `${RegCod} | ${RegName}` : RegName || "Region Details"
-            }
-          />
+
+          <NavComponent textdata={`${RegCod || ""} | ${RegName || ""}`} />
 
           {/* SEARCH ROW */}
           <div
@@ -734,9 +742,9 @@ export default function AmericanRegionDetailsReport() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "Balance" ? (
+                        ) : column.key === "Bal" ? (
                           Number(item[column.key] || 0).toLocaleString()
-                        ) : column.key === "progressBtn" ? (
+                        ) : column.key === "rptBtn" ? (
                           <div
                             style={{
                               display: "flex",
@@ -749,34 +757,7 @@ export default function AmericanRegionDetailsReport() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(
-                                  `${
-                                    window.location.origin
-                                  }/crystalsol/AmericanProgressReportDashboard?code=${
-                                    item.tacccod
-                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank",
-                                );
-                              }}
-                            />
-                          </div>
-                        ) : column.key === "ledgerBtn" ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <FaFileInvoiceDollar
-                              size={20}
-                              style={{ cursor: "pointer", color: "#28a745" }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(
-                                  `${
-                                    window.location.origin
-                                  }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                    item.tacccod
-                                  }&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  `${window.location.origin}/crystalsol/AmericanManagerSalesManDetailsReport?code=${item.tsalcod}&name=${encodeURIComponent(item.SalesMan)}`,
                                   "_blank",
                                 );
                               }}
@@ -840,7 +821,8 @@ export default function AmericanRegionDetailsReport() {
                   className={alignmentClass}
                   style={{
                     width: column.uiWidth,
-                    background: getcolor,
+                    background: getnavbarbackgroundcolor,
+                    color: "white",
                     borderRight:
                       index < columnsConfig.length - 1
                         ? `1px solid ${softTableStyles.softBorderColor}`
@@ -854,17 +836,7 @@ export default function AmericanRegionDetailsReport() {
                     fontSize: getdatafontsize,
                     fontFamily: getfontstyle,
                   }}
-                >
-                  {column.key === "Balance" ? (
-                    <span>{totalBalance.toLocaleString()}</span>
-                  ) : index === 0 ? (
-                    <span>{filteredData.length}</span>
-                  ) : column.key === "scrollSpacer" ? (
-                    ""
-                  ) : (
-                    ""
-                  )}
-                </div>
+                ></div>
               );
             })}
           </div>
