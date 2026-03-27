@@ -191,7 +191,6 @@ export default function AmericanSalesManDetailsReport() {
       align: "center",
     });
     doc.setFontSize(10);
-    doc.text(`Account: ${headerName}`, startX, 26);
 
     // ===== HEADER =====
     let curX = startX;
@@ -216,8 +215,13 @@ export default function AmericanSalesManDetailsReport() {
         doc.addPage();
         y = startY;
 
+        // ✅ reset font after new page
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(8);
+
         let curX = startX;
 
+        // header bold rahega
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(9);
 
@@ -231,6 +235,10 @@ export default function AmericanSalesManDetailsReport() {
         });
 
         y += headerHeight;
+
+        // 🔥 IMPORTANT → back to normal for data
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(8);
       }
     };
 
