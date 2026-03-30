@@ -7,12 +7,15 @@ body {
 
 .loginPageWrapper {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  /* 🔥 full screen */
   background: #ffffff;
+
   display: flex;
   flex-direction: column;
-  padding-top: 90px;
+
   font-family: "Poppins", sans-serif;
+
   align-items: center;
   justify-content: center;
 }
@@ -27,17 +30,21 @@ body {
 }
 
 .mainSection {
+  margin: auto !important;
   width: 85%;
   max-width: 1200px;
   background: white;
   border-radius: 12px;
   display: flex;
   padding: 2px;
-  margin-top: 2px;
+  /* margin-top: 2px; */
   box-shadow: 0px 10px 28px rgba(0, 0, 0, 0.15);
   overflow: visible !important;
   position: relative;
   min-height: 490px;
+  margin-top: 0 !important;
+  /* 🔥 remove push */
+  transform: translateY(150px);
 }
 
 .leftInfo {
@@ -648,11 +655,12 @@ body {
 
 .topNoticeBanner {
   width: 100%;
-  height: 52px;
-  /* 🔥 increased height for premium look */
+  min-height: 140px;
+  /* 🔥 flexible height */
+  height: auto;
+
   background: linear-gradient(90deg, #020617, #0f172a);
   color: #ffffff;
-  overflow: hidden;
 
   position: fixed;
   top: 0;
@@ -661,6 +669,7 @@ body {
 
   display: flex;
   align-items: center;
+  padding: 12px 0;
 }
 
 /* Inner layout */
@@ -672,25 +681,17 @@ body {
   height: 100%;
 }
 
-/* Image box */
 .bannerImageBox {
-  width: 110px;
-  /* 🔥 fixed width column */
+  width: 140px;
+  /* thori bari */
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #020617;
-  /* slightly darker for separation */
 }
 
-/* Image itself */
 .bannerImage {
-  height: 100%;
-  /* 🔥 full banner height */
+  max-height: 60px;
+  /* 🔥 control */
   width: auto;
   object-fit: contain;
-  /* no distortion */
 }
 
 /* Marquee container */
@@ -757,9 +758,14 @@ body {
 /* ===== DYNAMIC CENTERING BASED ON BANNER ===== */
 
 .loginPageWrapper.withBanner {
-  padding-top: 200px;
-  /* exact banner height */
-  min-height: calc(100vh - 200px);
+
+  margin-top: 140px;
+  /* 🔥 same as banner */
+  height: calc(100vh - 140px);
+
+
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
@@ -767,4 +773,62 @@ body {
   padding-top: 0;
   min-height: 100vh;
   justify-content: center;
+}
+
+
+/* ===== RESPONSIVE FIX ===== */
+
+@media (max-width: 1024px) {
+  .mainSection {
+    width: 95%;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .rightForm {
+    width: 100% !important;
+    margin-left: 0;
+  }
+
+  .heroTextSlider {
+    width: 100%;
+    padding: 0;
+    margin-top: 20px;
+  }
+
+  .topRightContact {
+    position: static;
+    align-items: flex-start;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topNoticeBanner {
+    min-height: 70px;
+  }
+
+  .bannerImageBox {
+    width: 100px;
+  }
+
+  .bannerImage {
+    max-height: 50px;
+  }
+
+  .heroLogo {
+    width: 180px;
+  }
+
+  .heroTextContent h1 {
+    font-size: 20px;
+  }
+
+  .heroTextContent p {
+    font-size: 13px;
+  }
+
+  .rightForm form {
+    padding: 18px;
+  }
 }

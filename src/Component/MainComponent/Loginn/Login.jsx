@@ -21,8 +21,9 @@ import { getFcmToken } from "../../../firebase";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { FiPhone, FiMapPin, FiMail } from "react-icons/fi";
 import TopBanner from "./TopBanner";
+import { FiPhone, FiMail, FiMapPin, FiGlobe } from "react-icons/fi";
+
 
 const slides = [
   {
@@ -429,7 +430,7 @@ function Loginn() {
       >
         {/* MAIN SECTION LEFT + RIGHT */}
         <div className="mainSection loginHeroWrapper">
-          <div className="topRightContact">
+          {/* <div className="topRightContact">
             <div className="contactRow">
               <FiPhone className="contactIcon" />
               <span>0304-4770075</span>
@@ -444,6 +445,41 @@ function Loginn() {
               <FiMapPin className="contactIcon" />
               <span>15-D AL-MAKKA CLY TOWN SHIP LHR.</span>
             </div>
+            
+            <div className="contactRow">
+              <FiMapPin className="contactIcon" />
+              <span>https://www.crystalsolutions.com.pk</span>
+            </div>
+          </div> */}
+
+          <div className="topRightContact">
+            <a href="tel:03044770075" className="contactRow">
+              <FiPhone className="contactIcon" />
+              <span>0304-4770075</span>
+            </a>
+
+            <a
+              href="mailto:support@crystalsolutions.com.pk"
+              className="contactRow"
+            >
+              <FiMail className="contactIcon" />
+              <span>support@crystalsolutions.com.pk</span>
+            </a>
+
+            <div className="contactRow">
+              <FiMapPin className="contactIcon" />
+              <span>15-D Al-Makka Colony, Township, Lahore</span>
+            </div>
+
+            <a
+              href="https://crystalsolutions.pk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contactRow"
+            >
+              <FiGlobe className="contactIcon" />
+              <span>www.crystalsolutions.pk</span>
+            </a>
           </div>
 
           {/* LEFT SIDE — LOGIN FORM */}
