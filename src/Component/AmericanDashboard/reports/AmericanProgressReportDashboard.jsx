@@ -422,17 +422,44 @@ export default function AmericanProgressReportDashboard() {
       ? apiData["credit amount"]
       : null;
 
+  // const handleSelect = () => {
+  //   const today = new Date();
+  //   const todayYear = today.getFullYear();
+
+  //   let apiDate;
+  //   let apiYear;
+
+  //   if (selectedYear > todayYear) {
+  //     apiDate = formatDateDDMMYYYY(today);
+  //     apiYear = todayYear;
+  //   } else {
+  //     apiDate = `31-12-${selectedYear}`;
+  //     apiYear = selectedYear;
+  //   }
+
+  //   setAppliedYear(apiYear);
+  //   setCusDate(apiDate);
+  //   fetchProgress(apiYear, apiDate);
+  // };
+
   const handleSelect = () => {
     const today = new Date();
     const todayYear = today.getFullYear();
+    const todayDate = formatDateDDMMYYYY(today);
 
     let apiDate;
     let apiYear;
 
     if (selectedYear > todayYear) {
-      apiDate = formatDateDDMMYYYY(today);
+      // future year
+      apiDate = todayDate;
       apiYear = todayYear;
+    } else if (selectedYear === todayYear) {
+      // ✅ CURRENT YEAR (FIX)
+      apiDate = todayDate;
+      apiYear = selectedYear;
     } else {
+      // past year
       apiDate = `31-12-${selectedYear}`;
       apiYear = selectedYear;
     }
@@ -441,6 +468,7 @@ export default function AmericanProgressReportDashboard() {
     setCusDate(apiDate);
     fetchProgress(apiYear, apiDate);
   };
+
   const exportPDFHandler = () => {
     const doc = new jsPDF({
       orientation: "portrait",
