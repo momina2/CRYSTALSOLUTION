@@ -31,7 +31,7 @@ const columnsConfig = [
     alignment: "center",
     uiWidth: 60,
     pdfWidth: 10,
-    excelWidth: 15,
+    excelWidth: 10,
   },
   {
     header: "Salesman",
@@ -47,14 +47,14 @@ const columnsConfig = [
     alignment: "right",
     uiWidth: 50,
     pdfWidth: 10,
-    excelWidth: 20,
+    excelWidth: 7,
   },
 
   {
     header: "Balance",
     key: "Bal",
     alignment: "right",
-    uiWidth: 100,
+    uiWidth: 120,
     pdfWidth: 25,
     excelWidth: 18,
   },
@@ -338,9 +338,16 @@ export default function AmericanSalesManReport() {
     worksheet.addRow([]);
 
     const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => {
+    headerRow.eachCell((cell, index) => {
+      const columnConfig = excelColumns[index - 1];
+
+      let align = "center";
+      if (columnConfig?.alignment === "left") align = "left";
+      if (columnConfig?.alignment === "right") align = "right";
+
       cell.font = { bold: true };
-      cell.alignment = { horizontal: "center" };
+      cell.alignment = { horizontal: align };
+
       cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
@@ -352,21 +359,29 @@ export default function AmericanSalesManReport() {
     rows.forEach((item) => {
       const row = worksheet.addRow(keys.map((key) => item[key]));
       row.eachCell((cell, index) => {
+        const columnKey = keys[index - 1];
+        const columnConfig = excelColumns.find((c) => c.key === columnKey);
+
+        let align = "left";
+        if (columnConfig?.alignment === "center") align = "center";
+        if (columnConfig?.alignment === "right") align = "right";
+
         cell.border = {
           top: { style: "thin" },
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" },
         };
+
         cell.alignment = {
-          horizontal: "left",
+          horizontal: align,
         };
       });
     });
 
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
-    totalRowData[headers.length - 1] = totalCollection.toLocaleString();
+    totalRowData[headers.length - 1] = (totalCollection || 0).toLocaleString();
     const totalRow = worksheet.addRow(totalRowData);
 
     totalRow.eachCell((cell) => {
@@ -549,12 +564,11 @@ export default function AmericanSalesManReport() {
     exportCSV({
       rows: sortedTableData,
       columnsConfig,
-      //   totalCollection: totalBalance,
+      totalCollection: totalBalance, // ✅ FIX
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
   };
-
   return (
     <>
       <style>
