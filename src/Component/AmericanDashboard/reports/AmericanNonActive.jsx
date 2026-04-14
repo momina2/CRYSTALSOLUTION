@@ -50,14 +50,7 @@ const columnsConfig = [
     pdfWidth: 80,
     excelWidth: 40,
   },
-  // {
-  //   header: "Salesman",
-  //   key: "SalesMan",
-  //   alignment: "left",
-  //   uiWidth: 200,
-  //   pdfWidth: 35,
-  //   excelWidth: 30,
-  // },
+
   {
     header: "City",
     key: "tctydsc",
@@ -78,7 +71,7 @@ const columnsConfig = [
     header: "SalesMan",
     key: "tsaldsc",
     alignment: "left",
-    uiWidth: 180,
+    uiWidth: 220,
     pdfWidth: 25,
     excelWidth: 20,
   },
@@ -86,7 +79,7 @@ const columnsConfig = [
     header: "Balance",
     key: "Balance",
     alignment: "right",
-    uiWidth: 100,
+    uiWidth: 120,
     pdfWidth: 25,
     excelWidth: 18,
   },
@@ -112,6 +105,8 @@ export default function AmericanNonActive() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  // const [days, setDays] = useState("");
+  const [days, setDays] = useState("90");
   const [isLoading, setIsLoading] = useState(true);
 
   const [salesman, setSalesman] = useState(null);
@@ -241,6 +236,7 @@ export default function AmericanNonActive() {
       form.append("code", "AMRELEC");
       form.append("FSalCod", salesman?.value || "");
       form.append("FCtyCod", city?.value || "");
+      form.append("FRepDay", days || "0");
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanNonActiveCustomers.php",
@@ -730,6 +726,26 @@ export default function AmericanNonActive() {
                 isSearchable
                 isClearable
                 styles={selectStyles}
+              />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+              <span style={{ width: "50px", fontSize: getdatafontsize }}>
+                Days :
+              </span>
+              <input
+                type="number"
+                placeholder="Days"
+                value={days}
+                onChange={(e) => setDays(e.target.value)}
+                style={{
+                  width: "100px",
+                  height: "28px",
+                  border: "1px solid #000",
+                  outline: "none",
+                  padding: "0 6px",
+                  fontSize: getdatafontsize,
+                }}
               />
             </div>
 

@@ -15,96 +15,41 @@ import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 const REPORT_NAME = "Customer Agging";
 const COMPANY_NAME = "American Electronics";
 
-const columnsConfig = [
+const baseColumns = [
   {
     header: "Lgr",
     key: "ledgerBtn",
     alignment: "center",
     uiWidth: 50,
-    pdfWidth: 0,
-    excelWidth: 0,
   },
   {
     header: "P.R",
     key: "progressBtn",
     alignment: "center",
     uiWidth: 50,
-    pdfWidth: 0,
-    excelWidth: 0,
   },
   {
     header: "Code",
     key: "Code",
-    alignment: "left",
-    uiWidth: 80,
-    pdfWidth: 20,
-    excelWidth: 15,
+    alignment: "center",
+    uiWidth: 90,
   },
   {
     header: "Customer",
     key: "Customer",
     alignment: "left",
-    uiWidth: 320,
-    pdfWidth: 80,
-    excelWidth: 40,
+    uiWidth: 340,
   },
   {
-    header: "0-30",
-    key: "Amt001",
+    key: "Amt001", // 🔥 header baad me set hoga
     alignment: "right",
     uiWidth: 120,
-    pdfWidth: 20,
-    excelWidth: 10,
-  },
-  {
-    header: "31-60",
-    key: "Amt002",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 20,
-    excelWidth: 10,
-  },
-
-  {
-    header: "61-90",
-    key: "Amt003",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 20,
-    excelWidth: 10,
-  },
-  {
-    header: "91-120",
-    key: "Amt004",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 20,
-    excelWidth: 10,
-  },
-  {
-    // header: "120 ≤ 180",
-    header: "121-150",
-    key: "Amt005",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 20,
-    excelWidth: 10,
-  },
-  {
-    header: "150+",
-    key: "Amt006",
-    alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 20,
-    excelWidth: 10,
   },
   {
     header: "Total",
     key: "Total",
     alignment: "right",
-    uiWidth: 120,
-    pdfWidth: 25,
-    excelWidth: 10,
+    uiWidth: 100,
   },
   {
     header: "",
@@ -126,19 +71,31 @@ const showIfNonZero = (val) => {
 };
 
 export default function AmericanAdminAgging() {
+  const query = useQueryParams();
+
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
-
+  const [FRepDay, setFRepDay] = useState(query.get("days") || "30");
+  const columnsConfig = useMemo(() => {
+    return baseColumns.map((col) => {
+      if (col.key === "Amt001") {
+        return {
+          ...col,
+          header: `0-${FRepDay || 30}`, // 🔥 dynamic
+        };
+      }
+      return col;
+    });
+  }, [FRepDay]);
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
-  const query = useQueryParams();
+  const [NumDays, setNumDays] = useState(query.get("min") || "1");
 
-  const NumDays = query.get("min") || "0";
   //   const maxParam = query.get("max") || "99999999";
   const labelParam = query.get("label") || "";
 
@@ -161,7 +118,30 @@ export default function AmericanAdminAgging() {
   const defaultDate = `${yyyy}-${mm}-${dd}`;
   const [RepDate, setRepDate] = useState(defaultDate);
   const [columnTotals, setColumnTotals] = useState({});
+  // const columnCount = useMemo(() => {
+  //   const val = parseInt(FRepDay || "0");
 
+  //   if (!val) return 1;
+
+  //   if (val <= 30) return 1;
+  //   if (val <= 60) return 2;
+  //   if (val <= 90) return 3;
+  //   if (val <= 120) return 4;
+  //   if (val <= 150) return 5;
+  //   return 6;
+  // }, [FRepDay]);
+  // const columnsConfig = useMemo(() => {
+  //   return columnsConfig.filter((col) => {
+  //     if (col.key === "Amt001") return columnCount >= 1;
+  //     if (col.key === "Amt002") return columnCount >= 2;
+  //     if (col.key === "Amt003") return columnCount >= 3;
+  //     if (col.key === "Amt004") return columnCount >= 4;
+  //     if (col.key === "Amt005") return columnCount >= 5;
+  //     if (col.key === "Amt006") return columnCount >= 6;
+
+  //     return true; // baqi columns always show
+  //   });
+  // }, [columnCount]);
   const toApiDate = (input) => {
     if (!input) return "";
     const [y, m, d] = input.split("-");
@@ -170,9 +150,21 @@ export default function AmericanAdminAgging() {
 
   // ----------- FETCH API (same as pehle) -----------
   // === API CALL =====
+
   useEffect(() => {
-    fetchData();
-  }, [NumDays]);
+    setFRepDay(query.get("days") || "30");
+  }, [query]);
+
+  useEffect(() => {
+    const val = parseInt(FRepDay || "0");
+
+    if (val <= 30) setNumDays("1");
+    else if (val <= 60) setNumDays("2");
+    else if (val <= 90) setNumDays("3");
+    else if (val <= 120) setNumDays("4");
+    else if (val <= 150) setNumDays("5");
+    else setNumDays("6");
+  }, [FRepDay]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -183,6 +175,7 @@ export default function AmericanAdminAgging() {
       form.append("code", "AMRELEC");
       form.append("FRepDat", toApiDate(RepDate));
       form.append("FDayNum", NumDays);
+      form.append("FRepDay", FRepDay || "0");
 
       const res = await axios.post(
         "https://crystalsolutions.pk/api/AmericanAdminAgging.php",
@@ -220,114 +213,11 @@ export default function AmericanAdminAgging() {
 
     setIsLoading(false);
   };
-
-  // const exportPDFHandler = () => {
-  //   const doc = new jsPDF({ orientation: "portrait" });
-
-  //   // -------- PDF CONFIG ----------
-  //   const topMargin = 16; // top space for header
-  //   const rowHeight = 5; // normal row height
-  //   const headerHeight = 8; // table header height
-  //   const maxRowY = 280; // printable area before adding new page
-
-  //   // ------- TITLE --------
-  //   function drawTitle() {
-  //     doc.setFont("Helvetica", "bold");
-  //     doc.setFontSize(20);
-  //     doc.text("CRYSTAL SOLUTIONS", 105, 16, { align: "center" });
-
-  //     doc.setFont("Helvetica", "normal");
-  //     doc.setFontSize(13);
-  //     doc.text(REPORT_NAME, 105, 24, { align: "center" });
-  //   }
-
-  //   // --------- TABLE HEADER ---------
-  //   const pdfColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-  //   const keys = pdfColumns.map((c) => c.key);
-  //   const headers = pdfColumns.map((c) => c.header);
-  //   const colWidths = pdfColumns.map((c) => c.pdfWidth);
-
-  //   const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-  //   const startX = (210 - tableWidth) / 2; // page width 210mm
-  //   let y = 32;
-
-  //   function drawHeader() {
-  //     doc.setFont("Helvetica", "bold");
-  //     doc.setFontSize(9);
-  //     let curX = startX;
-
-  //     headers.forEach((header, i) => {
-  //       let w = colWidths[i];
-  //       doc.setFillColor(220);
-  //       doc.rect(curX, y, w, headerHeight, "F");
-  //       doc.rect(curX, y, w, headerHeight);
-  //       doc.text(String(header), curX + w / 2, y + headerHeight - 3, {
-  //         align: "center",
-  //       });
-  //       curX += w;
-  //     });
-
-  //     y += headerHeight;
-  //   }
-
-  //   // ---------- DRAW ONE ROW ----------
-  //   function drawRow(row, isTotal) {
-  //     let curX = startX;
-
-  //     row.forEach((cell, cIndex) => {
-  //       let w = colWidths[cIndex];
-  //       doc.rect(curX, y, w, rowHeight);
-
-  //       doc.setFont("Helvetica", isTotal ? "bold" : "normal");
-  //       doc.setFontSize(8);
-
-  //       if (cIndex === colWidths.length - 1) {
-  //         doc.text(String(cell), curX + w - 2, y + rowHeight - 2, {
-  //           align: "right",
-  //         });
-  //       } else {
-  //         doc.text(String(cell), curX + 2, y + rowHeight - 2);
-  //       }
-  //       curX += w;
-  //     });
-
-  //     y += rowHeight;
-  //   }
-
-  //   // ---------- PAGE BREAK HANDLER -----------
-  //   function checkPageBreak() {
-  //     if (y > maxRowY) {
-  //       doc.addPage();
-  //       y = topMargin;
-  //       drawTitle();
-  //       y = 32;
-  //       drawHeader();
-  //     }
-  //   }
-
-  //   // ---------- START PRINT ----------
-  //   drawTitle();
-  //   y = 32;
-  //   drawHeader();
-
-  //   const dataRows = sortedTableData.map((row) =>
-  //     keys.map((key) => row[key] ?? "")
-  //   );
-  //   const totalRow = new Array(keys.length).fill("");
-  //   totalRow[0] = sortedTableData.length.toString();
-
-  //   totalRow[keys.length - 1] = totalBalance.toLocaleString();
-  //   const rowsPDF = [...dataRows, totalRow];
-
-  //   rowsPDF.forEach((row, index) => {
-  //     const isTotal = index === rowsPDF.length - 1;
-  //     checkPageBreak();
-  //     drawRow(row, isTotal);
-  //   });
-
-  //   // ---------- SAVE ----------
-  //   doc.save(`${REPORT_NAME}.pdf`);
-  // };
+  useEffect(() => {
+    if (FRepDay) {
+      fetchData();
+    }
+  }, [FRepDay, NumDays, RepDate]);
 
   const exportPDFHandler = () => {
     const doc = new jsPDF({
@@ -467,88 +357,6 @@ export default function AmericanAdminAgging() {
     // ===== SAVE =====
     doc.save(`${REPORT_NAME}.pdf`);
   };
-
-  // ======================= EXCEL EXPORT =======================
-
-  // async function exportCSV({
-  //   rows,
-  //   columnsConfig,
-  //   totalCollection,
-  //   companyName,
-  //   reportName,
-  // }) {
-  //   const workbook = new ExcelJS.Workbook();
-  //   const worksheet = workbook.addWorksheet("Report");
-
-  //   const excelColumns = columnsConfig.filter((c) => c.key !== "scrollSpacer");
-
-  //   const headers = excelColumns.map((c) => c.header);
-  //   const keys = excelColumns.map((c) => c.key);
-
-  //   worksheet.addRow([companyName]);
-  //   worksheet.mergeCells(1, 1, 1, headers.length);
-  //   worksheet.getRow(1).font = { bold: true, size: 16 };
-  //   worksheet.getRow(1).alignment = { horizontal: "center" };
-
-  //   worksheet.addRow([reportName]);
-  //   worksheet.mergeCells(2, 1, 2, headers.length);
-  //   worksheet.getRow(2).alignment = { horizontal: "center" };
-  //   worksheet.addRow([]);
-
-  //   const headerRow = worksheet.addRow(headers);
-  //   headerRow.eachCell((cell) => {
-  //     cell.font = { bold: true };
-  //     cell.alignment = { horizontal: "center" };
-  //     cell.border = {
-  //       top: { style: "thin" },
-  //       left: { style: "thin" },
-  //       bottom: { style: "thin" },
-  //       right: { style: "thin" },
-  //     };
-  //   });
-
-  //   rows.forEach((item) => {
-  //     const row = worksheet.addRow(keys.map((key) => item[key]));
-  //     row.eachCell((cell, index) => {
-  //       cell.border = {
-  //         top: { style: "thin" },
-  //         left: { style: "thin" },
-  //         bottom: { style: "thin" },
-  //         right: { style: "thin" },
-  //       };
-  //       cell.alignment = {
-  //         horizontal: "left",
-  //       };
-  //     });
-  //   });
-
-  //   const totalRowData = new Array(headers.length).fill("");
-  //   totalRowData[0] = rows.length.toString();
-  //   totalRowData[headers.length - 1] = totalCollection.toLocaleString();
-  //   const totalRow = worksheet.addRow(totalRowData);
-
-  //   totalRow.eachCell((cell) => {
-  //     cell.font = { bold: true };
-  //     cell.border = {
-  //       top: { style: "double" },
-  //       left: { style: "thin" },
-  //       bottom: { style: "double" },
-  //       right: { style: "thin" },
-  //     };
-  //   });
-
-  //   excelColumns.forEach((col, i) => {
-  //     worksheet.getColumn(i + 1).width = col.excelWidth || col.uiWidth || 20;
-  //   });
-
-  //   const buffer = await workbook.xlsx.writeBuffer();
-  //   saveAs(
-  //     new Blob([buffer], {
-  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //     }),
-  //     `${reportName}.xlsx`
-  //   );
-  // }
 
   async function exportCSV({
     rows,
@@ -840,11 +648,6 @@ export default function AmericanAdminAgging() {
   const runtimeColumnTotals = useMemo(() => {
     const totals = {
       Amt001: 0,
-      Amt002: 0,
-      Amt003: 0,
-      Amt004: 0,
-      Amt005: 0,
-      Amt006: 0,
       Total: 0,
     };
 
@@ -878,7 +681,10 @@ export default function AmericanAdminAgging() {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
+            width: "max-content",     
+            minWidth: "100%",        
+            // width: "100%",
+            tableLayout: "fixed",
           }
 
           .table-scroll {
@@ -886,6 +692,7 @@ export default function AmericanAdminAgging() {
             overflow-x: hidden;
             -ms-overflow-style: auto;
             scrollbar-width: auto;
+            height: "400px" 
           }
         `}
       </style>
@@ -904,377 +711,237 @@ export default function AmericanAdminAgging() {
           {/* NAV HEADER BAR (same look as MemberCollectionReport) */}
           <NavComponent textdata={REPORT_NAME} />
 
-          {/* SEARCH ROW */}
           <div
-            className="row"
             style={{
-              height: "auto",
-              marginTop: "8px",
-              marginBottom: "8px",
               display: "flex",
-              justifyContent: "flex-end",
-              paddingRight: "8px", // table edge se halka gap
+              alignItems: "center",
+              padding: "8px",
+              width: "100%",
             }}
           >
+            {/* LEFT SIDE */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ fontSize: getdatafontsize }}>Days :</span>
+
+              <input
+                type="number"
+                value={FRepDay}
+                onChange={(e) => setFRepDay(e.target.value)}
+                style={{
+                  width: "80px",
+                  height: "28px",
+                  border: `1px solid ${softTableStyles.softBorderColor}`,
+                  padding: "0 6px",
+                }}
+              />
+            </div>
+
+            {/* RIGHT SIDE */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "10px",
+                marginLeft: "auto", // 🔥 pushes to right
+                border: `1px solid ${softTableStyles.softBorderColor}`,
+                backgroundColor: "#fff",
+                padding: "0 6px",
+                height: "28px",
+                width: "220px", // 🔥 fixed width
               }}
             >
-              <div
-                style={{
-                  minWidth: "260px",
-                  maxWidth: "400px",
-                  border: `1px solid ${softTableStyles.softBorderColor}`,
-                  borderRadius: "2px",
-                  backgroundColor: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "2px 8px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MagnifyingGlassIcon
-                    className="text-gray-500"
-                    style={{ width: "16px", height: "16px" }}
-                  />
-                </div>
+              <MagnifyingGlassIcon
+                style={{ width: "14px", marginRight: "4px" }}
+              />
 
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    paddingLeft: "6px",
-                    fontSize: getdatafontsize,
-                    fontFamily: getfontstyle,
-                  }}
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  border: "none",
+                  outline: "none",
+                  width: "100%",
+                  fontSize: getdatafontsize,
+                  fontFamily: getfontstyle,
+                }}
+              />
             </div>
           </div>
-
-          {/* TABLE HEADER (fixed) */}
           <div
+            className="table-scroll"
             style={{
+              maxHeight: "60vh",
               overflowY: "auto",
               width: "100%",
-              overflowX: "hidden",
             }}
           >
             <table
               className="myTable"
               style={{
+                width: tableWidth, // ✅ important
+                minWidth: tableWidth, // ✅ important
+                tableLayout: "fixed", // ✅ important
+                borderCollapse: "collapse",
                 fontSize: getdatafontsize,
                 fontFamily: getfontstyle,
-                width: "100%",
-                position: "relative",
-                tableLayout: "fixed",
               }}
             >
+              {/* HEADER */}
               <thead
                 style={{
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                  fontWeight: "bold",
-                  height: "24px",
                   position: "sticky",
                   top: 0,
-                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
                   backgroundColor: getnavbarbackgroundcolor,
+                  color: "white",
+                  zIndex: 2,
                 }}
               >
-                <tr
-                  style={{
-                    backgroundColor: getnavbarbackgroundcolor,
-                    color: "white",
-                  }}
-                >
+                <tr>
                   {columnsConfig.map((column, index) => (
-                    <td
+                    <th
                       key={index}
                       onClick={() => requestSort(column.key)}
                       style={{
                         width: column.uiWidth,
-                        padding: "8px 6px",
+                        padding: "2px 4px",
+                        borderRight: `1px solid ${softTableStyles.softBorderColor}`,
                         borderBottom: `2px solid ${softTableStyles.softBorderColor}`,
+                        backgroundColor: getnavbarbackgroundcolor,
+                        color: "white",
+                        fontWeight: "600",
+                        height: "22px",
                       }}
                     >
                       <div className="sortable-header">
                         {column.header}
                         {getSortIcon(column.key)}
                       </div>
-                    </td>
+                    </th>
                   ))}
                 </tr>
               </thead>
-            </table>
-          </div>
 
-          {/* TABLE BODY */}
-          <div
-            className="table-scroll"
-            style={{
-              backgroundColor: "white",
-              borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
-              maxHeight: "50vh",
-              width: "100%",
-              wordBreak: "break-word",
-            }}
-          >
-            <table
-              className="myTable"
-              style={{
-                fontSize: getdatafontsize,
-                fontFamily: getfontstyle,
-                width: tableWidth,
-                position: "relative",
-                ...(sortedTableData.length > 0 ? { tableLayout: "fixed" } : {}),
-              }}
-            >
+              {/* BODY */}
               <tbody>
-                {isLoading ? (
-                  <>
-                    <tr
-                      style={{
-                        backgroundColor: getcolor,
-                        color: fontcolor,
-                      }}
-                    >
+                {sortedTableData.map((item, i) => (
+                  <tr
+                    key={i}
+                    onClick={() => setSelectedRowIndex(i)}
+                    style={{
+                      cursor: "pointer",
+                      backgroundColor:
+                        selectedRowIndex === i
+                          ? getnavbarbackgroundcolor
+                          : "white",
+                      color: selectedRowIndex === i ? "white" : "black",
+                      transition: "0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedRowIndex !== i) {
+                        e.currentTarget.style.backgroundColor = "#f5f7fa";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedRowIndex !== i) {
+                        e.currentTarget.style.backgroundColor = "white";
+                      }
+                    }}
+                  >
+                    {columnsConfig.map((column, index) => (
                       <td
-                        colSpan={columnsConfig.length}
-                        className="text-center"
-                        style={{ padding: "10px" }}
+                        key={`total-${index}`}
+                        className={getAlignmentClass(column.alignment)}
+                        style={{
+                          width: column.uiWidth,
+                          whiteSpace: "nowrap",
+                          padding: "8px 6px", // ✅ same as body
+                          borderRight: `1px solid ${softTableStyles.softBorderColor}`,
+                          borderTop: `2px solid ${softTableStyles.softBorderColor}`,
+                        }}
                       >
-                        Fetching data...
+                        {column.key === "progressBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaClipboardList
+                              size={20}
+                              style={{ cursor: "pointer", color: "#17a2b8" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${window.location.origin}/crystalsol/AmericanProgressReportDashboard?code=${item.Code}&name=${encodeURIComponent(item.Customer)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : column.key === "ledgerBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaFileInvoiceDollar
+                              size={20}
+                              style={{ cursor: "pointer", color: "#28a745" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${window.location.origin}/crystalsol/AmericanCustomerLedgerDashboard?code=${item.Code}&name=${encodeURIComponent(item.Customer)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          item[column.key]
+                        )}
                       </td>
-                    </tr>
-                    {Array.from({ length: 20 }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-loading-${rowIndex}`}
-                        style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
-                        }}
-                      >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-loading-${rowIndex}-${colIndex}`}>
-                            &nbsp;
-                          </td>
-                        ))}
-                      </tr>
                     ))}
-                  </>
-                ) : (
-                  <>
-                    {sortedTableData.map((item, i) => (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedRowIndex(i)}
-                        style={{
-                          cursor: "pointer",
-                          color: selectedRowIndex === i ? "white" : fontcolor,
-                          backgroundColor:
-                            selectedRowIndex === i
-                              ? getnavbarbackgroundcolor // ✅ theme color
-                              : i % 2 === 0
-                                ? getcolor
-                                : "#f8f9ff",
-                          transition: "background-color 0.2s ease",
-                        }}
-                      >
-                        {/* {columnsConfig.map((column, index) => (
-                          <td
-                            key={index}
-                            className={getAlignmentClass(column.alignment)}
-                            style={{
-                              width: column.uiWidth,
-                              padding: "8px 6px",
-                              borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
-                            }}
-                          >
-                            {column.key === "scrollSpacer"
-                              ? "" // ➤ empty column
-                              : column.key === "balance"
-                              ? Number(item[column.key] || 0).toLocaleString()
-                              : item[column.key]}
-                          </td>
-                        ))}
-                      </tr>
-                    ))} */}
-                        {columnsConfig.map((column, index) => (
-                          <td
-                            key={index}
-                            className={getAlignmentClass(column.alignment)}
-                            style={{
-                              width: column.uiWidth,
-                              padding: "8px 6px",
-                              borderBottom: `1px solid ${softTableStyles.softRowSeparator}`,
-                            }}
-                          >
-                            {column.key === "scrollSpacer" ? (
-                              ""
-                            ) : column.key === "progressBtn" ? (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <FaClipboardList
-                                  size={20}
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "#17a2b8",
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(
-                                      `${
-                                        window.location.origin
-                                      }/crystalsol/AmericanProgressReportDashboard?code=${
-                                        item.Code
-                                      }&name=${encodeURIComponent(
-                                        item.Customer,
-                                      )}`,
-                                      "_blank",
-                                    );
-                                  }}
-                                />
-                              </div>
-                            ) : column.key === "ledgerBtn" ? (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <FaFileInvoiceDollar
-                                  size={20}
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "#28a745",
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(
-                                      `${
-                                        window.location.origin
-                                      }/crystalsol/AmericanCustomerLedgerDashboard?code=${
-                                        item.Code
-                                      }&name=${encodeURIComponent(
-                                        item.Customer,
-                                      )}`,
-                                      "_blank",
-                                    );
-                                  }}
-                                />
-                              </div>
-                            ) : [
-                                "Amt001",
-                                "Amt002",
-                                "Amt003",
-                                "Amt004",
-                                "Amt005",
-                                "Amt006",
-                                "Total",
-                              ].includes(column.key) ? (
-                              showIfNonZero(item[column.key])
-                            ) : (
-                              item[column.key]
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
+                  </tr>
+                ))}
+                <tr
+                  style={{
+                    backgroundColor: getnavbarbackgroundcolor,
+                    color: "white",
+                    fontWeight: "bold",
+                    position: "sticky",
+                    bottom: 0,
+                  }}
+                >
+                  {columnsConfig.map((column, index) => {
+                    const key = column.key;
 
-                    {/* Blank rows to keep table height nice */}
-                    {Array.from({
-                      length: Math.max(0, 27 - sortedTableData.length),
-                    }).map((_, rowIndex) => (
-                      <tr
-                        key={`blank-${rowIndex}`}
+                    let value = "";
+
+                    if (key === "Code") {
+                      value = sortedTableData.length;
+                    } else if (runtimeColumnTotals[key]) {
+                      value = runtimeColumnTotals[key].toLocaleString();
+                    }
+
+                    return (
+                      <td
+                        key={`total-${index}`}
+                        className={getAlignmentClass(column.alignment)}
                         style={{
-                          backgroundColor: getcolor,
-                          color: fontcolor,
+                          width: column.uiWidth,
+                          padding: "6px",
+                          borderTop: `2px solid ${softTableStyles.softBorderColor}`,
                         }}
                       >
-                        {columnsConfig.map((_, colIndex) => (
-                          <td key={`blank-${rowIndex}-${colIndex}`}>&nbsp;</td>
-                        ))}
-                      </tr>
-                    ))}
-
-                    {/* Dummy row to keep widths */}
-                    <tr>
-                      {columnsConfig.map((column, index) => (
-                        <td
-                          key={`dummy-bottom-${index}`}
-                          style={{ width: column.uiWidth }}
-                        ></td>
-                      ))}
-                    </tr>
-                  </>
-                )}
+                        {value}
+                      </td>
+                    );
+                  })}
+                </tr>
               </tbody>
             </table>
-          </div>
-
-          {/* TOTAL ROW (bottom of table) */}
-          <div
-            style={{
-              borderBottom: `1px solid ${softTableStyles.softBorderColor}`,
-              borderTop: `2px solid ${softTableStyles.softBorderColor}`,
-              height: "24px",
-              display: "flex",
-              width: "100%",
-              backgroundColor: getnavbarbackgroundcolor, // ✅ SAME AS HEADER
-              color: "white",
-            }}
-          >
-            {columnsConfig.map((column, index) => (
-              <div
-                key={`total-col-${index}`}
-                className={getAlignmentClass(column.alignment)}
-                style={{
-                  width: column.uiWidth,
-                  borderRight:
-                    index < columnsConfig.length - 1
-                      ? `1px solid ${softTableStyles.softBorderColor}`
-                      : "none",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent:
-                    column.alignment === "right" ? "flex-end" : "flex-start",
-                  padding: "0 6px",
-                  fontWeight: "bold",
-                  fontSize: getdatafontsize,
-                  fontFamily: getfontstyle,
-                }}
-              >
-                {/* 🔥 RUNTIME TOTALS */}
-                {column.key === "Code"
-                  ? sortedTableData.length // ✅ total items
-                  : runtimeColumnTotals[column.key]
-                    ? runtimeColumnTotals[column.key].toLocaleString()
-                    : ""}
-              </div>
-            ))}
           </div>
 
           {/* ACTION BUTTONS – Only PDF & Excel */}
@@ -1284,22 +951,6 @@ export default function AmericanAdminAgging() {
               marginBottom: "2px",
             }}
           >
-            {/* <SingleButton
-              text="PDF"
-              onClick={exportPDFHandler}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            />
-            <SingleButton
-              text="Excel"
-              onClick={handleCSV}
-              onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-              onBlur={(e) =>
-                (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-              }
-            /> */}
             <SingleButton
               text="PDF"
               onClick={(e) => {

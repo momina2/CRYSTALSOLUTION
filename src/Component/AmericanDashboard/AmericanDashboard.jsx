@@ -72,7 +72,7 @@ const getCurrentDateFormatted = () => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-  return `${day}-${month}-${year}`; 
+  return `${day}-${month}-${year}`;
 };
 
 const getAggingDateFormatted = () => {
@@ -80,19 +80,19 @@ const getAggingDateFormatted = () => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-  return `${year}-${month}-${day}`; 
+  return `${year}-${month}-${day}`;
 };
 
 const currentDate = getCurrentDateFormatted();
 
 const ChartColors = {
-  Sales: "rgba(79, 109, 255, 0.8)", 
-  Purchase: "rgba(255, 126, 149, 0.8)", 
-  Expense: "rgba(255, 192, 90, 0.8)", 
-  Collection: "rgba(43, 190, 185, 0.8)", 
-  YearlySales: "#5790FF", 
-  YearlyPurchase: "#FFADAD", 
-  YearlyCollection: "#A0FFD1", 
+  Sales: "rgba(79, 109, 255, 0.8)",
+  Purchase: "rgba(255, 126, 149, 0.8)",
+  Expense: "rgba(255, 192, 90, 0.8)",
+  Collection: "rgba(43, 190, 185, 0.8)",
+  YearlySales: "#5790FF",
+  YearlyPurchase: "#FFADAD",
+  YearlyCollection: "#A0FFD1",
 };
 
 const YearlySPCGraph = ({ apiData }) => {
@@ -340,11 +340,11 @@ const FinancialPieChart = ({ webData, balanceData }) => {
   ];
 
   const colors = [
-    "#4F6DFF", 
-    "#FF7E95", 
-    "#FFD66B", 
-    "#2BBEB9", 
-    "#7A5EFF", 
+    "#4F6DFF",
+    "#FF7E95",
+    "#FFD66B",
+    "#2BBEB9",
+    "#7A5EFF",
     "#6FCF97",
   ];
 
@@ -352,7 +352,7 @@ const FinancialPieChart = ({ webData, balanceData }) => {
     is3D: true,
     pieHole: 0.35,
     pieStartAngle: 100,
-    legend: "none", 
+    legend: "none",
     colors,
     chartArea: {
       width: "95%",
@@ -1210,15 +1210,22 @@ const aggingDayMapping = {
   "> 180M": 6,
 };
 
-const handleAggingClick = (rangeLabel) => {
-  const dayNum = aggingDayMapping[rangeLabel];
-  if (!dayNum) return;
+// const handleAggingClick = (rangeLabel) => {
+//   const dayNum = aggingDayMapping[rangeLabel];
+//   if (!dayNum) return;
 
+//   const url =
+//     window.location.origin +
+//     `/crystalsol/AmericanAdminAgging?min=${dayNum}&label=${encodeURIComponent(
+//       rangeLabel,
+//     )}`;
+
+//   window.open(url, "_blank");
+// };
+
+const handleAggingClick = () => {
   const url =
-    window.location.origin +
-    `/crystalsol/AmericanAdminAgging?min=${dayNum}&label=${encodeURIComponent(
-      rangeLabel,
-    )}`;
+    window.location.origin + `/crystalsol/AmericanAdminAgging?days=30`; // 🔥 default
 
   window.open(url, "_blank");
 };
@@ -1240,7 +1247,7 @@ const HorizontalAggingRangeCard = ({ stats }) => (
       {stats.map((stat) => (
         <div
           key={stat.range}
-          onClick={() => handleAggingClick(stat.range)}
+          onClick={handleAggingClick}
           className="flex-1 flex flex-col items-center justify-evenly cursor-pointer hover:bg-gray-50 transition"
         >
           <p className="text-[12px] font-medium text-gray-600 leading-none">
@@ -1317,7 +1324,7 @@ const CustomerDistributionChart = ({ mainData }) => {
     is3D: true,
     pieHole: 0.35,
     pieStartAngle: 100,
-    legend: "none", 
+    legend: "none",
     colors,
     chartArea: {
       width: "95%",
@@ -1646,7 +1653,7 @@ const ElectronicsDashboard = () => {
                                   borderWidth: 1.4,
                                   pointRadius: 0,
                                   fill: false,
-                                  borderDash: [5, 5], 
+                                  borderDash: [5, 5],
                                   hidden: !salesData.some((v) => v !== 0),
                                 },
                                 {
