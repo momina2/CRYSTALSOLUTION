@@ -15,6 +15,7 @@ import {
   PointElement,
   LineController,
 } from "chart.js";
+import { getOrganisationData } from "../Auth";
 
 // Register Chart.js components
 import { Pie } from "react-chartjs-2";
@@ -31,16 +32,8 @@ ChartJS.register(
   Legend,
   LineController,
 );
-
 // API URLs
-// const ADMIN_INFO_API_URL = "https://crystalsolutions.pk/api/AdminInfo.php";
-// const MONTHLY_COMPARISON_API_URL =
-//   "https://crystalsolutions.pk/api/MonthlyComparison.php";
 const DASHBOARD_DAILY = "https://crystalsolutions.pk/api/DashboardDaily.php";
-// const DASHBOARD_DAILY_WEB =
-//   "https://crystalsolutions.pk/api/DashboardDailyWeb.php";
-// const AMERICAN_AGGING_API_URL =
-//   "https://crystalsolutions.pk/api/AmericanAdminAgging.php";
 
 const months = [
   "Jan",
@@ -1733,13 +1726,20 @@ const NasirTRD = () => {
     });
   };
 
+  // const organisation = getOrganisationData();
+  const organisation = getOrganisationData();
+
+  console.log("ORG:", organisation); // 👈 yahan likho
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
         const dailyFormData = new FormData();
-        dailyFormData.append("code", "NASIRTRD");
+        // dailyFormData.append("code", "NASIRTRD");
+
+        dailyFormData.append("code", organisation.code);
         dailyFormData.append("FRepDat", currentDate);
         dailyFormData.append("FLocCod", "001");
 
