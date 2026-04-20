@@ -1418,9 +1418,18 @@ const ElectronicsDashboard = () => {
         dailyWebFormData.append("FRepDat", currentDate);
         dailyWebFormData.append("FLocCod", "001");
 
+        // const americanAggingFormData = new FormData();
+        // americanAggingFormData.append("code", "AMRELEC");
+        // americanAggingFormData.append("FRepDat", getAggingDateFormatted());
+
         const americanAggingFormData = new FormData();
         americanAggingFormData.append("code", "AMRELEC");
-        americanAggingFormData.append("FRepDat", getAggingDateFormatted());
+
+        // ⚠️ IMPORTANT (format change)
+        americanAggingFormData.append("FRepDat", currentDate); // 20-04-2026 format
+
+        americanAggingFormData.append("FDayNum", "0"); // default
+        americanAggingFormData.append("FRepDay", "30"); // default
         const [
           adminResponse,
           monthlyResponse,
@@ -1466,15 +1475,17 @@ const ElectronicsDashboard = () => {
         };
 
         setDailyWebData(web);
-        let agging = dailyAggingResponse.data;
+        // let agging = dailyAggingResponse.data;
 
-        if (agging && agging.Detail) {
-          agging = agging;
-        } else if (Array.isArray(agging)) {
-          agging = agging.length ? agging[0] : {};
-        } else {
-          agging = {};
-        }
+        // if (agging && agging.Detail) {
+        //   agging = agging;
+        // } else if (Array.isArray(agging)) {
+        //   agging = agging.length ? agging[0] : {};
+        // } else {
+        //   agging = {};
+        // }
+        let agging = dailyAggingResponse.data || {};
+        setAggingData(agging);
 
         setAggingData(agging);
       } catch (err) {
