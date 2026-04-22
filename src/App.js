@@ -1000,9 +1000,9 @@ function App() {
                   exact
                   path="/MemberCollectionReport"
                   // element={<NasirTRD />}
-                  element={<AmericanDashbaord />}
+                  // element={<AmericanDashbaord />}
                   // element={<AmericanSalesmanMaintenance />}
-                  // element={<MemberCollectionReport />
+                  element={<MemberCollectionReport />}
                   // element={<BusinessDashboard />}
                 />
                 <Route
