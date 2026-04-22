@@ -13,53 +13,63 @@ import { saveAs } from "file-saver";
 import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
-const REPORT_NAME = "Region Details Report";
+const REPORT_NAME = "Region Customers Report";
 const COMPANY_NAME = "AMERICAN ELECTRONIC";
 
 const columnsConfig = [
   {
-    header: "Lgr",
-    key: "ledgerBtn",
+    header: "Rpt",
+    key: "rptBtn",
     alignment: "center",
     uiWidth: 50,
     pdfWidth: 0,
     excelWidth: 0,
   },
-  {
-    header: "Prg",
-    key: "progressBtn",
-    alignment: "center",
-    uiWidth: 50,
-    pdfWidth: 0,
-    excelWidth: 0,
-  },
+
   {
     header: "Code",
     key: "tacccod",
-    alignment: "left",
-    uiWidth: 90,
+    alignment: "center",
+    uiWidth: 120,
     pdfWidth: 20,
     excelWidth: 8,
   },
   {
-    header: "Description",
+    header: "Customer",
     key: "tcstdsc",
     alignment: "left",
-    uiWidth: 360,
+    uiWidth: 260,
     pdfWidth: 80,
     excelWidth: 20,
   },
+
   {
-    header: "Phone",
+    header: "Mobile",
     key: "tmobnum",
-    alignment: "right",
-    uiWidth: 120,
+    alignment: "center",
+    uiWidth: 140,
+    pdfWidth: 25,
+    excelWidth: 15,
+  },
+  {
+    header: "Contact",
+    key: "tcntper",
+    alignment: "left",
+    uiWidth: 200,
+    pdfWidth: 25,
+    excelWidth: 15,
+  },
+  {
+    header: "Salesman",
+    key: "tsaldsc",
+    alignment: "left",
+    uiWidth: 180,
     pdfWidth: 25,
     excelWidth: 15,
   },
   {
     header: "Balance",
-    key: "Balance",
+    key: "Bal",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
@@ -74,17 +84,18 @@ const columnsConfig = [
     excelWidth: 0,
   },
 ];
-function useQueryParams() {
-  const { search } = useLocation();
-  return useMemo(() => new URLSearchParams(search), [search]);
-}
+// function useQueryParams() {
+//   const { search } = useLocation();
+//   return useMemo(() => new URLSearchParams(search), [search]);
+// }
 
 export default function AmericanRegionDetailsReport() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
-  // const [apiData, setApiData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  //Totals
+  const [apiTotalBalance, setApiTotalBalance] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
@@ -92,18 +103,19 @@ export default function AmericanRegionDetailsReport() {
     direction: "ascending",
   });
 
-  const formatNumber = (val) => {
-    const num = Number(val);
-    if (isNaN(num)) return "0";
-    return Math.trunc(num).toLocaleString();
-  };
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
 
-  const query = useQueryParams();
-  const RegCod = query.get("code");
-  const RegName = query.get("name");
+  const CtyCod = params.get("tregcod");
+  const CtyName = params.get("name");
+  console.log("URL:", location.search);
+  console.log("CtyCod:", CtyCod);
+  // const query = useQueryParams();
+  // const CtyCod = query.get("tregcod");
+  // const CtyName = query.get("name");
 
-  const headerCode = RegCod;
-  const headerName = RegName;
+  const headerCode = CtyCod || "";
+  const headerName = CtyName || "";
 
   const {
     isSidebarVisible,
@@ -115,35 +127,53 @@ export default function AmericanRegionDetailsReport() {
   } = useTheme();
 
   // === API CALL =====
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+
+      const form = new FormData();
+      form.append("code", "AMRELEC");
+      form.append("FRegCod", CtyCod);
+
+      const res = await axios.post(
+        "https://crystalsolutions.pk/api/AmericanRegionCustomers.php",
+        form,
+      );
+
+      const DetailsList = Array.isArray(res.data)
+        ? res.data.map((row) => ({
+            tacccod: row.tacccod?.trim(),
+            tcstdsc: row.tcstdsc?.trim(),
+            tmobnum: row.tmobnum?.trim(),
+            tcntper: row.tcntper?.trim(),
+            tsaldsc: row.tsaldsc?.trim(),
+            Bal: Number(String(row.Balance ?? 0).replace(/,/g, "")),
+          }))
+        : [];
+
+      setRows(DetailsList);
+      const total = DetailsList.reduce((sum, r) => sum + r.Bal, 0);
+      setApiTotalBalance(total);
+    } catch (err) {
+      console.error("Progress API error:", err);
+      setRows([]);
+      // setApiData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatNumber = (val) => {
+    const num = Number(val);
+    if (isNaN(num)) return "0";
+    return Math.trunc(num).toLocaleString();
+  };
+
   useEffect(() => {
-    if (!RegCod) return;
-
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-
-        const form = new FormData();
-        form.append("code", "AMRELEC");
-        form.append("FRegCod", RegCod);
-
-        const res = await axios.post(
-          "https://crystalsolutions.pk/api/AmericanRegionCustomers.php",
-          form,
-        );
-
-        const DetailsList = Array.isArray(res.data) ? res.data : [];
-        setRows(DetailsList);
-      } catch (err) {
-        console.error("Region API error:", err);
-        setRows([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [RegCod]);
-
+    if (CtyCod !== null) {
+      fetchData();
+    }
+  }, [CtyCod]);
   const exportPDFHandler = () => {
     const doc = new jsPDF({
       orientation: "portrait",
@@ -171,9 +201,9 @@ export default function AmericanRegionDetailsReport() {
       align: "center",
     });
 
-    // ===== FILTER COLUMNS (FIXED) =====
+    // ===== FILTER COLUMNS (REMOVE RPT + SPACER) =====
     const pdfColumns = columnsConfig.filter(
-      (c) => !["scrollSpacer"].includes(c.key),
+      (c) => !["scrollSpacer", "rptBtn"].includes(c.key),
     );
 
     const keys = pdfColumns.map((c) => c.key);
@@ -231,13 +261,13 @@ export default function AmericanRegionDetailsReport() {
         const w = colWidths[i];
         let value = row[key] ?? "";
 
-        if (key === "Balance") {
-          value = formatNumber(value);
+        if (key === "Bal") {
+          value = Number(value || 0).toLocaleString();
         }
 
         doc.rect(curX, y, w, rowHeight);
 
-        if (key === "Balance") {
+        if (key === "Bal" || key === "Nos") {
           doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
@@ -263,8 +293,8 @@ export default function AmericanRegionDetailsReport() {
 
       let value = "";
 
-      if (i === 0) value = sortedTableData.length;
-      else if (key === "Balance") value = formatNumber(totalBalance);
+      if (key === "tacccod") value = filteredData.length;
+      else if (key === "Bal") value = apiTotalBalance.toLocaleString();
 
       doc.rect(curX2, y, w, rowHeight);
 
@@ -441,7 +471,7 @@ export default function AmericanRegionDetailsReport() {
 
     setSortConfig({ key, direction });
   };
-  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
+  const nonSortableKeys = ["rptBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
@@ -452,10 +482,10 @@ export default function AmericanRegionDetailsReport() {
       data = data.filter(
         (row) =>
           row.tacccod?.toLowerCase().includes(q) ||
-          row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-          row.tmobnum?.toLowerCase().includes(q) ||
-          row.tsaldsc?.toLowerCase().includes(q) ||
-          row.Balance?.toString().includes(q), // ✅ BALANCE
+          row.tcstdsc?.toLowerCase().includes(q) ||
+          row.tmobnum?.includes(q) ||
+          // row.Nos?.toString().includes(q) ||
+          row.Bal?.toString().includes(q), // ✅ BALANCE
       );
     }
 
@@ -465,9 +495,9 @@ export default function AmericanRegionDetailsReport() {
         const bVal = b[sortConfig.key] ?? "";
 
         // Balance numeric sort
-        if (sortConfig.key === "Balance") {
-          const aNum = Number(aVal) || 0;
-          const bNum = Number(bVal) || 0;
+        if (sortConfig.key === "Bal") {
+          const aNum = parseFloat(aVal) || 0;
+          const bNum = parseFloat(bVal) || 0;
           return sortConfig.direction === "ascending"
             ? aNum - bNum
             : bNum - aNum;
@@ -490,21 +520,24 @@ export default function AmericanRegionDetailsReport() {
     return sortedTableData.filter((row) => {
       return (
         row.tacccod?.toLowerCase().includes(q) ||
-        row.tcstdsc?.trim().toLowerCase().includes(q) || // ✅ NAME FIX
-        row.tmobnum?.toLowerCase().includes(q) ||
-        row.tsaldsc?.toLowerCase().includes(q) ||
-        row.Balance?.toString().includes(q) // ✅ BALANCE
+        row.tcstdsc?.toLowerCase().includes(q) ||
+        row.tmobnum?.includes(q) ||
+        row.tcntper?.toLowerCase().includes(q) ||
+        row.tsaldsc?.toLowerCase().includes(q)
       );
     });
   }, [sortedTableData, searchQuery]);
 
+  // const totalBalance = useMemo(() => {
+  //   return sortedTableData.reduce((sum, row) => {
+  //     return sum + (row.Bal || 0);
+  //   }, 0);
+  // }, [sortedTableData]);
   const totalBalance = useMemo(() => {
-    return sortedTableData.reduce((sum, row) => {
-      const value = parseFloat(row.Balance ?? 0);
-      return sum + (isNaN(value) ? 0 : value);
+    return filteredData.reduce((sum, row) => {
+      return sum + (row.Bal || 0);
     }, 0);
-  }, [sortedTableData]);
-
+  }, [filteredData]);
   const handleCSV = () => {
     exportCSV({
       rows: sortedTableData,
@@ -730,9 +763,9 @@ export default function AmericanRegionDetailsReport() {
                       >
                         {column.key === "scrollSpacer" ? (
                           ""
-                        ) : column.key === "Balance" ? (
-                          formatNumber(item[column.key])
-                        ) : column.key === "progressBtn" ? (
+                        ) : column.key === "Bal" ? (
+                          Number(item[column.key] || 0).toLocaleString()
+                        ) : column.key === "rptBtn" ? (
                           <div
                             style={{
                               display: "flex",
@@ -742,25 +775,6 @@ export default function AmericanRegionDetailsReport() {
                             <FaClipboardList
                               size={20}
                               style={{ cursor: "pointer", color: "#17a2b8" }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(
-                                  `${window.location.origin}/crystalsol/AmericanProgressReportDashboard?code=${item.tacccod}&name=${encodeURIComponent(item.tcstdsc)}`,
-                                  "_blank",
-                                );
-                              }}
-                            />
-                          </div>
-                        ) : column.key === "ledgerBtn" ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <FaFileInvoiceDollar
-                              size={20}
-                              style={{ cursor: "pointer", color: "#28a745" }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(
@@ -844,12 +858,10 @@ export default function AmericanRegionDetailsReport() {
                     fontFamily: getfontstyle,
                   }}
                 >
-                  {column.key === "Balance" ? (
-                    <span>{formatNumber(totalBalance)}</span>
-                  ) : index === 2 ? (
-                    <span>{filteredData.length}</span>
-                  ) : column.key === "scrollSpacer" ? (
-                    ""
+                  {column.key === "tacccod" ? (
+                    <span>{filteredData.length}</span> // total customers count
+                  ) : column.key === "Bal" ? (
+                    <span>{apiTotalBalance.toLocaleString()}</span> // total balance
                   ) : (
                     ""
                   )}

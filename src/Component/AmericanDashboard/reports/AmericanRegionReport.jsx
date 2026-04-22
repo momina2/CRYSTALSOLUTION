@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -14,7 +16,7 @@ import { useLocation } from "react-router-dom";
 import { FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
 
 const REPORT_NAME = "Region Report";
-const COMPANY_NAME = "AMERICAN ELECTRONICS";
+const COMPANY_NAME = "AMERICAN ELECTRONIC";
 
 const columnsConfig = [
   {
@@ -27,14 +29,14 @@ const columnsConfig = [
   },
   {
     header: "Code",
-    key: "tregcod",
+    key: "tregcod", // ✅ CHANGED
     alignment: "center",
     uiWidth: 60,
     pdfWidth: 10,
     excelWidth: 15,
   },
   {
-    header: "Region",
+    header: "Region", // ✅ CHANGED
     key: "Region",
     alignment: "left",
     uiWidth: 200,
@@ -117,7 +119,7 @@ export default function AmericanRegionReport() {
       form.append("code", "AMRELEC");
 
       const res = await axios.post(
-        "https://crystalsolutions.pk/api/AmericanRegionInfo.php",
+        "https://crystalsolutions.pk/api/AmericanRegionInfo.php", // ✅ CHANGED
         form,
       );
 
@@ -133,13 +135,9 @@ export default function AmericanRegionReport() {
         setApiTotalBalance(Number(cleanTotal) || 0);
       }
 
-      if (res.data["Total Customers"]) {
-        setApiTotalCustomers(Number(res.data["Total Customers"]) || 0);
-      }
-
       const mapped = dataRows.map((row) => ({
-        tregcod: row.tregcod?.trim(),
-        Region: row.Region?.trim(),
+        tregcod: row.tregcod?.trim(), // ✅ CHANGED
+        Region: row.Region?.trim(), // ✅ CHANGED
         Nos: Number(row.Nos) || 0,
         Bal: row.Bal ? Number(row.Bal.replace(/,/g, "")) : 0,
       }));
@@ -272,7 +270,7 @@ export default function AmericanRegionReport() {
 
       let value = "";
 
-      if (key === "tmgrcod") value = filteredData.length;
+      if (key === "tregcod") value = filteredData.length;
       else if (key === "Nos") value = totalNos.toLocaleString();
       else if (key === "Bal") value = apiTotalBalance.toLocaleString();
 
@@ -463,7 +461,7 @@ export default function AmericanRegionReport() {
         (row) =>
           row.tregcod?.toLowerCase().includes(q) ||
           row.Region?.toLowerCase().includes(q) ||
-          String(row.Nos).includes(q),
+          String(row.Nos).includes(q)
       );
     }
 
@@ -471,6 +469,12 @@ export default function AmericanRegionReport() {
       data.sort((a, b) => {
         const aVal = a[sortConfig.key] ?? "";
         const bVal = b[sortConfig.key] ?? "";
+        // ✅ CODE SORT (IMPORTANT)
+        if (sortConfig.key === "tregcod") {
+          return sortConfig.direction === "ascending"
+            ? String(aVal).localeCompare(String(bVal))
+            : String(bVal).localeCompare(String(aVal));
+        }
 
         // ✅ Balance numeric sort
         if (sortConfig.key === "Bal") {
@@ -509,7 +513,7 @@ export default function AmericanRegionReport() {
       return (
         row.tregcod?.toLowerCase().includes(q) ||
         row.Region?.trim().toLowerCase().includes(q) ||
-        row.Nos?.toString().includes(q)
+        String(row.Nos).includes(q)
       );
     });
   }, [sortedTableData, searchQuery]);
@@ -783,7 +787,11 @@ export default function AmericanRegionReport() {
                                 e.stopPropagation();
 
                                 window.open(
-                                  `${window.location.origin}/crystalsol/AmericanRegionDetailsReport?FRegCod=${item.tregcod}&name=${encodeURIComponent(item.Region)}`,
+                                  `${
+                                    window.location.origin
+                                  }/crystalsol/AmericanRegionDetailsReport?tregcod=${
+                                    item.tregcod
+                                  }&name=${encodeURIComponent(item.Region)}`,
                                   "_blank",
                                 );
                               }}
@@ -864,11 +872,11 @@ export default function AmericanRegionReport() {
                   }}
                 >
                   {column.key === "tregcod" ? (
-                    <span>{filteredData.length}</span>
+                    <span>{filteredData.length}</span> // total regions
                   ) : column.key === "Nos" ? (
-                    <span>{totalNos.toLocaleString()}</span>
+                    <span>{totalNos.toLocaleString()}</span> // total Nos
                   ) : column.key === "Bal" ? (
-                    <span>{apiTotalBalance.toLocaleString()}</span>
+                    <span>{apiTotalBalance.toLocaleString()}</span> // API total balance
                   ) : (
                     ""
                   )}

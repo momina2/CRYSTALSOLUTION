@@ -26,7 +26,7 @@ import AdminYearUser from "./Component/MainComponent/Header/Admin/AdminCustomer/
 import CompanyList from "./Component/Reports/List/CompanyList.js";
 import CategoryList from "./Component/Reports/List/CategoryList.js";
 import ChartofAccount from "./Component/Reports/List/ChartofAccount.js";
-import StoreList from "./Component/Reports/List/StoreList.jsx";
+// import StoreList from "./Component/Reports/List/StoreList.jsx";
 import GeneralLedger from "./Component/Reports/ledgers/GeneralLedger.js";
 import SupplierLedger from "./Component/Reports/ledgers/SupplierLedger.js";
 import CustomerLedger from "./Component/Reports/ledgers/CustomerLedger.js";
@@ -173,7 +173,7 @@ import CustomerBalance from "./Component/AmericanDashboard/reports/CustomerBalan
 import AmericanNonActive from "./Component/AmericanDashboard/reports/AmericanNonActive.jsx";
 import TotalCustomers from "./Component/AmericanDashboard/reports/AmericanTotalCustomers.jsx";
 import AmericanCustomerLedgerDashboard from "./Component/AmericanDashboard/reports/AmericanCustomerLedgerDashboard.jsx";
-import AmericanProgressReportDashboard from "./Component/AmericanDashboard/reports/AmericanProgressReportDashboard.jsx";
+import AmericanProgressReportDashboard from "./Component/AmericanDashboard/reports/AmericanProgressReportDashboard.jsx"; // Bina brackets ke
 import AmericanAdminAgging from "./Component/AmericanDashboard/reports/AmericanAdminAgging.jsx";
 import AmericanSalesManReport from "./Component/AmericanDashboard/reports/AmericanSalesManReport.jsx";
 import AmericanSalesManDetailsReport from "./Component/AmericanDashboard/reports/AmericanSalesManDetailsReport.jsx";
@@ -185,6 +185,7 @@ import AmericanCashReport from "./Component/AmericanDashboard/reports/AmericanCa
 import AmericanReceivableReport from "./Component/AmericanDashboard/reports/AmericanReceivableReport.jsx";
 import AmericanManagersReport from "./Component/AmericanDashboard/reports/AmericanManagersReport.jsx";
 import AmericanManagersDetailsReport from "./Component/AmericanDashboard/reports/AmericanManagersDetailsReport.jsx";
+import AmericanManagerSalesManDetailsReport from "./Component/AmericanDashboard/reports/AmericanManagerSalesManDetailsReport.jsx";
 //PURCHASE
 import AmericanPurchaseReportLastYear from "./Component/AmericanDashboard/reports/Purchase/AmericanPurchaseReportLastYear.jsx";
 import AmericanPurchaseReportCurrentYear from "./Component/AmericanDashboard/reports/Purchase/AmericanPurchaseReportCurrentYear.jsx";
@@ -213,11 +214,21 @@ import NASIRTRADERSCurrentMonthPurchaseReport from "./Component/NasirTraders/Rep
 //NASIR TRADERS - CASH & BANK
 import NASIRTRADERSCashReport from "./Component/NasirTraders/Reports/NASIRTRADERSCashReport.jsx";
 import NASIRTRADERSBankReport from "./Component/NasirTraders/Reports/NASIRTRADERSBankReport.jsx";
-
 import NASIRTRADERSReceivableReport from "./Component/NasirTraders/Reports/NASIRTRADERSRecievableReport.jsx";
-
-
+//RECIEVABLE REPORT
+import AmericanRecievableReport from "./Component/AmericanDashboard/reports/AmericanReceivableReport.jsx";
+import AmericanStockReport from "./Component/AmericanDashboard/reports/AmericanStockReport.jsx";
+import AmericanPayableReport from "./Component/AmericanDashboard/reports/AmericanPayableReport.jsx";
+//collection report
+import AmericanCollectionCurrentMonth from "./Component/AmericanDashboard/reports/Collection/AmericanCollectionCurrentMonth.jsx";
+import AmericanCollectionPreviousMonth from "./Component/AmericanDashboard/reports/Collection/AmericanCollectionPreviousMonth.jsx";
+//payment report
+import AmericanPaymentCurrentMonth from "./Component/AmericanDashboard/reports/Payment/AmericanPaymentCurrentMonth.jsx";
+import AmericanPaymentPreviousMonth from "./Component/AmericanDashboard/reports/Payment/AmericanPaymentPreviousMonth.jsx";
+import AmericanSalesmanMaintenance from "./Component/AmericanDashboard/reports/AmericanSalesmanMaintenance.jsx";
+import BusinessDashboard from "./Component/BusinessDashboard/BusinessDashboard.jsx";
 // import MemberCollectionReport from "./Component/Reports/DailyReport/MemberCollectionReport.jsx";
+import AmericanRegionDetailsReport from "./Component/AmericanDashboard/reports/AmericanRegionDetailsReport.jsx";
 function App() {
   const queryClient = new QueryClient();
   function ConditionalLoginRoute() {
@@ -469,10 +480,15 @@ function App() {
                   path="/AmericanRegionReport"
                   element={<AmericanRegionReport />}
                 ></Route>
+                 <Route
+                  exact
+                  path="/AmericanRegionReport"
+                  element={<AmericanRegionReport />}
+                ></Route>
                 <Route
                   exact
                   path="/AmericanRegionDetailsReport"
-                  element={<AmericanCityDetailsReport />}
+                  element={<AmericanRegionDetailsReport />}
                 ></Route>
                 <Route
                   exact
@@ -550,6 +566,51 @@ function App() {
                   exact
                   path="/AmericanLastYearSameMonthPurchaseReport"
                   element={<AmericanLastYearSameMonthPurchaseReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanRecievableReport"
+                  element={<AmericanRecievableReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanPayableReport"
+                  element={<AmericanPayableReport />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanStockReport"
+                  element={<AmericanStockReport />}
+                ></Route>
+                
+              {/* Collection Reports */}
+              <Route
+                  exact
+                  path="/AmericanCollectionCurrentMonth"
+                  element={<AmericanCollectionCurrentMonth />}
+                ></Route>
+          
+                <Route
+                  exact
+                  path="/AmericanCollectionPreviousMonth"
+                  element={<AmericanCollectionPreviousMonth />}
+                ></Route>
+
+              {/* Payment Reports */}
+                <Route
+                  exact
+                  path="/AmericanPaymentCurrentMonth"
+                  element={<AmericanPaymentCurrentMonth />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanPaymentPreviousMonth"
+                  element={<AmericanPaymentPreviousMonth />}
+                ></Route>
+                <Route
+                  exact
+                  path="/AmericanManagerSalesManDetailsReport"
+                  element={<AmericanManagerSalesManDetailsReport />}
                 ></Route>
                 {/* /////////////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////////////
@@ -734,7 +795,7 @@ function App() {
                 <Route exact path="/FacilityList" element={<FacilityList />} />
 
                 <Route exact path="/TrainerList" element={<TrainerList />} />
-                <Route exact path="/StoreList" element={<StoreList />} />
+                {/* <Route exact path="/StoreList" element={<StoreList />} /> */}
                 <Route exact path="/UserList" element={<UserList />} />
                 <Route
                   exact
@@ -777,7 +838,7 @@ function App() {
                   path="/CharofAccount"
                   element={<ChartofAccount />}
                 />
-                <Route exact path="/StoreList" element={<StoreList />} />
+                {/* <Route exact path="/StoreList" element={<StoreList />} /> */}
                 <Route exact path="/GoalList" element={<GoalList />} />
                 <Route
                   exact
@@ -938,7 +999,11 @@ function App() {
                 <Route
                   exact
                   path="/MemberCollectionReport"
-                  element={<NasirTRD />}
+                  // element={<NasirTRD />}
+                  element={<AmericanDashbaord />}
+                  // element={<AmericanSalesmanMaintenance />}
+                  // element={<MemberCollectionReport />
+                  // element={<BusinessDashboard />}
                 />
                 <Route
                   exact
