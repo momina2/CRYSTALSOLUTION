@@ -40,11 +40,39 @@ const baseColumns = [
     alignment: "left",
     uiWidth: 340,
   },
+
+  // 🔥 AGGING COLUMNS (ADD THESE)
   {
-    key: "Amt001", // 🔥 header baad me set hoga
+    key: "Amt001",
     alignment: "right",
     uiWidth: 120,
   },
+  {
+    key: "Amt002",
+    alignment: "right",
+    uiWidth: 120,
+  },
+  {
+    key: "Amt003",
+    alignment: "right",
+    uiWidth: 120,
+  },
+  {
+    key: "Amt004",
+    alignment: "right",
+    uiWidth: 120,
+  },
+  {
+    key: "Amt005",
+    alignment: "right",
+    uiWidth: 120,
+  },
+  {
+    key: "Amt006",
+    alignment: "right",
+    uiWidth: 120,
+  },
+
   {
     header: "Total",
     key: "Total",
@@ -71,30 +99,53 @@ const showIfNonZero = (val) => {
 };
 
 export default function AmericanAdminAgging() {
+  const getRangeLabel = (index) => {
+    const ranges = ["0-30", "31-60", "61-90", "91-120", "121-150", "151+"];
+    return ranges[index] || "";
+  };
   const query = useQueryParams();
 
+  // ✅ FIRST declare state
+
+  const NumDays = query.get("min") || "1";
+  const getStartDay = (num) => {
+    const map = {
+      1: 0,
+      2: 31,
+      3: 61,
+      4: 91,
+      5: 121,
+      6: 151,
+    };
+    return map[num] || 0;
+  };
+
+  // const [FRepDay, setFRepDay] = useState(NumDays);
+
+  // ✅ THEN useMemo
+  const columnsConfig = useMemo(() => {
+    return baseColumns.map((col) => {
+      if (col.key.startsWith("Amt")) {
+        const index = parseInt(col.key.replace("Amt00", "")) - 1;
+
+        return {
+          ...col,
+          header: getRangeLabel(index), // ✅ correct ranges
+        };
+      }
+      return col;
+    });
+  }, []);
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState(null);
   const [FRepDay, setFRepDay] = useState(query.get("days") || "30");
-  const columnsConfig = useMemo(() => {
-    return baseColumns.map((col) => {
-      if (col.key === "Amt001") {
-        return {
-          ...col,
-          header: `0-${FRepDay || 30}`, // 🔥 dynamic
-        };
-      }
-      return col;
-    });
-  }, [FRepDay]);
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
-
-  const [NumDays, setNumDays] = useState(query.get("min") || "1");
 
   //   const maxParam = query.get("max") || "99999999";
   const labelParam = query.get("label") || "";
@@ -118,30 +169,7 @@ export default function AmericanAdminAgging() {
   const defaultDate = `${yyyy}-${mm}-${dd}`;
   const [RepDate, setRepDate] = useState(defaultDate);
   const [columnTotals, setColumnTotals] = useState({});
-  // const columnCount = useMemo(() => {
-  //   const val = parseInt(FRepDay || "0");
 
-  //   if (!val) return 1;
-
-  //   if (val <= 30) return 1;
-  //   if (val <= 60) return 2;
-  //   if (val <= 90) return 3;
-  //   if (val <= 120) return 4;
-  //   if (val <= 150) return 5;
-  //   return 6;
-  // }, [FRepDay]);
-  // const columnsConfig = useMemo(() => {
-  //   return columnsConfig.filter((col) => {
-  //     if (col.key === "Amt001") return columnCount >= 1;
-  //     if (col.key === "Amt002") return columnCount >= 2;
-  //     if (col.key === "Amt003") return columnCount >= 3;
-  //     if (col.key === "Amt004") return columnCount >= 4;
-  //     if (col.key === "Amt005") return columnCount >= 5;
-  //     if (col.key === "Amt006") return columnCount >= 6;
-
-  //     return true; // baqi columns always show
-  //   });
-  // }, [columnCount]);
   const toApiDate = (input) => {
     if (!input) return "";
     const [y, m, d] = input.split("-");
@@ -151,21 +179,11 @@ export default function AmericanAdminAgging() {
   // ----------- FETCH API (same as pehle) -----------
   // === API CALL =====
 
-  useEffect(() => {
-    setFRepDay(query.get("days") || "30");
-  }, [query]);
-
-  useEffect(() => {
-    const val = parseInt(FRepDay || "0");
-
-    if (val <= 30) setNumDays("1");
-    else if (val <= 60) setNumDays("2");
-    else if (val <= 90) setNumDays("3");
-    else if (val <= 120) setNumDays("4");
-    else if (val <= 150) setNumDays("5");
-    else setNumDays("6");
-  }, [FRepDay]);
-
+  // useEffect(() => {
+  //   setFRepDay(query.get("days") || "30");
+  // }, [query]);
+  // const FRepDay = query.get("days") || "30";
+// const NumDays = query.get("min") || "1";
   const fetchData = async () => {
     setIsLoading(true);
     setErrorMessage("");
@@ -174,7 +192,8 @@ export default function AmericanAdminAgging() {
       const form = new FormData();
       form.append("code", "AMRELEC");
       form.append("FRepDat", toApiDate(RepDate));
-      form.append("FDayNum", NumDays);
+      form.append("FDayNum", NumDays); // ✅ correct
+
       form.append("FRepDay", FRepDay || "0");
 
       const res = await axios.post(
@@ -624,12 +643,12 @@ export default function AmericanAdminAgging() {
         const valueB = b[sortConfig.key] ?? "";
 
         if (!isNaN(valueA) && !isNaN(valueB)) {
-          return sortConfig.direction === "asc"
+          return sortConfig.direction === "ascending"
             ? Number(valueA) - Number(valueB)
             : Number(valueB) - Number(valueA);
         }
 
-        return sortConfig.direction === "asc"
+        return sortConfig.direction === "ascending"
           ? String(valueA).localeCompare(String(valueB))
           : String(valueB).localeCompare(String(valueA));
       });
@@ -648,6 +667,11 @@ export default function AmericanAdminAgging() {
   const runtimeColumnTotals = useMemo(() => {
     const totals = {
       Amt001: 0,
+      Amt002: 0,
+      Amt003: 0,
+      Amt004: 0,
+      Amt005: 0,
+      Amt006: 0,
       Total: 0,
     };
 
@@ -665,7 +689,7 @@ export default function AmericanAdminAgging() {
     exportCSV({
       rows: sortedTableData,
       columnsConfig,
-      columnTotals, // ⭐ MUST
+      columnTotals,
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -720,21 +744,14 @@ export default function AmericanAdminAgging() {
             }}
           >
             {/* LEFT SIDE */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {/* <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ fontSize: getdatafontsize }}>Days :</span>
-
               <input
-                type="number"
-                value={FRepDay}
-                onChange={(e) => setFRepDay(e.target.value)}
-                style={{
-                  width: "80px",
-                  height: "28px",
-                  border: `1px solid ${softTableStyles.softBorderColor}`,
-                  padding: "0 6px",
-                }}
+                type="text"
+                value={`${getStartDay(Number(NumDays))}-${FRepDay === "999999" ? "+" : FRepDay}`}
+                readOnly
               />
-            </div>
+            </div> */}
 
             {/* RIGHT SIDE */}
             <div

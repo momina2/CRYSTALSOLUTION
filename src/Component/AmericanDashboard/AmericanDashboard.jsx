@@ -1223,11 +1223,30 @@ const aggingDayMapping = {
 //   window.open(url, "_blank");
 // };
 
-const handleAggingClick = () => {
-  const url =
-    window.location.origin + `/crystalsol/AmericanAdminAgging?days=30`; // 🔥 default
+// const handleAggingClick = () => {
+//   const url =
+//     window.location.origin + `/crystalsol/AmericanAdminAgging?days=30`; // 🔥 default
 
-  window.open(url, "_blank");
+//   window.open(url, "_blank");
+// };
+
+const handleAggingClick = (index) => {
+  const ranges = [
+    { start: 0, end: 30 },
+    { start: 31, end: 60 },
+    { start: 61, end: 90 },
+    { start: 91, end: 120 },
+    { start: 121, end: 150 },
+    { start: 151, end: 999999 }, // 151+
+  ];
+
+  const FDayNum = index + 1;
+  const { start, end } = ranges[index];
+
+  window.open(
+    `${window.location.origin}/crystalsol/AmericanAdminAgging?start=${start}&end=${end}&min=${FDayNum}`,
+    "_blank",
+  );
 };
 
 const HorizontalAggingRangeCard = ({ stats }) => (
@@ -1244,10 +1263,10 @@ const HorizontalAggingRangeCard = ({ stats }) => (
 
     {/* BODY */}
     <div className="flex justify-between flex-1">
-      {stats.map((stat) => (
+      {stats.map((stat, index) => (
         <div
           key={stat.range}
-          onClick={handleAggingClick}
+          onClick={() => handleAggingClick(index)} // 🔥 index pass
           className="flex-1 flex flex-col items-center justify-evenly cursor-pointer hover:bg-gray-50 transition"
         >
           <p className="text-[12px] font-medium text-gray-600 leading-none">
@@ -1366,6 +1385,130 @@ const CustomerDistributionChart = ({ mainData }) => {
           width="100%"
           height="100%"
         />
+      </div>
+    </div>
+  );
+};
+
+const PaymentCard = ({ data }) => {
+  if (!data) return null;
+
+  return (
+    <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-3 rounded-lg flex flex-col justify-between">
+      {/* TOP */}
+      <div className="flex justify-between">
+        <p className="text-[14px] font-semibold">Payment</p>
+        <p className="text-[16px] font-bold text-indigo-800">
+          {data?.CurrentYearPayment || "0"}
+        </p>
+      </div>
+
+      {/* 3 MONTHS */}
+      <div className="grid grid-cols-3 text-center">
+        <div>
+          <p className="text-[10px] text-gray-500">Apr 2025</p>
+          <p className="text-[13px] font-semibold">
+            {data?.LastYearPayment || "0"}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-[10px] text-gray-500">Mar 2026</p>
+          <p className="text-[13px] font-semibold">
+            {data?.PreviousMonthPayment || "0"}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-[10px] text-gray-500">Apr 2026</p>
+          <p className="text-[13px] font-semibold">
+            {data?.MonthPayment || "0"}
+          </p>
+        </div>
+      </div>
+
+      <div className="border-t my-1"></div>
+
+      {/* BOTTOM (for now static / later API) */}
+      <div className="grid grid-cols-4 text-center text-[11px]">
+        <div>
+          <p>Parties</p>
+          <p>-</p>
+        </div>
+        <div>
+          <p>Expense</p>
+          <p>-</p>
+        </div>
+        <div>
+          <p>Bank</p>
+          <p>-</p>
+        </div>
+        <div>
+          <p>Others</p>
+          <p>-</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CollectionCard = ({ data }) => {
+  if (!data) return null;
+
+  return (
+    <div className="w-full h-[170px] bg-white shadow-sm border border-gray-100 p-3 rounded-lg flex flex-col justify-between">
+      {/* TOP */}
+      <div className="flex justify-between">
+        <p className="text-[14px] font-semibold">Collection</p>
+        <p className="text-[16px] font-bold text-indigo-800">
+          {data?.CurrentYearCollection || "0"}
+        </p>
+      </div>
+
+      {/* 3 MONTHS */}
+      <div className="grid grid-cols-3 text-center">
+        <div>
+          <p className="text-[10px] text-gray-500">Apr 2025</p>
+          <p className="text-[13px] font-semibold">
+            {data?.LastYearCollection || "0"}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-[10px] text-gray-500">Mar 2026</p>
+          <p className="text-[13px] font-semibold">
+            {data?.PreviousMonthCollection || "0"}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-[10px] text-gray-500">Apr 2026</p>
+          <p className="text-[13px] font-semibold">
+            {data?.MonthCollection || "0"}
+          </p>
+        </div>
+      </div>
+
+      <div className="border-t my-1"></div>
+
+      {/* BOTTOM */}
+      <div className="grid grid-cols-4 text-center text-[11px]">
+        <div>
+          <p>Customers</p>
+          <p>-</p>
+        </div>
+        <div>
+          <p>Advances</p>
+          <p>-</p>
+        </div>
+        <div>
+          <p>Banks</p>
+          <p>-</p>
+        </div>
+        <div>
+          <p>Others</p>
+          <p>-</p>
+        </div>
       </div>
     </div>
   );
@@ -1579,6 +1722,8 @@ const ElectronicsDashboard = () => {
                 <NewSalesCard salesData={webData} cardTitle="Sale" />
                 <NewPurchaseCard purchaseData={webData} cardTitle="Purchase" />
                 <NewCollectionPaymentCard salesData={webData} />
+                <PaymentCard data={webData} />
+                <CollectionCard data={webData} />
                 <CustomerDistributionChart mainData={mainData} />
                 <FinancialPieChart webData={webData} balanceData={webData} />
                 <FinanceSummaryCard webData={webData} />

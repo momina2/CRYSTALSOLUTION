@@ -18,8 +18,16 @@ const COMPANY_NAME = "AMERICAN ELECTRONIC";
 
 const columnsConfig = [
   {
-    header: "Rpt",
-    key: "rptBtn",
+    header: "Lgr",
+    key: "ledgerBtn",
+    alignment: "center",
+    uiWidth: 50,
+    pdfWidth: 0,
+    excelWidth: 0,
+  },
+  {
+    header: "Prg",
+    key: "progressBtn",
     alignment: "center",
     uiWidth: 50,
     pdfWidth: 0,
@@ -38,7 +46,7 @@ const columnsConfig = [
     header: "Customer",
     key: "tcstdsc",
     alignment: "left",
-    uiWidth: 260,
+    uiWidth: 320,
     pdfWidth: 80,
     excelWidth: 20,
   },
@@ -471,7 +479,7 @@ export default function AmericanRegionDetailsReport() {
 
     setSortConfig({ key, direction });
   };
-  const nonSortableKeys = ["rptBtn", "scrollSpacer"];
+  const nonSortableKeys = ["ledgerBtn", "progressBtn", "scrollSpacer"];
 
   // ----------- FILTER + SORT DATA -----------
   const sortedTableData = useMemo(() => {
@@ -765,7 +773,7 @@ export default function AmericanRegionDetailsReport() {
                           ""
                         ) : column.key === "Bal" ? (
                           Number(item[column.key] || 0).toLocaleString()
-                        ) : column.key === "rptBtn" ? (
+                        ) : column.key === "progressBtn" ? (
                           <div
                             style={{
                               display: "flex",
@@ -775,6 +783,25 @@ export default function AmericanRegionDetailsReport() {
                             <FaClipboardList
                               size={20}
                               style={{ cursor: "pointer", color: "#17a2b8" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  `${window.location.origin}/crystalsol/AmericanProgressReportDashboard?code=${item.tacccod}&name=${encodeURIComponent(item.tcstdsc)}`,
+                                  "_blank",
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : column.key === "ledgerBtn" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaFileInvoiceDollar
+                              size={20}
+                              style={{ cursor: "pointer", color: "#28a745" }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(
