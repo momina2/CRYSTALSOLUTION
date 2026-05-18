@@ -43,16 +43,24 @@ const columnsConfig = [
     excelWidth: 20,
   },
   {
-    header: "Debit",
-    key: "debit",
+    header: "Sale",
+    key: "sale",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
     excelWidth: 15,
   },
   {
-    header: "Credit",
-    key: "credit",
+    header: "Collection",
+    key: "collection",
+    alignment: "right",
+    uiWidth: 120,
+    pdfWidth: 25,
+    excelWidth: 15,
+  },
+  {
+    header: "Other",
+    key: "other",
     alignment: "right",
     uiWidth: 120,
     pdfWidth: 25,
@@ -250,8 +258,9 @@ export default function AmericanProgressReportDashboard() {
           .map((r) => ({
             sr: r["Sr#"],
             month: r.Month,
-            debit: r.Debit,
-            credit: r.Credit,
+            sale: r.Sale,
+            collection: r.Collection,
+            other: r.Other,
             balance: r.Balance,
           })),
       );
@@ -356,7 +365,7 @@ export default function AmericanProgressReportDashboard() {
         const aVal = a[sortConfig.key] ?? "";
         const bVal = b[sortConfig.key] ?? "";
 
-        const numericKeys = ["debit", "credit", "balance"];
+        const numericKeys = ["sale", "collection", "other", "balance"];
         if (numericKeys.includes(sortConfig.key)) {
           const aNum = parseFloat(aVal) || 0;
           const bNum = parseFloat(bVal) || 0;
@@ -390,13 +399,18 @@ export default function AmericanProgressReportDashboard() {
     });
   }, [sortedTableData, searchQuery]);
 
-  const totalDebit = useMemo(
-    () => filteredData.reduce((sum, r) => sum + toNumber(r.debit), 0),
+  const totalSale = useMemo(
+    () => filteredData.reduce((sum, r) => sum + toNumber(r.sale), 0),
     [filteredData],
   );
 
-  const totalCredit = useMemo(
-    () => filteredData.reduce((sum, r) => sum + toNumber(r.credit), 0),
+  const totalCollection = useMemo(
+    () => filteredData.reduce((sum, r) => sum + toNumber(r.collection), 0),
+    [filteredData],
+  );
+
+  const totalOther = useMemo(
+    () => filteredData.reduce((sum, r) => sum + toNumber(r.other), 0),
     [filteredData],
   );
 
@@ -557,13 +571,13 @@ export default function AmericanProgressReportDashboard() {
         const w = colWidths[i];
         let value = row[key] ?? "";
 
-        if (["debit", "credit", "balance"].includes(key)) {
+        if (["sale", "collection", "other", "balance"].includes(key)) {
           value = showIfNonZero(value);
         }
 
         doc.rect(curX, y, w, rowHeight);
 
-        if (["debit", "credit", "balance"].includes(key)) {
+        if (["sale", "collection", "other", "balance"].includes(key)) {
           doc.text(String(value), curX + w - 2, y + rowHeight - 2, {
             align: "right",
           });
@@ -589,12 +603,11 @@ export default function AmericanProgressReportDashboard() {
       let value = "";
 
       if (key === "sr") value = filteredData.length;
-      else if (key === "debit") value = showIfNonZero(apiData?.totalRow?.Debit);
-      else if (key === "credit")
-        value = showIfNonZero(apiData?.totalRow?.Credit);
-      else if (key === "balance")
-        value = showIfNonZero(apiData?.totalRow?.Balance);
-
+      else if (key === "sale") value = showIfNonZero(apiData?.totalRow?.Sale);
+      else if (key === "collection")
+        value = showIfNonZero(apiData?.totalRow?.Collection);
+      else if (key === "other") value = showIfNonZero(apiData?.totalRow?.Other);
+      else if (key === "balance") value = showIfNonZero(totalBalance);
       doc.rect(curX2, y, w, rowHeight);
 
       doc.text(String(value), curX2 + w - 2, y + rowHeight - 2, {
@@ -687,7 +700,7 @@ export default function AmericanProgressReportDashboard() {
     rows.forEach((item) => {
       const row = worksheet.addRow(
         keys.map((key) => {
-          if (["debit", "credit", "balance"].includes(key)) {
+          if (["sale", "collection", "other"].includes(key)) {
             return Number(item[key] || 0).toLocaleString();
           }
           return item[key] ?? "";
@@ -708,9 +721,11 @@ export default function AmericanProgressReportDashboard() {
 
     const totalRowData = new Array(headers.length).fill("");
     totalRowData[0] = rows.length.toString();
-    totalRowData[headers.indexOf("Debit")] = totalDebit.toLocaleString();
-    totalRowData[headers.indexOf("Credit")] = totalCredit.toLocaleString();
-    totalRowData[headers.indexOf("Balance")] = totalCollection.toLocaleString();
+    totalRowData[headers.indexOf("Sale")] = totalSale.toLocaleString();
+    totalRowData[headers.indexOf("Collection")] =
+      totalCollection.toLocaleString();
+    totalRowData[headers.indexOf("Other")] = totalOther.toLocaleString();
+    totalRowData[headers.indexOf("Balance")] = totalBalance.toLocaleString();
     const totalRow = worksheet.addRow(totalRowData);
 
     totalRow.eachCell((cell) => {
@@ -751,7 +766,7 @@ export default function AmericanProgressReportDashboard() {
     exportCSV({
       rows: filteredData,
       columnsConfig,
-      totalCollection: totalBalance,
+      totalCollection: totalCollection,
       companyName: COMPANY_NAME,
       reportName: REPORT_NAME,
     });
@@ -1014,7 +1029,9 @@ export default function AmericanProgressReportDashboard() {
                           if (key === "scrollSpacer") {
                             value = "";
                           } else if (
-                            ["debit", "credit", "balance"].includes(key)
+                            ["sale", "collection", "other", "balance"].includes(
+                              key,
+                            )
                           ) {
                             value = showIfNonZero(item[key]).toLocaleString();
                           } else {
@@ -1090,7 +1107,9 @@ export default function AmericanProgressReportDashboard() {
             >
               {columnsConfig.map((column, index) => {
                 const alignmentClass = getAlignmentClass(
-                  ["debit", "credit", "balance"].includes(column.key)
+                  ["sale", "collection", "other", "balance"].includes(
+                    column.key,
+                  )
                     ? "right"
                     : "left",
                 );
@@ -1098,14 +1117,19 @@ export default function AmericanProgressReportDashboard() {
                 let content = "";
                 if (column.key === "month") content = "";
 
-                if (column.key === "debit")
+                if (column.key === "sale")
                   content = showIfNonZero(
-                    apiData?.totalRow?.Debit ?? totalDebit,
+                    apiData?.totalRow?.Sale ?? totalSale,
                   ).toLocaleString();
 
-                if (column.key === "credit")
+                if (column.key === "collection")
                   content = showIfNonZero(
-                    apiData?.totalRow?.Credit ?? totalCredit,
+                    apiData?.totalRow?.Collection ?? totalCollection,
+                  ).toLocaleString();
+
+                if (column.key === "other")
+                  content = showIfNonZero(
+                    apiData?.totalRow?.Other ?? totalOther,
                   ).toLocaleString();
 
                 if (column.key === "balance")
@@ -1126,19 +1150,28 @@ export default function AmericanProgressReportDashboard() {
                           : "none",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: ["debit", "credit", "balance"].includes(
-                        column.key,
-                      )
+                      justifyContent: [
+                        "sale",
+                        "collection",
+                        "other",
+                        "balance",
+                      ].includes(column.key)
                         ? "flex-end"
                         : "flex-start",
-                      paddingRight: ["debit", "credit", "balance"].includes(
-                        column.key,
-                      )
+                      paddingRight: [
+                        "sale",
+                        "collection",
+                        "other",
+                        "balance",
+                      ].includes(column.key)
                         ? "5px"
                         : "0px",
-                      paddingLeft: ["debit", "credit", "balance"].includes(
-                        column.key,
-                      )
+                      paddingLeft: [
+                        "sale",
+                        "collection",
+                        "other",
+                        "balance",
+                      ].includes(column.key)
                         ? "0px"
                         : "5px",
                       fontWeight: "bold",
